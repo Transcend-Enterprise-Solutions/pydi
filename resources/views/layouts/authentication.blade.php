@@ -58,11 +58,6 @@
 
         .login-logo {
             position: relative;
-            z-index: 1;
-        }
-
-        .main-container {
-            overflow-x: hidden;
         }
 
         @keyframes slideInRight {
@@ -88,37 +83,40 @@
             transform: translateX(100%);
         }
 
-        .login-bg{
-            background-image: url('images/login-bg.png');
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
+        @media (max-width: 768px){
+            .login-bg{
+                object-fit: cover !important;
+                object-position: top;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width:768px){
+            .login-bg{
+                object-fit: cover !important;
+                object-position: top;
+            }
         }
     </style>
 </head>
 
-<body class="font-inter antialiased bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+<body class="font-inter antialiased text-slate-600 dark:text-slate-400">
 
-    <main class="bg-white main-container">
+    <main class="main-container">
 
-        <div class="relative flex overflow-hidden">
+        <div class="relative flex">
 
-            <!-- Content -->
-            <div class="w-full md:w-1/2 login-bg">
+            <!-- Left Content -->
+            <div class="w-full md:w-1/2 relative z-10 overflow-visible">
+                <div class="min-h-[100dvh] h-full flex flex-col items-center justify-center">
+                    <img src="images/login-bg.png" alt="beahoa" class="w-full h-full absolute login-bg">
 
-                <div class="min-h-[100dvh] h-full flex flex-col after:flex-1">
-
-                    <!-- Header -->
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                            <!-- Logo -->
-                            {{-- <a class="block" href="{{ route('dashboard') }}">
-                                <img src="images/beahoa.jpeg" alt="logo" class="h-12">
-                            </a> --}}
+                    <div class="flex relative z-10 mb-4 sm:hidden">
+                        <div class="flex items-center justify-center h-16 px-4 sm:px-6 lg:px-8">
+                            <img src="images/beahoa-logo-white.png" alt="logo" style="width: 200px;">
                         </div>
                     </div>
 
-                    <div class="max-w-sm mx-auto w-full px-4 py-8">
+                    <div class="max-w-sm mx-auto w-full px-4 py-8 mt-10 sm:mt-0">
                         {{ $slot }}
                     </div>
 
@@ -126,16 +124,11 @@
 
             </div>
 
-            <!-- Image -->
-            <div class="hidden md:block absolute top-0 bottom-0 right-0 md:w-1/2 overflow-hidden right-side-content" aria-hidden="true">
-                <div class="right-side-login animate-slide-in-right">
-                    {{-- <div></div> --}}
-                    {{-- <img src="images/Vector.png" alt="login bg" style="height: 101%;"> --}}
-                </div>
-
+            <!-- Right Content -->
+            <div class="hidden md:block md:w-1/2 overflow-hidden right-side-content" aria-hidden="true">
                 <div class="flex items-center justify-center w-full h-full login-logo animate-slide-in-right-delay">
                     <img class="w-1/2 h-1/2 object-contain" src="{{ asset('images/beahoa.jpeg') }}" width="760"
-                        height="1024" alt="Authentication image"/>
+                        height="1024" alt="BEAHOA Logo"/>
                 </div>
             </div>
 
