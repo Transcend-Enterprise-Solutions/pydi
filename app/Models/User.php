@@ -28,9 +28,9 @@ class User extends Authenticatable
         'email',
         'password',
         'user_role',
+        'position_id',
+        'committee_id',
         'active_status',
-        'company_name',
-        'registrant_name',
         'profile_photo_path',
     ];
 
@@ -47,21 +47,6 @@ class User extends Authenticatable
         'two_factor_recovery_codes',
         'two_factor_secret',
     ];
-
-    public function cpMonthlyReports()
-    {
-        return $this->hasMany(CpMonthlyReports::class);
-    }
-
-    public function quarterlyEmergencyDrillReports()
-    {
-        return $this->hasMany(QuarterlyEmergencyDrillReports::class);
-    }
-
-    public function permits()
-    {
-        return $this->hasMany(Permits::class);
-    }
 
     /**
      * The attributes that should be cast.
@@ -82,6 +67,10 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function userData(){
+        return $this->hasOne(UserData::class);
+    }
 
     public function scopeSearch($query, $term){
         $term = "%$term%";

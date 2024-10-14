@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" href="/images/mgar-logo.png" type="image/x-icon">
+    <link rel="icon" href="/images/beahoa-logo.png" type="image/x-icon">
 
-    <title>The Mine SHOP</title>
+    <title>BEAHOA</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,6 +87,13 @@
         .right-side-content {
             transform: translateX(100%);
         }
+
+        .login-bg{
+            background-image: url('images/login-bg.png');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 
@@ -97,7 +104,7 @@
         <div class="relative flex overflow-hidden">
 
             <!-- Content -->
-            <div class="w-full md:w-1/2">
+            <div class="w-full md:w-1/2 login-bg">
 
                 <div class="min-h-[100dvh] h-full flex flex-col after:flex-1">
 
@@ -105,9 +112,9 @@
                     <div class="flex-1">
                         <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                             <!-- Logo -->
-                            <a class="block" href="{{ route('dashboard') }}">
-                                <img src="images/mgar-logo.png" alt="logo" class="h-12">
-                            </a>
+                            {{-- <a class="block" href="{{ route('dashboard') }}">
+                                <img src="images/beahoa.jpeg" alt="logo" class="h-12">
+                            </a> --}}
                         </div>
                     </div>
 
@@ -122,12 +129,12 @@
             <!-- Image -->
             <div class="hidden md:block absolute top-0 bottom-0 right-0 md:w-1/2 overflow-hidden right-side-content" aria-hidden="true">
                 <div class="right-side-login animate-slide-in-right">
-                    <div></div>
-                    <img src="images/Vector.png" alt="login bg" style="height: 101%;">
+                    {{-- <div></div> --}}
+                    {{-- <img src="images/Vector.png" alt="login bg" style="height: 101%;"> --}}
                 </div>
 
                 <div class="flex items-center justify-center w-full h-full login-logo animate-slide-in-right-delay">
-                    <img class="w-1/2 h-1/2 object-contain" src="{{ asset('images/mgar-logo.png') }}" width="760"
+                    <img class="w-1/2 h-1/2 object-contain" src="{{ asset('images/beahoa.jpeg') }}" width="760"
                         height="1024" alt="Authentication image"/>
                 </div>
             </div>

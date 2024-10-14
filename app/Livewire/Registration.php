@@ -2,37 +2,41 @@
 
 namespace App\Livewire;
 
-use App\Models\Permits;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 use App\Models\User;
+use App\Models\UserData;
+use App\Models\SubdivisionLots;
 
 class Registration extends Component
 {
     public $password;
     public $c_password;
-    public $companyName;
-    public $name;
-    public $registrantName;
-    public $email;
-    public $showModal = false;
 
-    public $permits = [];
+    public $first_name;
+    public $middle_name;
+    public $last_name;
+    public $name_extension;
+    public $showModal = false;
+    public $tel_number;
+    public $mobile_number;
+    public $email;
+    public $lots;
+    public $lot;
+    public $block;
+    public $street;
+    private $subdivisionLots;
 
     protected $rules = [
-        'companyName' => 'required',
-        'registrantName' => 'required',
-        'name' => 'required',
+        'first_name' => 'required',
+        'last_name' => 'required',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|min:8',
         'c_password' => 'required|same:password',
-        'permits.*.permit_number' => 'required',
-        'permits.*.mining_type' => 'required',
-        'permits.*.permit_type' => 'required',
-        'permits.*.location' => 'required',
-        'permits.*.product' => 'required|array|min:1',
+        'block' => 'required',
+        'lot' => 'required',
+        'street' => 'required',
+        'mobile_number' => 'required',
     ];
 
     protected $messages = [
@@ -40,37 +44,15 @@ class Registration extends Component
         'password.min' => 'The password must be at least 8 characters long.',
         'c_password.required' => 'The password confirmation field is required.',
         'c_password.same' => 'The password confirmation does not match the password.',
-        'permits.*.permit_number.required' => 'The permit/contract number field is required.',
-        'permits.*.mining_type.required' => 'Please select a mining type.',
-        'permits.*.permit_type.required' => 'Please select a permit type.',
-        'permits.*.location.required' => 'Please select a permit location.',
-        'permits.*.product.required' => 'Please select at least one product.',
-        'permits.*.product.min' => 'Please select at least one product.',
+        'block' => 'The block field is required.',
+        'lot' => 'The lot field is required.',
+        'street' => 'The street field is required.',
+        'mobile_number' => 'The mobile number field is required.',
+        'first_name' => 'The first name field is required.',
+        'last_name' => 'The last name field is required.',
+        'email' => 'The email field is required.',
     ];
 
-    public function mount()
-    {
-        $this->addPermit();
-    }
-
-    public function addPermit()
-    {
-        $this->permits[] = [
-            'permit_number' => '',
-            'mining_type' => '',
-            'permit_type' => '',
-            'location' => '',
-            'product' => [],
-        ];
-    }
-
-    public function removePermit($index)
-    {
-        if (count($this->permits) > 1) {
-            unset($this->permits[$index]);
-            $this->permits = array_values($this->permits);
-        }
-    }
 
     public function submit(){
         
@@ -82,31 +64,30 @@ class Registration extends Component
         }
         sleep(1);
         
-
         // Create new user
+        $name = $this->first_name . " " . ($this->middle_name ?: '') . " " . $this->last_name . ($this->name_extension ?  (" " . $this->name_extension) : '');
         $user = User::create([
-            'name' => $this->name,
+            'name' => $name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
-            'company_name' => $this->companyName,
-            'registrant_name' => $this->registrantName,
-            'user_role' => 'client',
+            'user_role' => 'homeowner',
+            'active_status' => 0,
         ]);
 
-        foreach ($this->permits as $permitData) {
-            Permits::create([
-                'user_id' => $user->id,
-                'permit_number' => $permitData['permit_number'],
-                'mining_type' => $permitData['mining_type'],
-                'permit_type' => $permitData['permit_type'],
-                'location' => $permitData['location'],
-                'product' => json_encode($permitData['product']),
-            ]);
-        }
+        UserData::create([
+            'user_id' => $user->id,
+            'last_name' => $this->last_name,
+            'first_name' => $this->first_name,
+            'middle_name' => $this->middle_name ?: null,
+            'name_extension' => $this->name_extension ?: null,
+            'mobile_number' => $this->mobile_number,
+            'block' => $this->block,
+            'lot' => $this->lot,
+            'street' => $this->street,
+        ]);
 
         // Reset form fields
-        $this->reset(['password', 'c_password', 'companyName', 'name', 'registrantName', 'email']);
-
+        $this->reset(['password', 'c_password', 'first_name', 'last_name', 'middle_name', 'email', 'mobile_number', 'name_extension', 'block', 'lot', 'street']);
         $this->showModal = true;
     }
 
@@ -120,6 +101,18 @@ class Registration extends Component
 
     public function render()
     {
-        return view('livewire.registration');
+        $this->subdivisionLots = new SubdivisionLots();
+        $blocks = $this->subdivisionLots->getBlocks();
+        if($this->block){
+            $this->lots = $this->subdivisionLots->getLotsInBlock($this->block);
+        }
+
+        return view('livewire.registration', [
+            'blocks' => $blocks
+        ]);
+    }
+
+    public function resetVariables(){
+        return;
     }
 }

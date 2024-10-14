@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Home;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Storage;
@@ -11,34 +12,25 @@ Route::get('/register', function () {
     return view('registeraccount'); })->name('register');
 
 
-/* Admin account role */
-Route::middleware(['auth', 'checkrole:admin'])->group(function () {
+
+
+/* Admin account role ------------------------------------------------------------------------------*/
+Route::middleware(['auth', 'checkrole:sa'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/clients', function () {
-        return view('livewire.clients'); })->name('clients');
-    Route::get('/monthly-reports', function () {
-        return view('livewire.report'); })->name('monthly-reports');
-    Route::get('/quarterly-reports', function () {
-        return view('livewire.quarterly-report'); })->name('quarterly-reports');
-    Route::get('/admin-reports', function () {
-        return view('livewire.admin-reports-index'); })->name('admin-reports');
-    Route::get('/accident-reports', function () {
-        return view('livewire.accident'); })->name('accident-reports');
-    Route::get('/explosive-reports', function () {
-        return view('livewire.explosive'); })->name('explosive-reports');
 });
 
-/* Client account role */
-Route::middleware(['auth', 'checkrole:client'])->group(function () {
-    Route::get('/home', function () {
-        return view('livewire.home'); })->name('home');
-    Route::get('/monthly-report', function () {
-        return view('livewire.report'); })->name('monthly-report');
-    Route::get('/quarterly-report', function () {
-        return view('livewire.quarterly-report'); })->name('quarterly-report');
+
+
+
+/* Homeowner account role --------------------------------------------------------------------------*/
+Route::middleware(['auth', 'checkrole:homeowner'])->group(function () {
+    Route::get('/home', Home::class)->name('home');
 });
 
+
+
+
+/* Profile Photo -----------------------------------------------------------------------------------*/
 Route::get('/profile-photo/{filename}', function ($filename) {
     $path = 'profile-photos/' . $filename;
 

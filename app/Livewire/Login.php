@@ -3,9 +3,6 @@
 namespace App\Livewire;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
@@ -35,7 +32,7 @@ class Login extends Component
         if (Auth::attempt($credentials, $this->remember)) {
             $user = Auth::user();
 
-            if ($user->user_role === 'client') {
+            if ($user->user_role === 'homeowner') {
                 return app(LoginResponse::class)->toResponse($this->request)->intended('/home');
             } else {
                 return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');

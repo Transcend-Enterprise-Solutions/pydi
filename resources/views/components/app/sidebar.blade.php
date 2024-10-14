@@ -11,9 +11,10 @@
         <div class="flex justify-left mb-10 ml-1" style="width: 200px; height: 32px;">
             <!-- Logo -->
             <a class="flex items-center" href="{{ route('dashboard') }}">
-                <img class="mx-auto" src="/images/mgar-logo.png" alt="mgar logo" width="45">
+                <img class="mx-auto block dark:hidden" src="/images/beahoa-logo.png" alt="beahoa logo" width="45">
+                <img class="mx-auto hidden dark:block" src="/images/beahoa-logo-white.png" alt="beahoa logo" width="45">
                 <span
-                    class="text-black dark:text-white ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">The Mine SHOP</span>
+                    class="text-black dark:text-white ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">BEAHOA Inc.</span>
             </a>
         </div>
 
@@ -23,7 +24,7 @@
 
                     <!-- Admin Tabs ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 
-                    @if (Auth::user()->user_role === 'admin')
+                    @if (Auth::user()->user_role === 'sa')
 
                         <!-- Dashboard -->
                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
@@ -45,7 +46,7 @@
                         </li>
 
                         <!-- Clients -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
+                        {{-- <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
                             @if (in_array(Request::segment(1), ['clients'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
                             x-data="{ open: {{ in_array(Request::segment(1), ['clients']) ? 1 : 0 }} }">
                             <a class="block text-gray-800 dark:text-gray-100 truncate transition 
@@ -61,110 +62,13 @@
                                     </div>
                                 </div>
                             </a>
-                        </li>
-
-                        
-                        <!-- Report Approval -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['monthly-reports'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['monthly-reports']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('monthly-reports')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('monthly-reports') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-journal-check text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Monthly Reports
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        
-                        <!-- Report Approval -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['quarterly-reports'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['quarterly-reports']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('quarterly-reports')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('quarterly-reports') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-calendar3 text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Quarterly Reports
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-                        
-                        <!-- Admin Reports -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['admin-reports'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['admin-reports']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('admin-reports')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('admin-reports') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-card-checklist text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Admin Reports
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        
-                        <!-- Monthly Reports -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['accident-reports'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['accident-reports']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('accident-reports')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('accident-reports') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-calendar-check text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Accident Reports
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        
-                        <!-- Explosive Reports -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['explosive-reports'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['explosive-reports']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('explosive-reports')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('explosive-reports') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-list-check text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Explosive Reports
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                        </li> --}}
 
                     @endif
 
-                    <!-- Client Tabs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
+                    <!-- Homeowner Tabs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
 
-                    @if (Auth::user()->user_role === 'client')
+                    @if (Auth::user()->user_role === 'homeowner')
 
                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
                             @if (in_array(Request::segment(1), ['home'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
@@ -183,41 +87,6 @@
                                 </div>
                             </a>
                         </li>
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['monthly-report'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['monthly-report']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('monthly-report')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('monthly-report') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-calendar-check text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Monthly Report
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                            @if (in_array(Request::segment(1), ['quarterly-report'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['quarterly-report']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('quarterly-report')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('quarterly-report') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-calendar3 text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Quarterly Report
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        
                     @endif
 
                 </ul>
