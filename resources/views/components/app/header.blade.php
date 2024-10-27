@@ -34,10 +34,12 @@
                 <!-- Info button -->
                 <x-dropdown-help align="right" />
 
+                <!-- Notifications button -->
+                {{-- <x-dropdown-notifications align="right" /> --}}
+                @livewire('notification.notifications-dropdown')
 
                 <!-- Dark mode toggle -->
                 <x-theme-toggle />
-                
 
                 <!-- Divider -->
                 <hr class="w-px h-6 bg-slate-200 dark:bg-slate-700 border-none" />

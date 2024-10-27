@@ -31,11 +31,24 @@ class Login extends Component
 
         if (Auth::attempt($credentials, $this->remember)) {
             $user = Auth::user();
-
-            if ($user->user_role === 'homeowner') {
-                return app(LoginResponse::class)->toResponse($this->request)->intended('/home');
-            } else {
-                return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');
+            
+            if($user->active_status == 1) {
+                if ($user->user_role === 'homeowner') {
+                    return app(LoginResponse::class)->toResponse($this->request)->intended('/home');
+                } else {
+                    return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');
+                }
+            }
+            elseif($user->active_status == 2){// Deactivated user
+                Auth::logout();
+                session()->invalidate();
+                session()->regenerateToken();
+                $this->addError('login', 'Your account has been deactivated. Please contact the administrator.');
+            }else{
+                Auth::logout();
+                session()->invalidate();
+                session()->regenerateToken();
+                $this->addError('login', 'Your account is pending approval. Please wait for admin verification.');
             }
         } else {
             $this->addError('login', 'Invalid credentials.');
@@ -49,6 +62,7 @@ class Login extends Component
 
     public function togglePasswordVisibility()
     {
+        $this->addError('login', 'Invalid shit.');
         $this->showPassword = !$this->showPassword;
     }
 }

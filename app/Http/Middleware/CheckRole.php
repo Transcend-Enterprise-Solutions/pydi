@@ -17,10 +17,29 @@ class CheckRole
                 return $next($request);
             }
 
-            if ($user->user_role === 'homeowner') {
-                return redirect()->route('home');
-            } else {
-                return redirect()->route('dashboard');
+            if($user->active_status == 1) {
+                if ($user->user_role === 'homeowner') {
+                    return redirect()->route('home');
+                } else {
+                    return redirect()->route('dashboard');
+                }
+            }else{
+                Auth::logout();
+                session()->invalidate();
+                session()->regenerateToken();
+
+                // Return to login with appropriate message based on status
+                switch($user->active_status) {
+                    case 0:
+                        return redirect()->route('login')
+                            ->withErrors(['login' => 'Your account is pending approval. Please wait for admin verification.']);
+                    case 2:
+                        return redirect()->route('login')
+                            ->withErrors(['login' => 'Your account has been deactivated. Please contact the administrator.']);
+                    default:
+                        return redirect()->route('login')
+                            ->withErrors(['login' => 'Account status is invalid. Please contact the administrator.']);
+                }
             }
 
         }

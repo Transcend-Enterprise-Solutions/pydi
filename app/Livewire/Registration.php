@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Notification;
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -84,6 +85,14 @@ class Registration extends Component
             'block' => $this->block,
             'lot' => $this->lot,
             'street' => $this->street,
+        ]);
+
+        // Create a notification entry
+        Notification::create([
+            'user_id' => $user->id,
+            'type' => 'registration',
+            'notif' => 'register',
+            'read' => 0,
         ]);
 
         // Reset form fields

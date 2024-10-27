@@ -108,7 +108,7 @@
     <x-validation-errors class="mt-4" />
 
     @error('login')
-        <span class="text-red-500 animate-slide-in-left-delay-2">
+        <span class="text-red-300 animate-slide-in-left-delay-2">
             {{ $message }}
         </span>
     @enderror

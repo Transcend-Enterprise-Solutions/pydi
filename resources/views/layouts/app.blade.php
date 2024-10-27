@@ -67,7 +67,7 @@
 
             <x-app.header />
 
-            <main class="grow">
+            <main class="grow p-2 sm:p-8">
                 {{ $slot }}
             </main>
 

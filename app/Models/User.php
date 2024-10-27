@@ -75,10 +75,15 @@ class User extends Authenticatable
     public function scopeSearch($query, $term){
         $term = "%$term%";
         $query->where(function ($query) use ($term) {
-            $query->where('users.name', 'like', $term)
-                ->orWhere('users.company_name', 'like', $term)
-                ->orWhere('users.registrant_name', 'like', $term);
+            $query->where('users.name', 'like', $term);
         });
     }
 
+    public function adminAccount(){
+        return $this->hasOne(User::class, 'name', 'name')->where('user_role', '!=', 'emp');
+    }
+
+    public function notifications(){
+        return $this->hasMany(Notification::class, 'user_id');
+    }
 }
