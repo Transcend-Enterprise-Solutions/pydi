@@ -66,7 +66,10 @@ class Registration extends Component
         sleep(1);
         
         // Create new user
-        $name = $this->first_name . " " . ($this->middle_name ?: '') . " " . $this->last_name . ($this->name_extension ?  (" " . $this->name_extension) : '');
+        $name = $this->first_name . " " . 
+                ($this->middle_name ? strtoupper(substr($this->middle_name, 0, 1)) . ". " : '') . 
+                $this->last_name . 
+                ($this->name_extension ? (" " . $this->name_extension) : '');
         $user = User::create([
             'name' => $name,
             'email' => $this->email,

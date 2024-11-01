@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Positions;
 use App\Models\Committees;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 #[Layout('layouts.app')]
 #[Title('Association')]
@@ -21,8 +22,8 @@ class Association extends Component
     use WithPagination, WithFileUploads;
     public $addRole;
     public $editRole;
-    public $employees;
-    public $roleEmployees;
+    public $hos;
+    public $roleHomeowners;
     public $positionsByUnit;
     public $positions;
     public $officeDivisions;
@@ -68,45 +69,47 @@ class Association extends Component
     public $commId;
     public $registering;
     public $bods;
+    public $pos;
+    public $posId;
+    public $comId;
+    public $setPos;
     public $pageSize = 10; 
     public $pageSizes = [10, 20, 30, 50, 100]; 
 
-    public function mount(){
-        $this->employees = User::where('user_role', '=', 'emp')->get();
 
-        $this->roleEmployees = User::where('user_role', '=', 'emp')
-            ->whereDoesntHave('adminAccount')
-            ->get();
+    public function mount(){
+        $this->activeStatus = request()->query('activeStatus', 1);
+        $this->hos = User::where('user_role', '=', 'homeowner')
+                    ->whereNull(['position_id', 'committee_id'])
+                    ->get();
+
+        $this->roleHomeowners = User::where('user_role', '=', 'homeowner')
+                                ->get();
 
         $this->positions = Positions::where('position', '!=', 'Super Admin')->get();
         $this->registering = User::where('user_role', 'homeowner')
             ->where('active_status', 0)
             ->count();
-
-        $this->bods = Committees::leftJoin('users', 'users.committee_id', 'committees.id')
-                        ->leftJoin('user_data', 'user_data.user_id', 'users.id')
-                        ->join('positions', 'positions.committee_id', 'committees.id')
-                        ->where('committees.committee', 'bod')
-                        ->select('committees.id', 'users.name', 'user_data.block', 'user_data.lot', 'positions.position')
-                        ->get();
     }
 
     public function render(){
-        $admins = User::join('positions', 'positions.id', 'users.position_id')
-                ->where('positions.position', '!=', 'Super Admin')
-                ->join('committees', 'committees.id', 'users.committee_id')
-                ->where('users.user_role', '!=', 'emp')
-                ->where('users.active_status', '!=', 4)
+        $admins = User::leftJoin('positions', 'positions.id', 'users.position_id')
+                ->leftJoin('committees', 'committees.id', 'users.committee_id')
+                ->join('user_data', 'user_data.user_id', 'users.homeowner_id')
+                ->where('users.user_role', '!=', 'homeowner')
+                ->where('users.user_role', '!=', 'sa')
+                ->where('users.active_status', '=', 1)
                 ->when($this->search, function ($query) {
                     return $query->search(trim($this->search));
                 })
                 ->select(
-                    'users.id',
+                    'users.id as userId',
                     'users.name',
                     'users.email',
+                    'users.profile_photo_path',
                     'users.user_role',
                     'positions.position',
-                    'committees.committee',
+                    'user_data.*'
                 )->paginate($this->pageSize);
 
         $homeowners = User::select(
@@ -115,9 +118,11 @@ class Association extends Component
                     'users.email',
                     'users.profile_photo_path',
                     'users.user_role',
+                    'positions.position',
                     'user_data.*'
                 )->join('user_data', 'user_data.user_id', 'users.id')
                 ->where('users.user_role', 'homeowner')
+                ->leftJoin('positions', 'positions.id', 'users.position_id')
                 ->where('users.active_status', '=', $this->activeStatus)
                 ->when($this->search2, function ($query) {
                     return $query->search(trim($this->search2));
@@ -157,16 +162,53 @@ class Association extends Component
                 ->get()
                 ->groupBy('committee');
 
+            $this->bods = Committees::join('positions', 'positions.committee_id', 'committees.id')
+                ->leftJoin('users', function($join) {
+                    $join->on('users.committee_id', '=', 'committees.id')
+                         ->on('users.position_id', '=', 'positions.id');
+                })
+                ->leftJoin('user_data', 'user_data.user_id', 'users.id')
+                ->where(function($query) {
+                    $query->whereIn('committees.committee', [
+                        'bod', 
+                        'board of directors', 
+                        'Board of Directors', 
+                        'Board Of Directors', 
+                        'BOARD OF DIRECTORS'
+                    ]);
+                })
+                ->where('users.user_role', '=', 'homeowner')
+                ->select('committees.id', 'users.name', 'users.id as userId', 'user_data.block', 
+                         'user_data.lot', 'positions.position', 'positions.id as posId', 'users.profile_photo_path')
+                ->get();
+
         $this->committees = Committees::with('positions')
             ->when($this->search4, function ($query) {
                 return $query->search(trim($this->search4));
             })
             ->get();
+        
+        $comms = Committees::join('positions', 'positions.committee_id', 'committees.id')
+                ->leftJoin('users', function($join) {
+                    $join->on('users.committee_id', '=', 'committees.id')
+                            ->on('users.position_id', '=', 'positions.id');
+                })
+                ->leftJoin('user_data', 'user_data.user_id', 'users.id')
+                ->where('committees.committee', '!=', 'bod')
+                ->where('committees.committee', '!=', 'board of directors')
+                ->where('committees.committee', '!=', 'Board of Directors')
+                ->where('committees.committee', '!=', 'Board Of Directors')
+                ->where('committees.committee', '!=', 'BOARD OF DIRECTORS')
+                ->select('committees.id', 'committees.committee', 'users.name', 'users.id as userId', 'user_data.block', 
+                        'user_data.lot', 'positions.position', 'positions.id as posId', 'users.profile_photo_path')
+                ->get()
+                ->groupBy('committee');
 
         return view('livewire.admin.association',[
             'organizations' => $organizations,
             'admins' => $admins,
             'homeowners' => $homeowners,
+            'comms' => $comms,
         ]);
     }
 
@@ -423,50 +465,6 @@ class Association extends Component
         }
     }
 
-    public function toggleEditRole($userId){
-        $this->editRole = true;
-        $this->userId = $userId;
-        try {
-            $admin = User::where('users.id', $userId)
-                ->join('positions', 'positions.id', 'users.position_id')
-                ->where('positions.position', '!=', 'Super Admin')
-                ->join('office_divisions', 'office_divisions.id', 'users.office_division_id')
-                ->leftJoin('office_division_units', 'office_division_units.id', 'users.unit_id')
-                ->where('users.user_role', '!=', 'emp')
-                ->where('users.active_status', '!=', 4)
-                ->when($this->search, function ($query) {
-                    return $query->search(trim($this->search));
-                })
-                ->select(
-                    'users.id',
-                    'users.name',
-                    'users.email',
-                    'users.user_role',
-                    'users.emp_code',
-                    'users.unit_id',
-                    'positions.position',
-                    'office_divisions.office_division',
-                    'office_divisions.id as divId',
-                    'office_division_units.unit',
-                    'office_division_units.id as unitId'
-                )
-                ->first();
-            if ($admin) {
-                $this->divsUnits = OfficeDivisionUnits::where('office_division_id' , $admin->divId)->get();
-                $this->name = $admin->name;
-                $this->user_role = $admin->user_role;
-                $this->admin_email = $admin->email;
-                $this->office_division = $admin->office_division;
-                $this->unitName = $admin->unit;
-                $this->unit = $admin->unitId;
-                $this->position = $admin->position;
-                $this->divId = $admin->divId;
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
     public function toggleAddRole(){
         $this->editRole = true;
         $this->addRole = true;
@@ -500,79 +498,35 @@ class Association extends Component
 
     public function saveRole(){
         try {
-            $user = User::where('users.id', $this->userId)
-                ->join('positions', 'positions.id', 'users.position_id')
-                ->select('users.id', 'users.name', 'users.emp_code','positions.id as posId')
-                ->first();
+            $user = User::findOrFail( $this->userId);
             if($user){
-                if($this->addRole){
-                    $this->validate([
-                        'user_role' => 'required',
-                        'divId' => 'required',
-                        'admin_email' => 'required|email|unique:users,email',
-                        'password' => 'required|min:8',
-                        'cpassword' => 'required|same:password',
-                    ]);
+                $this->validate([
+                    'admin_email' => 'required|email|unique:users,email',
+                    'password' => 'required|min:8',
+                    'cpassword' => 'required|same:password',
+                ]);
 
-                    if (!$this->isPasswordComplex($this->password)) {
-                        $this->addError('password', 'The password must contain at least one uppercase letter, one number, and one special character.');
-                        return;
-                    }
-
-                    // $payrollId = null;
-                    // $payrolls = Payrolls::where('user_id', $user->id)->first();
-                    // $cosRegPayrolls = CosRegPayrolls::where('user_id', $user->id)->first();
-                    // $cosSkPayrolls = CosSkPayrolls::where('user_id', $user->id)->first();
-
-                    // if($payrolls){
-                    //     $payrollId = $payrolls->user_id;
-                    // }else if($cosRegPayrolls){
-                    //     $payrollId = $cosRegPayrolls->user_id;
-                    // }else if($cosSkPayrolls){
-                    //     $payrollId = $cosSkPayrolls->user_id;
-                    // }else{
-                    //     $this->dispatch('swal', [
-                    //         'title' => "This employee don't have a payroll yet!",
-                    //         'icon' => 'error'
-                    //     ]);
-                    //     return;
-                    // }
-
-                    $admin = User::create([
-                        'name' => $user->name,
-                        'email' => $this->admin_email,
-                        'password' => $this->password,
-                        'emp_code' => $this->user_role . '-' .$user->emp_code,
-                        'user_role' => $this->user_role,
-                        'active_status' => 1,
-                        'position_id' => $user->posId,
-                        'office_division_id' => $this->divId,
-                        'unit_id' => $this->unit,
-                    ]);
-                }else{
-                    $admin = User::where('users.id', $this->userId)
-                            ->first();
-
-                    $this->validate([
-                        'user_role' => 'required',
-                        'office_division' => 'required',
-                        'admin_email' => 'required|email',
-                    ]);
-
-                    $admin->update([
-                        'email' => $this->admin_email,
-                        'user_role' => $this->user_role,
-                        'office_division_id' => $this->divId,
-                        'unit_id' => $this->unit,
-                    ]);
+                if (!$this->isPasswordComplex($this->password)) {
+                    $this->addError('password', 'The password must contain at least one uppercase letter, one number, and one special character.');
+                    return;
                 }
+
+                User::create([
+                    'name' => $user->name,
+                    'email' => $this->admin_email,
+                    'password' => $this->password,
+                    'user_role' => 'admin',
+                    'homeowner_id' => $user->id,
+                    'active_status' => 1,
+                    'position_id' => $user->position_id ?: null,
+                    'committee_id' => $user->committee_id ?: null,
+                ]);
             }
             $this->resetVariables();
             $this->dispatch('swal', [
-                'title' => "Account role updated successfully!",
+                'title' => "System admin added successfully!",
                 'icon' => 'success'
             ]);
-    
         } catch (Exception $e) {
             $this->dispatch('swal', [
                 'title' => "Account role update was unsuccessful!",
@@ -628,23 +582,10 @@ class Association extends Component
                     $message = "Position deleted successfully!";
                 }
             }else{
-                $user = User::where('id', $this->deleteId)->first();
+                $user = User::findOrFail($this->deleteId);
                 if ($user) {
-                    switch($this->deleteMessage){
-                        case "role":
-                            $user->update([
-                                'committee_id' => null,
-                                'position_id' => null,
-                            ]);
-                            $message = "Role deleted successfully!";
-                            break;
-                        case "homeowner":
-                            $user->delete();
-                            $message = "Homeowner deleted successfully!";
-                            break;
-                        default:
-                            break;
-                    }             
+                    $user->delete();
+                    $message = "Homeowner deleted successfully!";
                 }
             }
 
@@ -704,6 +645,80 @@ class Association extends Component
         }
     }
 
+    public function toggleSetPos($comId, $posId, $userId = null, $pos){
+        $this->setPos = $pos;
+        $this->posId = $posId;
+        $this->comId = $comId;
+        $this->userId = $userId;
+    }
+
+    public function savePos(){
+        try{
+            $message = '';
+            $icon = '';
+            if($this->pos == 0){
+                $user = User::where('committee_id', $this->comId)
+                        ->where('position_id', $this->posId)
+                        ->first();
+                if($user){
+                    $user->update([
+                        'committee_id' =>  null,
+                        'position_id' => null,
+                    ]);
+    
+                    $message = 'Position vacated successfully!';
+                    $icon = 'success';
+                }else{
+                    $message = 'Position update was unsuccessful!';
+                    $icon = 'error';
+                }
+            }else{
+                if($this->pos == $this->userId || $this->userId == 0){
+                    $user = User::findOrFail($this->pos);
+                    if($user){
+                        $user->update([
+                            'committee_id' =>  $this->comId,
+                            'position_id' => $this->posId,
+                        ]);
+        
+                        $message = 'Position saved successfully!';
+                        $icon = 'success';
+                    }else{
+                        $message = 'Position update was unsuccessful!';
+                        $icon = 'error';
+                    }
+                }else{
+                    $oldOfficer = User::findOrFail($this->userId);
+                    $user = User::findOrFail($this->pos);
+                    if($user){
+                        $oldOfficer->update([
+                            'committee_id' =>  null,
+                            'position_id' => null,
+                        ]);
+
+                        $user->update([
+                            'committee_id' =>  $this->comId,
+                            'position_id' => $this->posId,
+                        ]);
+        
+                        $message = 'Position saved successfully!';
+                        $icon = 'success';
+                    }else{
+                        $message = 'Position update was unsuccessful!';
+                        $icon = 'error';
+                    }
+                }
+            }
+            $this->resetVariables();
+            $this->dispatch('swal', [
+                'title' => $message,
+                'icon' => $icon
+            ]);
+        }catch(Exception $e){
+            throw $e;
+        }
+    }
+
     public function resetVariables(){
         $this->resetValidation();
         $this->userId = null;
@@ -726,6 +741,9 @@ class Association extends Component
         $this->editingId = null;
         $this->editPosition = null;
         $this->approveMessage = null;
+        $this->setPos = null;
+        $this->posId = null;
+        $this->comId = null;
     }
 
     private function isPasswordComplex($password){

@@ -14,8 +14,9 @@ return new class extends Migration
                 $table->string('email', 50);
                 $table->string('password', 1000);
                 $table->string('user_role')->nullable();
-                $table->string('position_id')->nullable();
-                $table->string('committee_id')->nullable();
+                $table->integer('homeowner_id')->nullable();
+                $table->integer('position_id')->nullable();
+                $table->integer('committee_id')->nullable();
                 $table->string('active_status')->nullable();
                 $table->string('profile_photo_path')->nullable();
                 $table->rememberToken();

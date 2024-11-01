@@ -23,7 +23,7 @@ class NotificationsDropdown extends Component
             ->where('read', false)
             ->latest();
 
-        if ($user->user_role === 'sa') {
+        if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             // Get existing notifications
             $this->registrationCount = User::where('active_status', 0)->count();
 
@@ -59,7 +59,7 @@ class NotificationsDropdown extends Component
         $query = NotificationModel::where('type', $type)
             ->where('read', false);
 
-        if ($user->user_role === 'sa') {
+        if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             $query->where('type', 'request')
             ->orWhere('type', 'registration');
         } else {
@@ -75,7 +75,7 @@ class NotificationsDropdown extends Component
         $user = Auth::user();
         $query = NotificationModel::where('read', false);
 
-        if ($user->user_role === 'sa') {
+        if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             $query->where('type', 'request')
              ->orWhere('type', 'registration');
         } else {

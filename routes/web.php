@@ -19,7 +19,7 @@ Route::get('/register', function () {
 
 
 /* Admin account role ------------------------------------------------------------------------------*/
-Route::middleware(['auth', 'checkrole:sa'])->group(function () {
+Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/monthly-payments/association-dues', AssociationDues::class)->name('association-dues');
     Route::get('/monthly-payments/water-bills', WaterBills::class)->name('water-bills');
@@ -38,7 +38,7 @@ Route::middleware(['auth', 'checkrole:homeowner'])->group(function () {
 
 
 /* Homeowner and Admin account role --------------------------------------------------------------------------*/
-Route::middleware(['auth', 'checkrole:sa,homeowner'])->group(function () {
+Route::middleware(['auth', 'checkrole:sa,admin,homeowner'])->group(function () {
     Route::get('/association', Association::class)->name('association');
 });
 

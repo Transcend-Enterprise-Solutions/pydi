@@ -48,13 +48,21 @@
         </div>
         <!-- Dropdown items -->
         <ul class="max-h-64 overflow-y-auto" x-auto-animate>
-            @if (Auth::user()->user_role === 'sa')
+            @if (Auth::user()->user_role === 'sa' || Auth::user()->user_role === 'admin')
                 @forelse ($notifications as $notification)
                     <li class="border-b border-slate-200 dark:border-slate-700 last:border-0">
                         <div class="block py-2 px-4">
                             <div class="flex justify-between items-start">
                                 @if($notification->type === 'registration')
-                                    <a wire:navigate href="{{ route('association')  }}" class="flex-grow">
+                                    <a wire:navigate href="{{ route('association', 
+                                            [
+                                                'mainTab' => 'org',
+                                                'tab' => 'homeowners',
+                                                'subTab' => 'registering',
+                                                'activeStatus' => 0
+                                            ]
+                                            ) }}" 
+                                            class="flex-grow">
                                         <span class="block text-sm mb-1">
                                             👤 <span class="font-medium text-slate-800 dark:text-slate-100">
                                                 {{ $this->getRegistrationMessage() }}

@@ -24,7 +24,7 @@
 
                     <!-- Admin Tabs ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 
-                    @if (Auth::user()->user_role === 'sa')
+                    @if (Auth::user()->user_role === 'sa' || Auth::user()->user_role === 'admin')
 
                         <!-- Dashboard -->
                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
