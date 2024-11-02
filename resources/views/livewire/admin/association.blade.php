@@ -164,7 +164,7 @@ x-cloak>
                                                             @endif
                                                         @endforeach
                                                     </div>
-                                                    <h1 class="text-2xl font-bold leading-none text-center sm:text-5xl text-gray-500 dark:text-gray-300">Board Members</h1>
+                                                    <h1 class="text-2xl font-bold leading-none text-center text-gray-500 dark:text-gray-300">Board Members</h1>
                                                     <div class="bg-gray-500" style="height: 1px; width: 50%;"></div>
                                                     <div class="flex flex-row flex-wrap justify-center">
                                                         @foreach ($bods as $bod)
