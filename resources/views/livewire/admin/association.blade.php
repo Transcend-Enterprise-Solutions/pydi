@@ -198,7 +198,7 @@ x-cloak>
                                                         <i class="bi bi-building mr-2 text-emerald-500 dark:text-emerald-300 mr-2"></i>
                                                         <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-300">{{ $committeeName }}</h3>
                                                     </div>
-                                                    <button wire:click="exportEmployeesPerUnit(null, {{ $users->first()->id }})"
+                                                    {{-- <button wire:click="exportEmployeesPerUnit(null, {{ $users->first()->id }})"
                                                         class="peer inline-flex items-center justify-center
                                                         text-sm font-medium tracking-wide text-green-500 hover:text-green-600 focus:outline-none"
                                                         title="Export List">
@@ -210,7 +210,7 @@ x-cloak>
                                                             <div class="spinner-border small text-primary" role="status">
                                                             </div>
                                                         </div>
-                                                    </button>
+                                                    </button> --}}
                                                 </div>
 
                                                 <div class="w-full p-4 flex flex-col mb-6 bg-white dark:bg-gray-600">
