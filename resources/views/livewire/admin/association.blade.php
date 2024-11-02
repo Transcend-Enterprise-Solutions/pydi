@@ -604,271 +604,269 @@ x-cloak>
     </div>
 
 
-
-
-{{-- Delete Modal --}}
-<x-modal id="deleteModal" maxWidth="md" wire:model="deleteId" centered>
-    <div class="p-4">
-        <div class="mb-4 text-slate-900 dark:text-gray-100 font-bold">
-            Confirm Deletion
-            <button @click="show = false" class="float-right focus:outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
-            Are you sure you want to delete this {{ $deleteMessage }}?
-        </label>
-        <form wire:submit.prevent='deleteData'>
-            <div class="mt-4 flex justify-end col-span-1 sm:col-span-1">
-                <button class="mr-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                    <div wire:loading wire:target="deleteData" style="margin-bottom: 5px;">
-                        <div class="spinner-border small text-primary" role="status">
-                        </div>
-                    </div>
-                    Delete
+    {{-- Delete Modal --}}
+    <x-modal id="deleteModal" maxWidth="md" wire:model="deleteId" centered>
+        <div class="p-4">
+            <div class="mb-4 text-slate-900 dark:text-gray-100 font-bold">
+                Confirm Deletion
+                <button @click="show = false" class="float-right focus:outline-none">
+                    <i class="fas fa-times"></i>
                 </button>
-                <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer">
-                    Cancel
-                </p>
             </div>
-        </form>
-    </div>
-</x-modal>
 
-{{-- Approve/Deactivate/Activate Modal --}}
-<x-modal id="approveModal" maxWidth="md" wire:model="approveId" centered>
-    <div class="p-4">
-        <div class="mb-4 text-slate-900 dark:text-gray-100 font-bold">
-            Confirm <span class="capitalize">{{ $approveMessage }}</span>
-            <button @click="show = false" class="float-right focus:outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
-            Are you sure you want to {{ $approveMessage }} this homeowner?
-        </label>
-        <form wire:submit.prevent='approveUser'>
-            <div class="mt-4 flex justify-end col-span-1 sm:col-span-1">
-                <button class="mr-2 text-white font-bold py-2 px-4 rounded
-                    {{ $approveMessage != 'deactivate' ? 'bg-green-500 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-700' }}
-                    ">
-                    <div wire:loading wire:target="approveUser" style="margin-bottom: 5px;">
-                        <div class="spinner-border small text-primary" role="status">
-                        </div>
-                    </div>
-                    <span class="capitalize">{{ $approveMessage }}</span>
-                </button>
-                <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer">
-                    Cancel
-                </p>
-            </div>
-        </form>
-    </div>
-</x-modal>
-
-{{-- Add and Commitee and Position Modal --}}
-<x-modal id="posModal" maxWidth="2xl" wire:model="settings">
-    <div class="p-4">
-        <div class="mb-4 text-slate-900 dark:text-white font-bold uppercase">
-            {{ $add ? 'Add' : 'Edit' }} {{ $data }}
-            <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        {{-- Form fields --}}
-        <form wire:submit.prevent='saveSettings'>
-            <div class="grid grid-cols-2 gap-4">
-                
-                @if($add)
-                    @if($data === "committee")
-                        <div class="col-span-2 relative">
-                            <label for="settings_data" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
-                            <input type="text" id="settings_data" wire:model='settings_data' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700" required>
-                            @error('settings_data')
-                                <span class="text-red-500 text-sm">This field is required!</span>
-                            @enderror
-                        </div>
-                    @endif
-                    @if($data === "position")
-                        @foreach ($settingsData as $index => $setting)
-                            <div class="col-span-2 relative">
-                                <label for="settings_data_{{ $index }}" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
-                                <input type="text" id="settings_data_{{ $index }}" wire:model='settingsData.{{ $index }}.value' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-            
-                                <button type="button" wire:click="removeSetting({{ $index }})" class="absolute right-2 top-8 text-red-500 hover:text-red-700">
-                                    <i class="fas fa-times"></i>
-                                </button>
-
-                                @error('settingsData.' . $index . '.value')
-                                    <span class="text-red-500 text-sm">This field is required!</span>
-                                @enderror
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Are you sure you want to delete this {{ $deleteMessage }}?
+            </label>
+            <form wire:submit.prevent='deleteData'>
+                <div class="mt-4 flex justify-end col-span-1 sm:col-span-1">
+                    <button class="mr-2 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                        <div wire:loading wire:target="deleteData" style="margin-bottom: 5px;">
+                            <div class="spinner-border small text-primary" role="status">
                             </div>
-                        @endforeach
-                        <div class="col-span-2">
-                            <button type="button" wire:click="addNewSetting" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Add Another {{ $data }}
-                            </button>
                         </div>
-                    @endif
-                @else
-                    @if($data === "committee")
-                        <div class="col-span-2 relative">
-                            <label for="settings_data" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
-                            <input type="text" id="settings_data" wire:model='settings_data' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-                            @error('settings_data')
-                                <span class="text-red-500 text-sm">This field is required!</span>
-                            @enderror
-                        </div>
-                    @endif
-                    @if($data === "position")
-                        @foreach ($settingsData as $index => $setting)
-                            <div class="col-span-2 relative">
-                                <label for="settings_data_{{ $index }}" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
-                                <input type="text" id="settings_data_{{ $index }}" wire:model='settingsData.{{ $index }}.value' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-                    
-                                <button type="button" wire:click="removeSetting({{ $index }})" class="absolute right-2 top-8 text-red-500 hover:text-red-700">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                
-                                @error('settingsData.' . $index . '.value')
-                                    <span class="text-red-500 text-sm">This field is required!</span>
-                                @enderror
-                            </div>
-                        @endforeach
-                        <div class="col-span-2">
-                            <button type="button" wire:click="addNewSetting" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Add Another {{ $data }}
-                            </button>
-                        </div>
-                    @endif
-                @endif
-
-                <div class="mt-4 flex justify-end col-span-2">
-                    <button type="submit" class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        <div wire:loading wire:target="saveSettings" class="spinner-border small text-primary" role="status">
-                        </div>
-                        Save
+                        Delete
                     </button>
-                    <button type="button" @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</x-modal>
-
-{{-- Set Position Modal --}}
-<x-modal id="posModal" maxWidth="2xl" wire:model="setPos" centered>
-    <div class="p-4">
-        <div class="mb-4 dark:text-white text-slate-900 font-bold uppercase">
-            Set officer for the <span class="text-green-500">{{ $setPos }}</span> position
-            <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        {{-- Form fields --}}
-        <form wire:submit.prevent='savePos'>
-            <div class="grid grid-cols-2 gap-4">
-                
-                <div class="col-span-2 relative">
-                    <label for="pos" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">Homeowner</label>
-                    <select name="pos" id="pos" wire:model='pos' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700" required>
-                        <option value="">Select homeowner</option>
-                        <option value="0" class="text-red-300">Vacant</option>
-                        @foreach ($hos as $ho)
-                            <option value="{{ $ho->id }}">{{ $ho->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('pos')
-                        <span class="text-red-500 text-sm">This field is required!</span>
-                    @enderror
-                </div>
-
-                <div class="mt-4 flex justify-end col-span-2">
-                    <button type="submit" class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        <div wire:loading wire:target="savePos" class="spinner-border small text-primary" role="status">
-                        </div>
-                        Save
-                    </button>
-                    <button type="button" @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</x-modal>
-
-{{-- Add Role Modal --}}
-<x-modal id="roleModal" maxWidth="2xl" wire:model="editRole" centered>
-    <div class="p-4">
-        <div class="mb-4 dark:text-white text-slate-900 font-bold uppercase">
-            {{ $addRole ? 'Add' : 'Edit' }} System Admin
-            <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        {{-- Form fields --}}
-        <form wire:submit.prevent='saveRole'>
-            <div class="grid grid-cols-2 gap-4">
-                
-                <div class="col-span-full sm:col-span-1">
-                    <label for="userId" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Homeowner <span class="text-red-500">*</span></label>
-                    <select id="userId" wire:model='userId' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700"
-                        {{ $addRole ? '' : 'disabled' }}>
-                        <option value="{{ $userId }}">{{ $name ? $name : 'Select an employee' }}</option>
-                        @foreach ($roleHomeowners as $ho)
-                            <option value="{{ $ho->id }}">{{ $ho->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('userId') 
-                        <span class="text-red-500 text-sm">Please select an employee!</span> 
-                    @enderror
-                </div>
-
-                <div class="col-span-full sm:col-span-1">
-                    <label for="admin_email" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Admin Email <span class="text-red-500">*</span></label>
-                    <input type="text" id="admin_email" wire:model='admin_email' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-                    @error('admin_email') 
-                        <span class="text-red-500 text-sm">{{ $message }}</span> 
-                    @enderror
-                </div>
-
-                @if($addRole)
-                    <div class="col-span-full sm:col-span-1">
-                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Password <span class="text-red-500">*</span></label>
-                        <input type="password" id="password" wire:model='password' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-                        @error('password') 
-                            <span class="text-red-500 text-sm">{{ $message }}</span> 
-                        @enderror
-                    </div>
-
-                    <div class="col-span-full sm:col-span-1">
-                        <label for="cpassword" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Confirm Password <span class="text-red-500">*</span></label>
-                        <input type="password" id="cpassword" wire:model='cpassword' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
-                        @error('cpassword') 
-                            <span class="text-red-500 text-sm">{{ $message }}</span> 
-                        @enderror
-                    </div>
-                @endif
-
-                <div class="mt-4 flex justify-end col-span-2">
-                    <button class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                        <div wire:loading wire:target="saveRole" class="spinner-border small text-primary" role="status">
-                        </div>
-                        Save
-                    </button>
-                    <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
+                    <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer">
                         Cancel
                     </p>
                 </div>
+            </form>
+        </div>
+    </x-modal>
+
+    {{-- Approve/Deactivate/Activate Modal --}}
+    <x-modal id="approveModal" maxWidth="md" wire:model="approveId" centered>
+        <div class="p-4">
+            <div class="mb-4 text-slate-900 dark:text-gray-100 font-bold">
+                Confirm <span class="capitalize">{{ $approveMessage }}</span>
+                <button @click="show = false" class="float-right focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-        </form>
-    </div>
-</x-modal>
+
+            <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                Are you sure you want to {{ $approveMessage }} this homeowner?
+            </label>
+            <form wire:submit.prevent='approveUser'>
+                <div class="mt-4 flex justify-end col-span-1 sm:col-span-1">
+                    <button class="mr-2 text-white font-bold py-2 px-4 rounded
+                        {{ $approveMessage != 'deactivate' ? 'bg-green-500 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-700' }}
+                        ">
+                        <div wire:loading wire:target="approveUser" style="margin-bottom: 5px;">
+                            <div class="spinner-border small text-primary" role="status">
+                            </div>
+                        </div>
+                        <span class="capitalize">{{ $approveMessage }}</span>
+                    </button>
+                    <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer">
+                        Cancel
+                    </p>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    {{-- Add and Commitee and Position Modal --}}
+    <x-modal id="posModal" maxWidth="2xl" wire:model="settings">
+        <div class="p-4">
+            <div class="mb-4 text-slate-900 dark:text-white font-bold uppercase">
+                {{ $add ? 'Add' : 'Edit' }} {{ $data }}
+                <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {{-- Form fields --}}
+            <form wire:submit.prevent='saveSettings'>
+                <div class="grid grid-cols-2 gap-4">
+                    
+                    @if($add)
+                        @if($data === "committee")
+                            <div class="col-span-2 relative">
+                                <label for="settings_data" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
+                                <input type="text" id="settings_data" wire:model='settings_data' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700" required>
+                                @error('settings_data')
+                                    <span class="text-red-500 text-sm">This field is required!</span>
+                                @enderror
+                            </div>
+                        @endif
+                        @if($data === "position")
+                            @foreach ($settingsData as $index => $setting)
+                                <div class="col-span-2 relative">
+                                    <label for="settings_data_{{ $index }}" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
+                                    <input type="text" id="settings_data_{{ $index }}" wire:model='settingsData.{{ $index }}.value' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                
+                                    <button type="button" wire:click="removeSetting({{ $index }})" class="absolute right-2 top-8 text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+
+                                    @error('settingsData.' . $index . '.value')
+                                        <span class="text-red-500 text-sm">This field is required!</span>
+                                    @enderror
+                                </div>
+                            @endforeach
+                            <div class="col-span-2">
+                                <button type="button" wire:click="addNewSetting" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Add Another {{ $data }}
+                                </button>
+                            </div>
+                        @endif
+                    @else
+                        @if($data === "committee")
+                            <div class="col-span-2 relative">
+                                <label for="settings_data" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
+                                <input type="text" id="settings_data" wire:model='settings_data' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                                @error('settings_data')
+                                    <span class="text-red-500 text-sm">This field is required!</span>
+                                @enderror
+                            </div>
+                        @endif
+                        @if($data === "position")
+                            @foreach ($settingsData as $index => $setting)
+                                <div class="col-span-2 relative">
+                                    <label for="settings_data_{{ $index }}" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">{{ $data }}</label>
+                                    <input type="text" id="settings_data_{{ $index }}" wire:model='settingsData.{{ $index }}.value' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                        
+                                    <button type="button" wire:click="removeSetting({{ $index }})" class="absolute right-2 top-8 text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                    
+                                    @error('settingsData.' . $index . '.value')
+                                        <span class="text-red-500 text-sm">This field is required!</span>
+                                    @enderror
+                                </div>
+                            @endforeach
+                            <div class="col-span-2">
+                                <button type="button" wire:click="addNewSetting" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    Add Another {{ $data }}
+                                </button>
+                            </div>
+                        @endif
+                    @endif
+
+                    <div class="mt-4 flex justify-end col-span-2">
+                        <button type="submit" class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <div wire:loading wire:target="saveSettings" class="spinner-border small text-primary" role="status">
+                            </div>
+                            Save
+                        </button>
+                        <button type="button" @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    {{-- Set Position Modal --}}
+    <x-modal id="posModal" maxWidth="2xl" wire:model="setPos" centered>
+        <div class="p-4">
+            <div class="mb-4 dark:text-white text-slate-900 font-bold uppercase">
+                Set officer for the <span class="text-green-500">{{ $setPos }}</span> position
+                <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {{-- Form fields --}}
+            <form wire:submit.prevent='savePos'>
+                <div class="grid grid-cols-2 gap-4">
+                    
+                    <div class="col-span-2 relative">
+                        <label for="pos" class="block text-sm font-medium text-gray-700 dark:text-slate-400 uppercase">Homeowner</label>
+                        <select name="pos" id="pos" wire:model='pos' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700" required>
+                            <option value="">Select homeowner</option>
+                            <option value="0" class="text-red-300">Vacant</option>
+                            @foreach ($hos as $ho)
+                                <option value="{{ $ho->id }}">{{ $ho->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('pos')
+                            <span class="text-red-500 text-sm">This field is required!</span>
+                        @enderror
+                    </div>
+
+                    <div class="mt-4 flex justify-end col-span-2">
+                        <button type="submit" class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <div wire:loading wire:target="savePos" class="spinner-border small text-primary" role="status">
+                            </div>
+                            Save
+                        </button>
+                        <button type="button" @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </x-modal>
+
+    {{-- Add Role Modal --}}
+    <x-modal id="roleModal" maxWidth="2xl" wire:model="editRole" centered>
+        <div class="p-4">
+            <div class="mb-4 dark:text-white text-slate-900 font-bold uppercase">
+                {{ $addRole ? 'Add' : 'Edit' }} System Admin
+                <button @click="show = false" class="float-right focus:outline-none" wire:click='resetVariables'>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {{-- Form fields --}}
+            <form wire:submit.prevent='saveRole'>
+                <div class="grid grid-cols-2 gap-4">
+                    
+                    <div class="col-span-full sm:col-span-1">
+                        <label for="userId" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Homeowner <span class="text-red-500">*</span></label>
+                        <select id="userId" wire:model='userId' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700"
+                            {{ $addRole ? '' : 'disabled' }}>
+                            <option value="{{ $userId }}">{{ $name ? $name : 'Select an employee' }}</option>
+                            @foreach ($roleHomeowners as $ho)
+                                <option value="{{ $ho->id }}">{{ $ho->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('userId') 
+                            <span class="text-red-500 text-sm">Please select an employee!</span> 
+                        @enderror
+                    </div>
+
+                    <div class="col-span-full sm:col-span-1">
+                        <label for="admin_email" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Admin Email <span class="text-red-500">*</span></label>
+                        <input type="text" id="admin_email" wire:model='admin_email' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                        @error('admin_email') 
+                            <span class="text-red-500 text-sm">{{ $message }}</span> 
+                        @enderror
+                    </div>
+
+                    @if($addRole)
+                        <div class="col-span-full sm:col-span-1">
+                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Password <span class="text-red-500">*</span></label>
+                            <input type="password" id="password" wire:model='password' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                            @error('password') 
+                                <span class="text-red-500 text-sm">{{ $message }}</span> 
+                            @enderror
+                        </div>
+
+                        <div class="col-span-full sm:col-span-1">
+                            <label for="cpassword" class="block text-sm font-medium text-gray-700 dark:text-slate-400">Confirm Password <span class="text-red-500">*</span></label>
+                            <input type="password" id="cpassword" wire:model='cpassword' class="mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md dark:text-gray-300 dark:bg-gray-700">
+                            @error('cpassword') 
+                                <span class="text-red-500 text-sm">{{ $message }}</span> 
+                            @enderror
+                        </div>
+                    @endif
+
+                    <div class="mt-4 flex justify-end col-span-2">
+                        <button class="mr-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            <div wire:loading wire:target="saveRole" class="spinner-border small text-primary" role="status">
+                            </div>
+                            Save
+                        </button>
+                        <p @click="show = false" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded cursor-pointer" wire:click='resetVariables'>
+                            Cancel
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </x-modal>
 
 </div>
 
