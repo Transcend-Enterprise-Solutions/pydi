@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Exports\UserListExport;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -216,104 +217,19 @@ class Association extends Component
         $this->activeStatus = $status;
     }
 
-    public function exportRoles(){
-        try{
-            $admins = User::join('positions', 'positions.id', 'users.position_id')
-                ->where('positions.position', '!=', 'Super Admin')
-                ->join('office_divisions', 'office_divisions.id', 'users.office_division_id')
-                ->leftJoin('office_division_units', 'office_division_units.id', 'users.unit_id')
-                ->where('users.user_role', '!=', 'emp')
-                ->where('users.active_status', '!=', 4)
-                ->when($this->search, function ($query) {
-                    return $query->search(trim($this->search));
-                })
-                ->select(
-                    'users.id',
-                    'users.name',
-                    'users.user_role',
-                    'users.emp_code',
-                    'positions.position',
-                    'office_divisions.office_division',
-                    'office_division_units.unit'
-                );
-
-            $filters = [
-                'admins' => $admins,
-            ];
-            return Excel::download(new AdminRolesExport($filters), 'Admin_Roles_List.xlsx');
-            
-        }catch(Exception $e){
-            throw $e;
-        }
-    }
-
-    public function exportEmployees($division)
-    {
-        try {
-            $organizations = User::where('user_role', 'emp')
-                ->join('user_data', 'user_data.user_id', 'users.id')
-                ->join('positions', 'positions.id', 'users.position_id')
-                ->join('office_divisions', 'office_divisions.id', 'users.office_division_id')
-                ->leftJoin('office_division_units', 'office_division_units.id', 'users.unit_id')
-                ->leftJoin('payrolls', 'payrolls.user_id', 'users.id')
-                ->leftJoin('cos_sk_payrolls', 'cos_sk_payrolls.user_id', 'users.id')
-                ->leftJoin('cos_reg_payrolls', 'cos_reg_payrolls.user_id', 'users.id')
-                ->where('users.active_status', '!=', 4)
-                ->select(
-                    'users.name', 
-                    'users.email', 
-                    'users.emp_code', 
-                    'users.active_status', 
-                    'positions.position', 
-                    'user_data.appointment', 
-                    'user_data.date_hired', 
-                    'office_divisions.office_division',
-                    'office_division_units.unit',
-                    'payrolls.sg_step as plantilla_sg_step',
-                    'payrolls.rate_per_month as plantilla_rate',
-                    'cos_sk_payrolls.sg_step as cos_sk_sg_step',
-                    'cos_sk_payrolls.rate_per_month as cos_sk_rate',
-                    'cos_reg_payrolls.sg_step as cos_reg_sg_step',
-                    'cos_reg_payrolls.rate_per_month as cos_reg_rate',
-                )
-                ->where('office_divisions.office_division', $division)
-                ->when($this->search2, function ($query) {
-                    return $query->search(trim($this->search2));
-                })
-                ->when(!$this->allStat, function ($query) {
-                    return $query->where(function ($subQuery) {
-                        if ($this->status['active']) {
-                            $subQuery->orWhere('active_status', 1);
-                        }
-                        if ($this->status['inactive']) {
-                            $subQuery->orWhere('active_status', 0);
-                        }
-                        if ($this->status['resigned']) {
-                            $subQuery->orWhere('active_status', 2);
-                        }
-                        if ($this->status['retired']) {
-                            $subQuery->orWhere('active_status', 3);
-                        }
-                    });
-                });
-
-            $selectedStatuses = $this->allStat ? ['All'] : array_keys(array_filter($this->status));
-            $statusLabels = [
-                'active' => 'Active',
-                'inactive' => 'Inactive',
-                'resigned' => 'Resigned',
-                'retired' => 'Retired',
-                'promoted' => 'Promoted'
-            ];
+    public function exportList(){
+        $filters = [
+            'search' => $this->search2,
+            'activeStatus' => $this->activeStatus,
+        ];
     
-            $filters = [
-                'organizations' => $organizations,
-                'office_division' => $division,
-                'statuses' => $selectedStatuses == ['All'] ? ['All'] : array_map(function($status) use ($statusLabels) {
-                    return $statusLabels[$status];
-                }, $selectedStatuses)
-            ];
-            return Excel::download(new PerOfficeDivisionExport($filters), $division . '_EmployeesList.xlsx');
+        try {
+            $exporter = new UserListExport($filters);
+            $result = $exporter->export();
+
+            return response()->streamDownload(function () use ($result) {
+                echo $result['content'];
+            }, $result['filename']);
         } catch (Exception $e) {
             throw $e;
         }
@@ -468,32 +384,6 @@ class Association extends Component
     public function toggleAddRole(){
         $this->editRole = true;
         $this->addRole = true;
-    }
-
-    public function toggleEditPosition($userId){
-        $this->editPosition = true;
-        $this->userId = $userId;
-        try {
-            $empPos = User::where('users.id', $this->userId)
-                    ->join('positions', 'positions.id', 'users.position_id')
-                    ->join('office_divisions', 'office_divisions.id', 'users.office_division_id')
-                    ->leftJoin('office_division_units', 'office_division_units.id', 'users.unit_id')
-                    ->select('users.*', 'positions.position', 'office_divisions.office_division', 'office_division_units.unit')
-                    ->first();
-            if ($empPos) {
-                $this->userId = $empPos->id;
-                $this->name = $empPos->name;
-                $this->position = $empPos->position;
-                $this->office_division = $empPos->office_division;
-                $this->positionId = $empPos->position_id;
-                $this->officeDivisionId = $empPos->office_division_id;
-                $this->activeStatus = $empPos->active_status;
-                $this->unitName = $empPos->unit;
-                $this->unit = $empPos->unit_id;
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
     }
 
     public function saveRole(){

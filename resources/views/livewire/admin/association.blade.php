@@ -252,14 +252,18 @@ x-cloak>
                                                 <div class="w-full sm:w-2/3 flex flex-col sm:flex-row sm:justify-end sm:space-x-4">
                                                     <!-- Export to Excel -->
                                                     <div class="relative inline-block text-left">
-                                                        <button wire:click="exportRoles"
+                                                        <button wire:click="exportList"
                                                             class="peer mt-4 sm:mt-1 inline-flex items-center dark:hover:bg-slate-600 dark:border-slate-600
                                                             justify-center px-4 py-1.5 text-sm font-medium tracking-wide 
                                                             text-neutral-800 dark:text-neutral-200 transition-colors duration-200 
                                                             rounded-lg border border-gray-400 hover:bg-gray-300 focus:outline-none"
                                                             type="button" title="Export">
-                                                            <img class="flex dark:hidden" src="/images/export-excel.png" width="22" alt="">
-                                                            <img class="hidden dark:block" src="/images/export-excel-dark.png" width="22" alt="">
+                                                            <img class="flex dark:hidden" src="/images/export-excel.png" width="22" alt="" wire:target="exportList" wire:loading.remove>
+                                                            <img class="hidden dark:block" src="/images/export-excel-dark.png" width="22" alt="" wire:target="exportList" wire:loading.remove>
+                                                            <div wire:loading wire:target="exportList">
+                                                                <div class="spinner-border small text-primary" role="status">
+                                                                </div>
+                                                            </div>
                                                         </button>                    
                                                     </div>
                                                 </div>
