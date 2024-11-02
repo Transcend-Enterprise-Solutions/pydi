@@ -110,7 +110,7 @@
                                                 </span>
                                             </a>
                                         </li>
-                                        <li class="mb-1 last:mb-0">
+                                        {{-- <li class="mb-1 last:mb-0">
                                             <a class="block text-slate-400 hover:text-blue-500 transition duration-150 truncate @if (Route::is('electric-bills')) {{ '!text-blue-500' }} @endif"
                                                 href="{{ route('electric-bills') }}"wire:navigate>
                                                 <span class="text-sm font-medium transition-opacity duration-300"
@@ -119,7 +119,7 @@
                                                     Electric Bill
                                                 </span>
                                             </a>
-                                        </li>
+                                        </li> --}}
                                  </ul>
                              </div>
                          </li>

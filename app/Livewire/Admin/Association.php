@@ -7,13 +7,11 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Maatwebsite\Excel\Facades\Excel;
 use Livewire\WithFileUploads;
 use App\Models\User;
 use App\Models\Positions;
 use App\Models\Committees;
 use Exception;
-use Illuminate\Support\Facades\DB;
 
 #[Layout('layouts.app')]
 #[Title('Association')]
@@ -127,7 +125,10 @@ class Association extends Component
                 ->where('users.active_status', '=', $this->activeStatus)
                 ->when($this->search2, function ($query) {
                     return $query->search(trim($this->search2));
-                })->paginate($this->pageSize);
+                })
+                ->orderByRaw('CAST(user_data.block AS UNSIGNED) ASC')
+                ->orderByRaw('CAST(user_data.lot AS UNSIGNED) ASC')
+                ->paginate($this->pageSize);
 
         $organizations = User::where('user_role', 'emp')
                 ->join('user_data', 'user_data.user_id', 'users.id')

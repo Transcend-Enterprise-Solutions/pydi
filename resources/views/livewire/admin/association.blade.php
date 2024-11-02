@@ -326,9 +326,9 @@ x-cloak>
                                                                             @if ($ho->profile_photo_path)
                                                                                 <img src="{{ route('profile-photo.file', ['filename' => basename($ho->profile_photo_path)]) }}" 
                                                                                         alt="{{ Auth::user()->name }}" 
-                                                                                        class="w-full h-full rounded-full hover:grayscale" style="pointer-events:none">
+                                                                                        class="w-full h-full rounded-full border border-gray-400" style="pointer-events:none">
                                                                             @else
-                                                                                <img class="w-full h-full rounded-full hover:grayscale" src="{{ asset('images/blank-profile.png') }}" alt=""  style="pointer-events:none">
+                                                                                <img class="w-full h-full rounded-full border border-gray-400" src="{{ asset('images/blank-profile.png') }}" alt=""  style="pointer-events:none">
                                                                             @endif
                                                                         </div>
                                                                     </td>
@@ -471,7 +471,7 @@ x-cloak>
                                                                 </td>
                                                                 <td class="px-5 py-4 text-left text-sm font-medium whitespace-nowrap bg-white dark:bg-gray-800">
                                                                     <i class="bi bi-envelope"></i> &nbsp;{{ $ho->email }} <br>
-                                                                    <i class="bi bi-telephone"></i> &nbsp;{{ $ho->tel_number }} {{ $ho->mobile_number }}
+                                                                    <i class="bi bi-telephone"></i> &nbsp;{{ $ho->tel_number }}{{ $ho->mobile_number }}
                                                                 </td>
                                                                 <td class="px-5 py-4 text-sm font-medium text-center whitespace-nowrap sticky right-0 z-10 bg-white dark:bg-gray-800">
                                                                     <div class="relative">
