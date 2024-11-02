@@ -454,9 +454,9 @@ x-cloak>
                                                                             @if ($ho->profile_photo_path)
                                                                                 <img src="{{ route('profile-photo.file', ['filename' => basename($ho->profile_photo_path)]) }}" 
                                                                                         alt="{{ Auth::user()->name }}" 
-                                                                                        class="rounded-full hover:grayscale border border-gray-400" style="width: 50px; height: 50px">
+                                                                                        class="rounded-full border border-gray-400" style="width: 50px; height: 50px">
                                                                             @else
-                                                                                <img class="rounded-full hover:grayscale border border-gray-400" src="{{ asset('images/blank-profile.png') }}" alt=""  style="width: 50px; height: 50px">
+                                                                                <img class="rounded-full border border-gray-400" src="{{ asset('images/blank-profile.png') }}" alt=""  style="width: 50px; height: 50px">
                                                                             @endif
                                                                             <p class="ml-4" style="line-height: 18px; margin-right: 100px">
                                                                                 {{ $ho->first_name }}{{ $ho->middle_name ? (' ' . substr($ho->middle_name, 0, 1) . '.') : '' }} {{ $ho->last_name }} {{ $ho->name_extension }} <br>
@@ -591,8 +591,7 @@ x-cloak>
                                                 </div>                                       
                                             @endforeach
                                         </div>
-                                     </div>
-
+                                    </div>
                                 </div>
                             </div>
                         </div>
