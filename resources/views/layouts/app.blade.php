@@ -9,7 +9,7 @@
     <link rel="icon" href="/images/beahoa-logo.png" type="image/x-icon">
 
 
-    <title>{{ isset($title) ? ('BEAHOA - ' . $title) : 'BEAHOA' }}</title>
+    <title>{{ isset($title) ? 'PYDI - ' . $title : 'PYDI' }}</title>
 
 
     <!-- Fonts -->
