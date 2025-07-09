@@ -27,10 +27,10 @@
                     @if (Auth::user()->user_role === 'sa' || Auth::user()->user_role === 'admin')
 
                         <!-- Dashboard -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
                             @if (in_array(Request::segment(1), ['dashboard'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
                             x-data="{ open: {{ in_array(Request::segment(1), ['dashboard']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
                             @if (Route::is('dashboard')) {{ '!text-blue-500' }} @endif"
                                 href="{{ route('dashboard') }}" wire:navigate>
                                 <div class="flex items-center justify-between">
@@ -45,19 +45,19 @@
                             </a>
                         </li>
 
-                        <!-- Association -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
-                        @if (in_array(Request::segment(1), ['association'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['association']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
-                            @if (Route::is('association')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('association') }}" wire:navigate>
+                        <!-- Agency Rep List -->
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
+                        @if (in_array(Request::segment(1), ['representatives'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
+                            x-data="{ open: {{ in_array(Request::segment(1), ['representatives']) ? 1 : 0 }} }">
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
+                            @if (Route::is('representatives')) {{ '!text-blue-500' }} @endif"
+                                href="{{ route('representatives') }}" wire:navigate>
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
-                                        <i class="bi bi-diagram-3 text-slate-400 mr-3"></i>
+                                        <i class="bi bi-person-vcard text-slate-400 mr-3"></i>
                                         <span
                                             class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Association
+                                            Representatives
                                         </span>
                                     </div>
                                 </div>
@@ -65,7 +65,7 @@
                         </li>
 
                          <!-- Monthly Payments -->
-                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
+                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
                          @if (in_array(Request::segment(1), ['monthly-payments'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
                              x-data="{ open: {{ in_array(Request::segment(1), ['monthly-payments']) ? 1 : 0 }} }">
                              <a class="block text-gray-800 dark:text-gray-100 truncate transition" href="#0"
@@ -87,41 +87,7 @@
                                  </div>
                              </a>
 
-                             <div class="lg:hidden lg:sidebar-expanded:block 2xl:block">
-                                 <ul class="pl-9 mt-1 transition-all duration-300 overflow-hidden"
-                                     :class="open ? '!block' : 'hidden'">
-                                        <li class="mb-1 last:mb-0">
-                                            <a class="block text-slate-400 hover:text-blue-500 transition duration-150 truncate @if (Route::is('association-dues')) {{ '!text-blue-500' }} @endif"
-                                                href="{{ route('association-dues') }}" wire:navigate>
-                                                <span class="text-sm font-medium transition-opacity duration-300"
-                                                    :class="sidebarExpanded ? 'opacity-100 lg:inline' :
-                                                        'opacity-0 lg:hidden'">
-                                                    Association Dues
-                                                </span>
-                                            </a>
-                                        </li>
-                                        <li class="mb-1 last:mb-0">
-                                            <a class="block text-slate-400 hover:text-blue-500 transition duration-150 truncate @if (Route::is('water-bills')) {{ '!text-blue-500' }} @endif"
-                                                href="{{ route('water-bills') }}" wire:navigate>
-                                                <span class="text-sm font-medium transition-opacity duration-300"
-                                                    :class="sidebarExpanded ? 'opacity-100 lg:inline' :
-                                                        'opacity-0 lg:hidden'">
-                                                    Water Bill
-                                                </span>
-                                            </a>
-                                        </li>
-                                        {{-- <li class="mb-1 last:mb-0">
-                                            <a class="block text-slate-400 hover:text-blue-500 transition duration-150 truncate @if (Route::is('electric-bills')) {{ '!text-blue-500' }} @endif"
-                                                href="{{ route('electric-bills') }}"wire:navigate>
-                                                <span class="text-sm font-medium transition-opacity duration-300"
-                                                    :class="sidebarExpanded ? 'opacity-100 lg:inline' :
-                                                        'opacity-0 lg:hidden'">
-                                                    Electric Bill
-                                                </span>
-                                            </a>
-                                        </li> --}}
-                                 </ul>
-                             </div>
+
                          </li>
 
                     @endif
@@ -130,10 +96,10 @@
 
                     @if (Auth::user()->user_role === 'homeowner')
 
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
                             @if (in_array(Request::segment(1), ['home'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
                             x-data="{ open: {{ in_array(Request::segment(1), ['home']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
                             @if (Route::is('home')) {{ '!text-blue-500' }} @endif"
                                 href="{{ route('home') }}" wire:navigate>
                                 <div class="flex items-center justify-between">
@@ -149,10 +115,10 @@
                         </li>
 
                         <!-- Association -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] 
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
                         @if (in_array(Request::segment(1), ['association'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
                             x-data="{ open: {{ in_array(Request::segment(1), ['association']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition 
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
                             @if (Route::is('association')) {{ '!text-blue-500' }} @endif"
                                 href="{{ route('association') }}" wire:navigate>
                                 <div class="flex items-center justify-between">
