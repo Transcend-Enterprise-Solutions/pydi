@@ -8,7 +8,7 @@ use App\Livewire\Admin\DimensionIndicatorManager;
 use App\Livewire\Admin\ElectricBills;
 use App\Livewire\Admin\UserList;
 use App\Livewire\Admin\WaterBills;
-use App\Livewire\User\DataEntryBatchManager;
+use App\Livewire\User\PydiDataEntry;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
@@ -35,7 +35,7 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
 
 /* Homeowner account role --------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:user'])->group(function () {
-    Route::get('/data-entry', DataEntryBatchManager::class)->name('data-entry');
+    Route::get('/data-entry', PydiDataEntry::class)->name('data-entry');
 });
 
 
