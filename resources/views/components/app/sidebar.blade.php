@@ -64,74 +64,51 @@
                             </a>
                         </li>
 
-                         <!-- Monthly Payments -->
-                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                         @if (in_array(Request::segment(1), ['monthly-payments'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                             x-data="{ open: {{ in_array(Request::segment(1), ['monthly-payments']) ? 1 : 0 }} }">
-                             <a class="block text-gray-800 dark:text-gray-100 truncate transition" href="#0"
-                                 @click.prevent="sidebarExpanded ? open = !open : sidebarExpanded = true">
-                                 <div class="flex items-center justify-between">
-                                     <div class="flex items-center">
-                                         <i class="bi bi-cash-stack text-slate-400 mr-3"></i>
-                                         <span
-                                             class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                             Monthly Payments
-                                         </span>
-                                     </div>
-                                     <div class="flex shrink-0 ml-2">
-                                         <svg class="lg:hidden lg:sidebar-expanded:inline w-3 h-3 shrink-0 ml-1 fill-current text-slate-400 transition-transform duration-300"
-                                             :class="open ? 'rotate-180' : 'rotate-0'" viewBox="0 0 12 12">
-                                             <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                                         </svg>
-                                     </div>
-                                 </div>
-                             </a>
-
-
-                         </li>
+                        <!-- Dimension Indicator Manager -->
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
+                        @if (in_array(Request::segment(1), ['dimension-indicator'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
+                            x-data="{ open: {{ in_array(Request::segment(1), ['dimension-indicator']) ? 1 : 0 }} }">
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
+                            @if (Route::is('dimension-indicator')) {{ '!text-blue-500' }} @endif"
+                                href="{{ route('dimension-indicator') }}" wire:navigate>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="bi bi-person-vcard text-slate-400 mr-3"></i>
+                                        <span
+                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                            Dimension Indicators
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
 
                     @endif
 
-                    <!-- Homeowner Tabs ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
+                    <!-- user tabs------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
 
-                    @if (Auth::user()->user_role === 'homeowner')
+                    @if (Auth::user()->user_role === 'user')
 
                         <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                            @if (in_array(Request::segment(1), ['home'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['home']) ? 1 : 0 }} }">
+                            @if (in_array(Request::segment(1), ['data-entry'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
+                            x-data="{ open: {{ in_array(Request::segment(1), ['data-entry']) ? 1 : 0 }} }">
                             <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('home')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('home') }}" wire:navigate>
+                            @if (Route::is('data-entry')) {{ '!text-blue-500' }} @endif"
+                                href="{{ route('data-entry') }}" wire:navigate>
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <i class="bi bi-house-fill text-slate-400 dark:text-slate-300 mr-3"></i>
                                         <span
                                             class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Home
+                                            Data Entry
                                         </span>
                                     </div>
                                 </div>
                             </a>
                         </li>
 
-                        <!-- Association -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['association'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['association']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('association')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('association') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-diagram-3 text-slate-400 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Association
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+
+
                     @endif
 
                 </ul>
