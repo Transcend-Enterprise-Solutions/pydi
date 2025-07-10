@@ -1,11 +1,9 @@
-<div>
+<div class="w-full">
     <!-- Header Section -->
-    <div class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="py-6">
-                <h1 class="text-2xl font-bold text-gray-900">PYDI Indicator Data Entry</h1>
-                <p class="mt-2 text-sm text-gray-600">Upload, edit, and manage your PYDI indicator datasets</p>
-            </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-slate-800 shadow-sm p-6 rounded-lg">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-200">PYDI Indicator Data Entry</h1>
+            <p class="mt-2 text-sm">Upload, edit, and manage your PYDI indicator datasets</p>
         </div>
     </div>
 
@@ -29,27 +27,27 @@
         @if($activeTab === 'upload')
             <div class="space-y-6">
                 <!-- Upload Methods -->
-                <div class="bg-white shadow rounded-lg">
+                <div class="bg-white dark:bg-slate-800 shadow rounded-lg">
                     <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Choose Upload Method</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Choose Upload Method</h3>
 
                         <!-- Method Selection -->
                         <div class="flex space-x-4 mb-6">
                             <button wire:click="setUploadMethod('manual')"
-                                    class="px-4 py-2 rounded-md {{ $uploadMethod === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                                    class="text-sm px-4 hover:bg-blue-700 py-2 rounded-md {{ $uploadMethod === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                                 Manual Entry
                             </button>
                             <button wire:click="setUploadMethod('file')"
-                                    class="px-4 py-2 rounded-md {{ $uploadMethod === 'file' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                                    class="text-sm dark:bg-green-700 dark:hover:bg-green-800 dark:text-gray-200 px-4 py-2 rounded-md {{ $uploadMethod === 'file' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                                 File Upload
                             </button>
                         </div>
 
                         <!-- Session Selection -->
                         <div class="mb-6">
-                            <label for="session_selection" class="block text-sm font-medium text-gray-700">Session</label>
+                            <label for="session_selection" class="block text-sm font-medium">Session</label>
                             <div class="mt-1 flex space-x-4">
-                                <select wire:model="selectedSessionId" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select wire:model="selectedSessionId" class="dark:bg-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Create New Session</option>
                                     @foreach($activeSessions as $session)
                                         <option value="{{ $session->id }}">{{ $session->session_name }} ({{ $session->dataRecords->count() }} records)</option>
@@ -61,9 +59,9 @@
                         <!-- New Session Name -->
                         @if(!$selectedSessionId)
                             <div class="mb-6">
-                                <label for="session_name" class="block text-sm font-medium text-gray-700">Session Name</label>
+                                <label for="session_name" class="block text-sm font-medium">Session Name</label>
                                 <input wire:model="sessionName" type="text" id="session_name"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                       class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                        placeholder="Enter session name">
                                 @error('sessionName') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -72,9 +70,9 @@
                         <!-- Dimension and Indicator Selection -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div>
-                                <label for="dimension_id" class="block text-sm font-medium text-gray-700">Dimension/Center of Participation</label>
+                                <label for="dimension_id" class="block text-sm font-medium">Dimension/Center of Participation</label>
                                 <select wire:model="dimensionId" wire:change="loadIndicators"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Select Dimension</option>
                                     @foreach($dimensions as $dimension)
                                         <option value="{{ $dimension->id }}">{{ $dimension->name }}</option>
@@ -84,9 +82,9 @@
                             </div>
 
                             <div>
-                                <label for="indicator_id" class="block text-sm font-medium text-gray-700">Indicator (Drop-down)</label>
+                                <label for="indicator_id" class="block text-sm font-medium">Indicator (Drop-down)</label>
                                 <select wire:model="indicatorId"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         {{ !$dimensionId ? 'disabled' : '' }}>
                                     <option value="">Select Indicator</option>
                                     @foreach($indicators as $indicator)
@@ -100,13 +98,13 @@
                         <!-- Manual Entry Form -->
                         @if($uploadMethod === 'manual')
                             <div class="border-t pt-6">
-                                <h4 class="text-md font-medium text-gray-900 mb-4">Manual Data Entry</h4>
+                                <h4 class="text-md font-medium text-gray-800 dark:text-gray-300 mb-4">Manual Data Entry</h4>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                                     <div>
-                                        <label for="region" class="block text-sm font-medium text-gray-700">Region</label>
+                                        <label for="region" class="block text-sm font-medium">Region</label>
                                         <select wire:model="region"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="">Select Region</option>
                                             @foreach($regions as $regionOption)
                                                 <option value="{{ $regionOption->region_description }}">{{ $regionOption->region_description }}</option>
@@ -116,9 +114,9 @@
                                     </div>
 
                                     <div>
-                                        <label for="sex" class="block text-sm font-medium text-gray-700">Sex</label>
+                                        <label for="sex" class="block text-sm font-medium">Sex</label>
                                         <select wire:model="sex"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                             <option value="">Select Sex</option>
                                             <option value="Male">Male</option>
                                             <option value="Female">Female</option>
@@ -128,9 +126,9 @@
                                     </div>
 
                                     <div>
-                                        <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+                                        <label for="age" class="block text-sm font-medium">Age</label>
                                         <input wire:model="age" type="text"
-                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                placeholder="e.g., 15-24, All Ages">
                                         @error('age') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                     </div>
@@ -138,17 +136,17 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
-                                        <label for="value" class="block text-sm font-medium text-gray-700">Value of Indicator</label>
+                                        <label for="value" class="block text-sm font-medium">Value of Indicator</label>
                                         <input wire:model="value" type="number" step="0.0001"
-                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                placeholder="Enter numeric value">
                                         @error('value') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                     </div>
 
                                     <div>
-                                        <label for="remarks" class="block text-sm font-medium text-gray-700">Remarks</label>
+                                        <label for="remarks" class="block text-sm font-medium">Remarks</label>
                                         <input wire:model="remarks" type="text"
-                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               class="dark:bg-gray-700 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                placeholder="Optional remarks">
                                         @error('remarks') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                                     </div>
@@ -169,7 +167,7 @@
                                 <h4 class="text-md font-medium text-gray-900 mb-4">File Upload</h4>
 
                                 <div class="mb-4">
-                                    <label for="dataset_file" class="block text-sm font-medium text-gray-700">Dataset File</label>
+                                    <label for="dataset_file" class="block text-sm font-medium">Dataset File</label>
                                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                         <div class="space-y-1 text-center">
                                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -255,19 +253,19 @@
 
         <!-- Datasets Tab -->
         @if($activeTab === 'datasets')
-            <div class="bg-white shadow rounded-lg">
+            <div class="bg-white dark:bg-slate-800 shadow rounded-lg">
                 <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Your Datasets</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200 mb-4">Your Datasets</h3>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 dark:bg-slate-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Records</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Session Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Records</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Submitted</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">

@@ -34,7 +34,7 @@ class Login extends Component
 
             if($user->active_status == 1) {
                 if ($user->user_role === 'sa') {
-                    return app(LoginResponse::class)->toResponse($this->request)->intended('/data-entry');
+                    return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');
                 } else {
                     return app(LoginResponse::class)->toResponse($this->request)->intended('/data-entry');
                 }
