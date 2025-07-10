@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "493e20c9d77d5e13cb55229e990bf89c",
+    "content-hash": "de91d89765fe10ae32cd062a4ae7a346",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2632,16 +2632,16 @@
         },
         {
             "name": "maatwebsite/excel",
-            "version": "3.1.55",
+            "version": "3.1.56",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SpartnerNL/Laravel-Excel.git",
-                "reference": "6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260"
+                "reference": "0381d0225b42c3f328d90f0dd05ca071fca3953f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260",
-                "reference": "6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260",
+                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/0381d0225b42c3f328d90f0dd05ca071fca3953f",
+                "reference": "0381d0225b42c3f328d90f0dd05ca071fca3953f",
                 "shasum": ""
             },
             "require": {
@@ -2660,12 +2660,12 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "providers": [
-                        "Maatwebsite\\Excel\\ExcelServiceProvider"
-                    ],
                     "aliases": {
                         "Excel": "Maatwebsite\\Excel\\Facades\\Excel"
-                    }
+                    },
+                    "providers": [
+                        "Maatwebsite\\Excel\\ExcelServiceProvider"
+                    ]
                 }
             },
             "autoload": {
@@ -2697,7 +2697,7 @@
             ],
             "support": {
                 "issues": "https://github.com/SpartnerNL/Laravel-Excel/issues",
-                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.55"
+                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.56"
             },
             "funding": [
                 {
@@ -2709,7 +2709,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-20T08:27:10+00:00"
+            "time": "2024-08-19T09:40:43+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -7715,16 +7715,16 @@
         },
         {
             "name": "woenel/prpcmblmts",
-            "version": "v1.0.2",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woenel/prpcmblmts.git",
-                "reference": "4c679b71fa2c06718ffe54928d8e63e007dab86e"
+                "reference": "833082cd5a856a8717b3296675f475e4663b144a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woenel/prpcmblmts/zipball/4c679b71fa2c06718ffe54928d8e63e007dab86e",
-                "reference": "4c679b71fa2c06718ffe54928d8e63e007dab86e",
+                "url": "https://api.github.com/repos/woenel/prpcmblmts/zipball/833082cd5a856a8717b3296675f475e4663b144a",
+                "reference": "833082cd5a856a8717b3296675f475e4663b144a",
                 "shasum": ""
             },
             "type": "library",
@@ -7747,7 +7747,7 @@
             "authors": [
                 {
                     "name": "Ronnel Martinez",
-                    "email": "misc.woe@outlook.ph"
+                    "email": "ronnel@mronnel.com"
                 }
             ],
             "description": "Philippines region, province, cities/municipalities and barangays Laravel migration and table seeder.",
@@ -7764,9 +7764,9 @@
             ],
             "support": {
                 "issues": "https://github.com/woenel/prpcmblmts/issues",
-                "source": "https://github.com/woenel/prpcmblmts/tree/v1.0.2"
+                "source": "https://github.com/woenel/prpcmblmts/tree/v1.1.0"
             },
-            "time": "2021-04-11T01:49:26+00:00"
+            "time": "2024-12-13T15:07:58+00:00"
         }
     ],
     "packages-dev": [
@@ -10152,5 +10152,5 @@
         "php": "^8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

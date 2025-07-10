@@ -32,7 +32,7 @@
     >
     <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase pt-1.5 pb-2 px-4">Notifications</div>
         <ul>
-            @livewire('notification.notifications-dropdown')
+            {{-- @livewire('notification.notifications-dropdown') --}}
         </ul>
     </div>
 </div>

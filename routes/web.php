@@ -4,9 +4,11 @@ use App\Livewire\Admin\Association;
 use App\Livewire\Home;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Livewire\Admin\AssociationDues;
+use App\Livewire\Admin\DimensionIndicatorManager;
 use App\Livewire\Admin\ElectricBills;
+use App\Livewire\Admin\UserList;
 use App\Livewire\Admin\WaterBills;
+use App\Livewire\User\PydiDataEntry;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
@@ -21,26 +23,25 @@ Route::get('/register', function () {
 /* Admin account role ------------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/monthly-payments/association-dues', AssociationDues::class)->name('association-dues');
+    Route::get('/representatives', UserList::class)->name('representatives');
+    Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
     Route::get('/monthly-payments/water-bills', WaterBills::class)->name('water-bills');
     Route::get('/monthly-payments/electric-bills', ElectricBills::class)->name('electric-bills');
+
 });
 
 
 
 
 /* Homeowner account role --------------------------------------------------------------------------*/
-Route::middleware(['auth', 'checkrole:homeowner'])->group(function () {
-    Route::get('/home', Home::class)->name('home');
+Route::middleware(['auth', 'checkrole:user'])->group(function () {
+    Route::get('/data-entry', PydiDataEntry::class)->name('data-entry');
 });
 
 
 
 
-/* Homeowner and Admin account role --------------------------------------------------------------------------*/
-Route::middleware(['auth', 'checkrole:sa,admin,homeowner'])->group(function () {
-    Route::get('/association', Association::class)->name('association');
-});
+
 
 
 

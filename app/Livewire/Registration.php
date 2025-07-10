@@ -11,73 +11,105 @@ use App\Models\SubdivisionLots;
 
 class Registration extends Component
 {
-    public $password;
-    public $c_password;
-
+    // Personal Info
     public $first_name;
     public $middle_name;
     public $last_name;
     public $name_extension;
-    public $showModal = false;
-    public $tel_number;
-    public $mobile_number;
+
+    // Contact Info
     public $email;
+    public $mobile_number;
+
+    // Address Info
     public $lots;
     public $lot;
     public $block;
     public $street;
+
+    // Government Info
+    public $position_designation;
+    public $government_agency;
+    public $office_department_division;
+    public $office_address;
+
+    // Account Info
+    public $password;
+    public $c_password;
+
+    // UI State
+    public $showModal = false;
     private $subdivisionLots;
 
     protected $rules = [
-        'first_name' => 'required',
-        'last_name' => 'required',
+        // Personal Info
+        'first_name' => 'required|string|max:255',
+        'last_name' => 'required|string|max:255',
+
+        // Contact Info
         'email' => 'required|email|unique:users,email',
+        'mobile_number' => 'required|string|max:20',
+
+        // Address Info
+        'block' => 'required|string',
+        'lot' => 'required|string',
+        'street' => 'required|string',
+
+        // Government Info
+        'position_designation' => 'required|string|max:255',
+        'government_agency' => 'required|string|max:255',
+        'office_department_division' => 'required|string|max:255',
+        'office_address' => 'required|string|max:500',
+
+        // Account Info
         'password' => 'required|min:8',
         'c_password' => 'required|same:password',
-        'block' => 'required',
-        'lot' => 'required',
-        'street' => 'required',
-        'mobile_number' => 'required',
     ];
 
     protected $messages = [
+        'first_name.required' => 'The first name field is required.',
+        'last_name.required' => 'The last name field is required.',
+        'email.required' => 'The email field is required.',
+        'email.email' => 'Please enter a valid email address.',
+        'email.unique' => 'This email is already registered.',
+        'mobile_number.required' => 'The mobile number field is required.',
+        'block.required' => 'The block field is required.',
+        'lot.required' => 'The lot field is required.',
+        'street.required' => 'The street field is required.',
+        'position_designation.required' => 'The position/designation field is required.',
+        'government_agency.required' => 'The government agency field is required.',
+        'office_department_division.required' => 'The office/department/division field is required.',
+        'office_address.required' => 'The office address field is required.',
         'password.required' => 'The password field is required.',
-        'password.min' => 'The password must be at least 8 characters long.',
-        'c_password.required' => 'The password confirmation field is required.',
-        'c_password.same' => 'The password confirmation does not match the password.',
-        'block' => 'The block field is required.',
-        'lot' => 'The lot field is required.',
-        'street' => 'The street field is required.',
-        'mobile_number' => 'The mobile number field is required.',
-        'first_name' => 'The first name field is required.',
-        'last_name' => 'The last name field is required.',
-        'email' => 'The email field is required.',
+        'password.min' => 'The password must be at least 8 characters.',
+        'c_password.required' => 'Please confirm your password.',
+        'c_password.same' => 'The passwords do not match.',
     ];
 
-
-    public function submit(){
-        
+    public function submit()
+    {
         $this->validate();
 
         if (!$this->isPasswordComplex($this->password)) {
             $this->addError('password', 'The password must include at least one uppercase letter, one number, and one special character.');
             return;
         }
-        sleep(1);
-        
-        // Create new user
-        $name = $this->first_name . " " . 
-                ($this->middle_name ? strtoupper(substr($this->middle_name, 0, 1)) . ". " : '') . 
-                $this->last_name . 
+
+        // Create user
+        $name = $this->first_name . " " .
+                ($this->middle_name ? strtoupper(substr($this->middle_name, 0, 1)) . ". " : '') .
+                $this->last_name .
                 ($this->name_extension ? (" " . $this->name_extension) : '');
+
         $user = User::create([
             'name' => $name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
-            'user_role' => 'homeowner',
+            'user_role' => 'user',
             'active_status' => 0,
         ]);
 
+        // Create user data
         UserData::create([
             'user_id' => $user->id,
             'last_name' => $this->last_name,
@@ -88,9 +120,13 @@ class Registration extends Component
             'block' => $this->block,
             'lot' => $this->lot,
             'street' => $this->street,
+            'position_designation' => $this->position_designation,
+            'government_agency' => $this->government_agency,
+            'office_department_division' => $this->office_department_division,
+            'office_address' => $this->office_address,
         ]);
 
-        // Create a notification entry
+        // Create notification
         Notification::create([
             'user_id' => $user->id,
             'type' => 'registration',
@@ -98,8 +134,15 @@ class Registration extends Component
             'read' => 0,
         ]);
 
-        // Reset form fields
-        $this->reset(['password', 'c_password', 'first_name', 'last_name', 'middle_name', 'email', 'mobile_number', 'name_extension', 'block', 'lot', 'street']);
+        // Reset form and show success modal
+        $this->reset([
+            'first_name', 'middle_name', 'last_name', 'name_extension',
+            'email', 'mobile_number',
+            'block', 'lot', 'street',
+            'position_designation', 'government_agency', 'office_department_division', 'office_address',
+            'password', 'c_password'
+        ]);
+
         $this->showModal = true;
     }
 
@@ -115,16 +158,16 @@ class Registration extends Component
     {
         $this->subdivisionLots = new SubdivisionLots();
         $blocks = $this->subdivisionLots->getBlocks();
-        if($this->block){
+
+        if ($this->block) {
             $this->lots = $this->subdivisionLots->getLotsInBlock($this->block);
         }
 
         return view('livewire.registration', [
-            'blocks' => $blocks
+            'blocks' => $blocks,
+            'positions' => UserData::getPositionDesignations(),
+            'agencies' => UserData::getGovernmentAgencies(),
+            'departments' => UserData::getOfficeDepartments(),
         ]);
-    }
-
-    public function resetVariables(){
-        return;
     }
 }
