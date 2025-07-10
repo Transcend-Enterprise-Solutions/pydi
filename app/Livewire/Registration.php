@@ -50,11 +50,6 @@ class Registration extends Component
         'email' => 'required|email|unique:users,email',
         'mobile_number' => 'required|string|max:20',
 
-        // Address Info
-        'block' => 'required|string',
-        'lot' => 'required|string',
-        'street' => 'required|string',
-
         // Government Info
         'position_designation' => 'required|string|max:255',
         'government_agency' => 'required|string|max:255',
@@ -73,9 +68,6 @@ class Registration extends Component
         'email.email' => 'Please enter a valid email address.',
         'email.unique' => 'This email is already registered.',
         'mobile_number.required' => 'The mobile number field is required.',
-        'block.required' => 'The block field is required.',
-        'lot.required' => 'The lot field is required.',
-        'street.required' => 'The street field is required.',
         'position_designation.required' => 'The position/designation field is required.',
         'government_agency.required' => 'The government agency field is required.',
         'office_department_division.required' => 'The office/department/division field is required.',
@@ -117,9 +109,6 @@ class Registration extends Component
             'middle_name' => $this->middle_name ?: null,
             'name_extension' => $this->name_extension ?: null,
             'mobile_number' => $this->mobile_number,
-            'block' => $this->block,
-            'lot' => $this->lot,
-            'street' => $this->street,
             'position_designation' => $this->position_designation,
             'government_agency' => $this->government_agency,
             'office_department_division' => $this->office_department_division,
@@ -135,15 +124,25 @@ class Registration extends Component
         ]);
 
         // Reset form and show success modal
-        $this->reset([
-            'first_name', 'middle_name', 'last_name', 'name_extension',
-            'email', 'mobile_number',
-            'block', 'lot', 'street',
-            'position_designation', 'government_agency', 'office_department_division', 'office_address',
-            'password', 'c_password'
-        ]);
+        $this->resetVariables();
 
         $this->showModal = true;
+    }
+
+    public function resetVariables()
+    {
+        $this->first_name = '';
+        $this->middle_name = '';
+        $this->last_name = '';
+        $this->name_extension = '';
+        $this->email = '';
+        $this->mobile_number = '';
+        $this->position_designation = '';
+        $this->government_agency = '';
+        $this->office_department_division = '';
+        $this->office_address = '';
+        $this->password = '';
+        $this->c_password = '';
     }
 
     private function isPasswordComplex($password)

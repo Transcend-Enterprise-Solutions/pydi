@@ -88,60 +88,6 @@
                             </div>
                         </div>
 
-                        <!-- Address Information Section -->
-                        <div class="mt-8">
-                            <h2 class="text-lg font-medium text-gray-500">
-                                Address Information
-                            </h2>
-
-                            <div class="mt-3 gap-2 lg:columns-2 sm:columns-1">
-                                <div class="w-full">
-                                    <label for="block" class="text-sm text-gray-500 font-bold">Block <span class="text-red-600">*</span></label>
-                                    <select id="block" wire:model.live="block"
-                                        class="w-full h-10 px-4 py-2 text-black border rounded-lg appearance-none bg-chalk border-zinc-300 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm">
-                                        <option value="">Select Block</option>
-                                        @foreach($blocks as $blockNumber)
-                                            <option value="{{ $blockNumber }}">{{ $blockNumber }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('block') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="w-full">
-                                    <label for="lot" class="text-sm text-gray-500 font-bold">Lot <span class="text-red-600">*</span></label>
-                                    <select id="lot" wire:model.live="lot"
-                                        class="w-full h-10 px-4 py-2 text-black border rounded-lg appearance-none bg-chalk border-zinc-300 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm">
-                                        <option value="">Select Lot</option>
-                                        @if($lots)
-                                            @foreach($lots as $lotNumber)
-                                                <option value="{{ $lotNumber }}">{{ $lotNumber }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                    @error('lot') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-
-                            <div class="mt-4 gap-2 lg:columns-1 sm:columns-1">
-                                <div class="w-full">
-                                    <label for="street" class="text-sm text-gray-500 font-bold">Street <span class="text-red-600">*</span></label>
-                                    <select id="street" wire:model.live="street"
-                                        class="w-full h-10 px-4 py-2 text-black border rounded-lg appearance-none bg-chalk border-zinc-300 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm">
-                                        <option value="">Select Street</option>
-                                        <option value="Blackthorn">Blackthorn</option>
-                                        <option value="Periwinkle">Periwinkle</option>
-                                        <option value="Sunny Sky">Sunny Sky</option>
-                                        <option value="Hyacinth">Hyacinth</option>
-                                        <option value="Shooting Star">Shooting Star</option>
-                                        <option value="Stargazer">Stargazer</option>
-                                        <option value="Hawthorn">Hawthorn</option>
-                                        <option value="Blue Irish">Blue Irish</option>
-                                        <option value="Sweet Amber">Sweet Amber</option>
-                                    </select>
-                                    @error('street') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Government Information Section -->
                         <div class="mt-8">
                             <h2 class="text-lg font-medium text-gray-500">
@@ -272,16 +218,16 @@
     </section>
 
      <!-- Success Modal -->
-     <x-modal id="showModal" maxWidth="2xl" wire:model="showModal" centered>
-        <div class="p-4 w-full">
+     @if($showModal)
+        <div class="fixed bg-white/80 backdrop-blur-md top-0 left-0 z-10 h-full w-full flex justify-center items-center">
             <div class="w-full max-w-full text-center">
-                <h2 class="text-3xl font-semibold mb-6">Congratulations!</h2>
+                <h2 class="text-green-700 text-3xl font-semibold mb-6">Congratulations!</h2>
                 <p class="mb-6">Your registration was successful. You can now log in.</p>
                 <a href="{{ route('login') }}"
-                   class="inline-flex items-center px-6 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-500">
+                    class="inline-flex items-center px-6 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-500">
                     Go to Login
                 </a>
             </div>
         </div>
-    </x-modal>
+    @endif
 </div>

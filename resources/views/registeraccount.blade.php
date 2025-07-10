@@ -130,6 +130,8 @@
 
     <script defer src="{{ asset('build/assets/app-DEoBNXZR.js') }}"></script>
     @livewireScripts
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.5.0/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
