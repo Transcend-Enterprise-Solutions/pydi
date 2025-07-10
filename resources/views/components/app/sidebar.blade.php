@@ -11,7 +11,7 @@
         <div class="flex justify-left mb-10 ml-1" style="width: 200px; height: 32px;">
             <!-- Logo -->
             <a class="flex items-center" href="{{ route('dashboard') }}">
-                <img class="mx-auto" src="/images/nyc_logo.png" alt="beahoa logo" width="45">
+                <img class="mx-auto" src="/images/nyc_logo.png" alt="nyc logo" style="width: 45px; height: 40px;">
                 <span
                     class="text-black dark:text-white ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">PYDI</span>
             </a>
