@@ -7,7 +7,6 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\UserData;
-use App\Models\SubdivisionLots;
 
 class Registration extends Component
 {
@@ -21,12 +20,6 @@ class Registration extends Component
     public $email;
     public $mobile_number;
 
-    // Address Info
-    public $lots;
-    public $lot;
-    public $block;
-    public $street;
-
     // Government Info
     public $position_designation;
     public $government_agency;
@@ -36,27 +29,21 @@ class Registration extends Component
     // Account Info
     public $password;
     public $c_password;
+    public $submitCount = 0;
 
     // UI State
     public $showModal = false;
     private $subdivisionLots;
 
     protected $rules = [
-        // Personal Info
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
-
-        // Contact Info
         'email' => 'required|email|unique:users,email',
         'mobile_number' => 'required|string|max:20',
-
-        // Government Info
         'position_designation' => 'required|string|max:255',
         'government_agency' => 'required|string|max:255',
         'office_department_division' => 'required|string|max:255',
         'office_address' => 'required|string|max:500',
-
-        // Account Info
         'password' => 'required|min:8',
         'c_password' => 'required|same:password',
     ];
@@ -87,7 +74,6 @@ class Registration extends Component
             return;
         }
 
-        // Create user
         $name = $this->first_name . " " .
                 ($this->middle_name ? strtoupper(substr($this->middle_name, 0, 1)) . ". " : '') .
                 $this->last_name .
@@ -101,7 +87,6 @@ class Registration extends Component
             'active_status' => 0,
         ]);
 
-        // Create user data
         UserData::create([
             'user_id' => $user->id,
             'last_name' => $this->last_name,
@@ -115,7 +100,6 @@ class Registration extends Component
             'office_address' => $this->office_address,
         ]);
 
-        // Create notification
         Notification::create([
             'user_id' => $user->id,
             'type' => 'registration',
@@ -123,26 +107,30 @@ class Registration extends Component
             'read' => 0,
         ]);
 
-        // Reset form and show success modal
+        $this->submitCount++;
         $this->resetVariables();
-
         $this->showModal = true;
     }
 
     public function resetVariables()
     {
-        $this->first_name = '';
-        $this->middle_name = '';
-        $this->last_name = '';
-        $this->name_extension = '';
-        $this->email = '';
-        $this->mobile_number = '';
-        $this->position_designation = '';
-        $this->government_agency = '';
-        $this->office_department_division = '';
-        $this->office_address = '';
-        $this->password = '';
-        $this->c_password = '';
+        $this->reset([
+            'first_name',
+            'middle_name',
+            'last_name',
+            'name_extension',
+            'email',
+            'mobile_number',
+            'position_designation',
+            'government_agency',
+            'office_department_division',
+            'office_address',
+            'password',
+            'c_password',
+        ]);
+        
+        // Force a re-render
+        $this->dispatch('reset-fields');
     }
 
     private function isPasswordComplex($password)
@@ -155,15 +143,7 @@ class Registration extends Component
 
     public function render()
     {
-        $this->subdivisionLots = new SubdivisionLots();
-        $blocks = $this->subdivisionLots->getBlocks();
-
-        if ($this->block) {
-            $this->lots = $this->subdivisionLots->getLotsInBlock($this->block);
-        }
-
         return view('livewire.registration', [
-            'blocks' => $blocks,
             'positions' => UserData::getPositionDesignations(),
             'agencies' => UserData::getGovernmentAgencies(),
             'departments' => UserData::getOfficeDepartments(),
