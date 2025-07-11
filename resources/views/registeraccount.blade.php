@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/images/beahoa-logo.png" type="image/x-icon">
 
-    <title>BEAHOA</title>
+    <title>PYDI</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
 
 </head>
 
-<body class="font-inter antialiased bg-slate-100 bg-white text-slate-600 dark:text-slate-400">
+<body class="font-inter antialiased bg-slate-100 text-slate-600 dark:text-slate-400">
 
     @livewire('registration')
 
