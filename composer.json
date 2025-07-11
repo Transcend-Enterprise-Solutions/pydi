@@ -22,7 +22,7 @@
         "owen-it/laravel-auditing": "^13.6",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
-        "woenel/prpcmblmts": "^1.0"
+        "woenel/prpcmblmts": "1.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

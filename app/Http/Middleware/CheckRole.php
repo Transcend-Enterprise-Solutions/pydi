@@ -18,8 +18,8 @@ class CheckRole
             }
 
             if($user->active_status == 1) {
-                if ($user->user_role === 'homeowner') {
-                    return redirect()->route('home');
+                if ($user->user_role === 'user') {
+                    return redirect()->route('data-entry');
                 } else {
                     return redirect()->route('dashboard');
                 }

@@ -21,7 +21,7 @@
     </button>
 
     <!-- Dropdown menu -->
-    <div
+    {{-- <div
         class="fixed top-16 right-4 z-50 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-1.5 rounded-2xl shadow-lg overflow-hidden max-h-[calc(100vh-5rem)] overflow-y-auto"
         @click.outside="open = false"
         @keydown.escape.window="open = false"
@@ -54,14 +54,14 @@
                         <div class="block py-2 px-4">
                             <div class="flex justify-between items-start">
                                 @if($notification->type === 'registration')
-                                    <a wire:navigate href="{{ route('association', 
+                                    <a wire:navigate href="{{ route('association',
                                             [
                                                 'mainTab' => 'org',
                                                 'tab' => 'homeowners',
                                                 'subTab' => 'registering',
                                                 'activeStatus' => 0
                                             ]
-                                            ) }}" 
+                                            ) }}"
                                             class="flex-grow">
                                         <span class="block text-sm mb-1">
                                             👤 <span class="font-medium text-slate-800 dark:text-slate-100">
@@ -156,5 +156,5 @@
                 @endforelse
             @endif
         </ul>
-    </div>
+    </div> --}}
 </div>

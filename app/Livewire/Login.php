@@ -31,12 +31,12 @@ class Login extends Component
 
         if (Auth::attempt($credentials, $this->remember)) {
             $user = Auth::user();
-            
+
             if($user->active_status == 1) {
-                if ($user->user_role === 'homeowner') {
-                    return app(LoginResponse::class)->toResponse($this->request)->intended('/home');
-                } else {
+                if ($user->user_role === 'sa') {
                     return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');
+                } else {
+                    return app(LoginResponse::class)->toResponse($this->request)->intended('/data-entry');
                 }
             }
             elseif($user->active_status == 2){// Deactivated user

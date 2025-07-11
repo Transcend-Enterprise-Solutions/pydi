@@ -28,9 +28,6 @@ class User extends Authenticatable
         'email',
         'password',
         'user_role',
-        'homeowner_id',
-        'position_id',
-        'committee_id',
         'active_status',
         'profile_photo_path',
     ];
