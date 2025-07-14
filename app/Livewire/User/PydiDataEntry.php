@@ -2,479 +2,350 @@
 
 namespace App\Livewire\User;
 
-use Livewire\Component;
 use App\Models\Dimension;
 use App\Models\Indicator;
-use App\Models\UploadSession;
-use App\Models\PydiDataRecord;
 use App\Models\PhilippineRegions;
+use App\Models\PydiDataRecord;
+use App\Models\UploadSession;
+use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Livewire\WithFileUploads;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\PydiDataImport;
 
 #[Layout('layouts.app')]
 #[Title('Data Entry | PYDI')]
 class PydiDataEntry extends Component
 {
-    use WithFileUploads;
-
-    // Tab management
-    public $activeTab = 'upload';
-
-    // Manual entry form
+    // Session properties
+    public $currentSession = null;
     public $sessionName = '';
-    public $dimensionId = '';
-    public $indicatorId = '';
-    public $region = '';
-    public $sex = '';
-    public $age = '';
-    public $value = '';
-    public $remarks = '';
+    public $sessionNotes = '';
+    public $showCreateSession = false;
 
-    // File upload
-    public $uploadFile;
-    public $datasetFile; // Added missing property
-    public $uploadSessionName = '';
-    public $uploadDimensionId = '';
-    public $uploadIndicatorId = '';
-    public $uploadMethod = 'manual';
+    // Form properties for data entry
+    public $rows = [];
+    public $newRow = [
+        'dimension_id' => '',
+        'indicator_id' => '',
+        'region' => '',
+        'sex' => '',
+        'age' => '',
+        'value' => '',
+        'remarks' => '',
+    ];
 
-    // Data
+    // Dropdown data
     public $dimensions = [];
     public $indicators = [];
     public $regions = [];
-    public $activeSessions = [];
-    public $allSessions = []; // Added missing property
-    public $selectedSessionRecords = [];
-    public $selectedSession = null; // Added missing property
-
-    // UI States
-    public $showAddForm = false;
-    public $showSessionDetails = false;
-    public $showSessionModal = false; // Added missing property
-    public $selectedSessionId = null;
-    public $isProcessing = false;
-
-    // Sex options
-    public $sexOptions = [
-        'Male' => 'Male',
-        'Female' => 'Female',
-        'Both' => 'Both Sexes'
+    public $sexOptions = ['Male', 'Female', 'Both'];
+    public $ageGroups = [
+        '0-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65+', 'All Ages'
     ];
 
-    // Age group options
-    public $ageOptions = [
-        '0-4' => '0-4 years',
-        '5-9' => '5-9 years',
-        '10-14' => '10-14 years',
-        '15-19' => '15-19 years',
-        '20-24' => '20-24 years',
-        '25-29' => '25-29 years',
-        '30-34' => '30-34 years',
-        '35-39' => '35-39 years',
-        '40-44' => '40-44 years',
-        '45-49' => '45-49 years',
-        '50-54' => '50-54 years',
-        '55-59' => '55-59 years',
-        '60-64' => '60-64 years',
-        '65+' => '65+ years',
-        'All' => 'All Ages'
+    // UI state
+    public $showAddRow = false;
+    public $editingRowIndex = null;
+
+    protected $rules = [
+        'sessionName' => 'required|string|max:255',
+        'sessionNotes' => 'nullable|string',
+        'newRow.dimension_id' => 'required|exists:dimensions,id',
+        'newRow.indicator_id' => 'required|exists:indicators,id',
+        'newRow.region' => 'required|string',
+        'newRow.sex' => 'required|string',
+        'newRow.age' => 'required|string',
+        'newRow.value' => 'required|numeric|min:0',
+        'newRow.remarks' => 'nullable|string',
+    ];
+
+    protected $messages = [
+        'newRow.dimension_id.required' => 'Please select a dimension.',
+        'newRow.indicator_id.required' => 'Please select an indicator.',
+        'newRow.region.required' => 'Please select a region.',
+        'newRow.sex.required' => 'Please select a sex.',
+        'newRow.age.required' => 'Please select an age group.',
+        'newRow.value.required' => 'Please enter a value.',
+        'newRow.value.numeric' => 'Value must be a number.',
+        'newRow.value.min' => 'Value must be greater than or equal to 0.',
     ];
 
     public function mount()
     {
-        $this->loadData();
+        $this->loadDropdownData();
+        $this->loadActiveSession();
     }
 
-    public function loadData()
+    public function loadDropdownData()
     {
         $this->dimensions = Dimension::orderBy('name')->get();
+        $this->indicators = Indicator::orderBy('name')->get();
         $this->regions = PhilippineRegions::orderBy('region_description')->get();
-        $this->loadActiveSessions();
-        $this->loadAllSessions();
     }
 
-    public function loadActiveSessions()
+    public function loadActiveSession()
     {
-        $this->activeSessions = UploadSession::forUser(Auth::id())
-            ->active()
-            ->with(['dataRecords'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
+        $this->currentSession = UploadSession::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->first();
 
-    // Added missing method
-    public function loadAllSessions()
-    {
-        $this->allSessions = UploadSession::forUser(Auth::id())
-            ->with(['dataRecords'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
-
-    // Added missing method
-    public function setUploadMethod($method)
-    {
-        $this->uploadMethod = $method;
-        $this->resetForm();
-    }
-
-    // Added missing method
-    public function loadIndicators()
-    {
-        $this->indicatorId = '';
-        $this->indicators = [];
-
-        if ($this->dimensionId) {
-            $this->indicators = Indicator::where('dimension_id', $this->dimensionId)
-                ->orderBy('name')
-                ->get();
+        if ($this->currentSession) {
+            $this->loadSessionData();
         }
     }
 
-    public function updatedDimensionId($value)
+    public function loadSessionData()
     {
-        $this->indicatorId = '';
-        $this->indicators = [];
-
-        if ($value) {
-            $this->indicators = Indicator::where('dimension_id', $value)
-                ->orderBy('name')
-                ->get();
+        if ($this->currentSession) {
+            $this->rows = $this->currentSession->draftRecords()
+                ->with(['dimension', 'indicator'])
+                ->get()
+                ->map(function ($record) {
+                    return [
+                        'id' => $record->id,
+                        'dimension_id' => $record->dimension_id,
+                        'indicator_id' => $record->indicator_id,
+                        'region' => $record->region,
+                        'sex' => $record->sex,
+                        'age' => $record->age,
+                        'value' => $record->value,
+                        'remarks' => $record->remarks,
+                        'dimension_name' => $record->dimension->name,
+                        'indicator_name' => $record->indicator->name,
+                    ];
+                })->toArray();
         }
     }
 
-    public function updatedUploadDimensionId($value)
+    public function showCreateSessionForm()
     {
-        $this->uploadIndicatorId = '';
-
-        if ($value) {
-            $this->indicators = Indicator::where('dimension_id', $value)
-                ->orderBy('name')
-                ->get();
-        }
+        $this->showCreateSession = true;
+        $this->sessionName = 'Dataset ' . now()->format('Y-m-d H:i:s');
     }
 
-    public function setActiveTab($tab)
-    {
-        $this->activeTab = $tab;
-        $this->resetForm();
-    }
-
-    public function toggleAddForm()
-    {
-        $this->showAddForm = !$this->showAddForm;
-        if (!$this->showAddForm) {
-            $this->resetManualForm();
-        }
-    }
-
-    public function resetForm()
-    {
-        $this->resetManualForm();
-        $this->resetUploadForm();
-        $this->showAddForm = false;
-        $this->showSessionDetails = false;
-        $this->showSessionModal = false;
-    }
-
-    public function resetManualForm()
-    {
-        $this->sessionName = '';
-        $this->dimensionId = '';
-        $this->indicatorId = '';
-        $this->region = '';
-        $this->sex = '';
-        $this->age = '';
-        $this->value = '';
-        $this->remarks = '';
-        $this->indicators = [];
-    }
-
-    public function resetUploadForm()
-    {
-        $this->uploadFile = null;
-        $this->datasetFile = null;
-        $this->uploadSessionName = '';
-        $this->uploadDimensionId = '';
-        $this->uploadIndicatorId = '';
-    }
-
-    // Updated method name to match template
-    public function addRecord()
+    public function createSession()
     {
         $this->validate([
             'sessionName' => 'required|string|max:255',
-            'dimensionId' => 'required|exists:dimensions,id',
-            'indicatorId' => 'required|exists:indicators,id',
-            'region' => 'required|string',
-            'sex' => 'required|in:Male,Female,Both',
-            'age' => 'required|string',
-            'value' => 'required|numeric',
-            'remarks' => 'nullable|string|max:1000',
+            'sessionNotes' => 'nullable|string',
         ]);
 
-        DB::beginTransaction();
-        try {
-            // Create or get existing upload session
-            $session = UploadSession::firstOrCreate([
+        DB::transaction(function () {
+            $this->currentSession = UploadSession::create([
                 'user_id' => Auth::id(),
                 'session_name' => $this->sessionName,
                 'status' => 'active',
+                'notes' => $this->sessionNotes,
+                'total_records' => 0,
             ]);
+        });
 
-            // Create the data record
-            PydiDataRecord::create([
-                'upload_session_id' => $session->id,
-                'dimension_id' => $this->dimensionId,
-                'indicator_id' => $this->indicatorId,
+        $this->showCreateSession = false;
+        $this->sessionName = '';
+        $this->sessionNotes = '';
+        $this->rows = [];
+
+        session()->flash('success', 'New dataset created successfully!');
+    }
+
+    public function cancelCreateSession()
+    {
+        $this->showCreateSession = false;
+        $this->sessionName = '';
+        $this->sessionNotes = '';
+    }
+
+    public function showAddRowForm()
+    {
+        $this->showAddRow = true;
+        $this->resetNewRow();
+    }
+
+    public function resetNewRow()
+    {
+        $this->newRow = [
+            'dimension_id' => '',
+            'indicator_id' => '',
+            'region' => '',
+            'sex' => '',
+            'age' => '',
+            'value' => '',
+            'remarks' => '',
+        ];
+    }
+
+    public function addRow()
+    {
+        if (!$this->currentSession) {
+            session()->flash('error', 'Please create a dataset first.');
+            return;
+        }
+
+        $this->validate([
+            'newRow.dimension_id' => 'required|exists:dimensions,id',
+            'newRow.indicator_id' => 'required|exists:indicators,id',
+            'newRow.region' => 'required|string',
+            'newRow.sex' => 'required|string',
+            'newRow.age' => 'required|string',
+            'newRow.value' => 'required|numeric|min:0',
+            'newRow.remarks' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () {
+            $record = PydiDataRecord::create([
+                'upload_session_id' => $this->currentSession->id,
+                'dimension_id' => $this->newRow['dimension_id'],
+                'indicator_id' => $this->newRow['indicator_id'],
                 'user_id' => Auth::id(),
-                'region' => $this->region,
-                'sex' => $this->sex,
-                'age' => $this->age,
-                'value' => $this->value,
-                'remarks' => $this->remarks,
+                'region' => $this->newRow['region'],
+                'sex' => $this->newRow['sex'],
+                'age' => $this->newRow['age'],
+                'value' => $this->newRow['value'],
+                'remarks' => $this->newRow['remarks'],
                 'status' => 'draft',
             ]);
 
-            // Update session record count
-            $session->updateRecordsCount();
+            $this->currentSession->updateRecordsCount();
+        });
 
-            DB::commit();
+        $this->loadSessionData();
+        $this->showAddRow = false;
+        $this->resetNewRow();
 
-            $this->resetManualForm();
-            $this->loadActiveSessions();
-            $this->loadAllSessions();
-            $this->showAddForm = false;
-
-            session()->flash('message', 'Data record added successfully!');
-        } catch (\Exception $e) {
-            DB::rollback();
-            session()->flash('error', 'Failed to add data record: ' . $e->getMessage());
-        }
+        session()->flash('success', 'Row added successfully!');
     }
 
-    // Updated method name to match template
-    public function uploadFile()
+    public function editRow($index)
     {
+        $row = $this->rows[$index];
+        $this->newRow = [
+            'dimension_id' => $row['dimension_id'],
+            'indicator_id' => $row['indicator_id'],
+            'region' => $row['region'],
+            'sex' => $row['sex'],
+            'age' => $row['age'],
+            'value' => $row['value'],
+            'remarks' => $row['remarks'],
+        ];
+        $this->editingRowIndex = $index;
+        $this->showAddRow = true;
+    }
+
+    public function updateRow()
+    {
+        if (!$this->currentSession || $this->editingRowIndex === null) {
+            return;
+        }
+
         $this->validate([
-            'sessionName' => 'required|string|max:255',
-            'dimensionId' => 'required|exists:dimensions,id',
-            'indicatorId' => 'required|exists:indicators,id',
-            'datasetFile' => 'required|file|mimes:csv,xlsx,xls|max:10240', // 10MB max
+            'newRow.dimension_id' => 'required|exists:dimensions,id',
+            'newRow.indicator_id' => 'required|exists:indicators,id',
+            'newRow.region' => 'required|string',
+            'newRow.sex' => 'required|string',
+            'newRow.age' => 'required|string',
+            'newRow.value' => 'required|numeric|min:0',
+            'newRow.remarks' => 'nullable|string',
         ]);
 
-        $this->isProcessing = true;
+        $row = $this->rows[$this->editingRowIndex];
 
-        DB::beginTransaction();
-        try {
-            // Create upload session
-            $session = UploadSession::create([
-                'user_id' => Auth::id(),
-                'session_name' => $this->sessionName,
-                'status' => 'active',
-                'notes' => 'File upload: ' . $this->datasetFile->getClientOriginalName(),
+        DB::transaction(function () use ($row) {
+            PydiDataRecord::where('id', $row['id'])->update([
+                'dimension_id' => $this->newRow['dimension_id'],
+                'indicator_id' => $this->newRow['indicator_id'],
+                'region' => $this->newRow['region'],
+                'sex' => $this->newRow['sex'],
+                'age' => $this->newRow['age'],
+                'value' => $this->newRow['value'],
+                'remarks' => $this->newRow['remarks'],
             ]);
+        });
 
-            // Process the file
-            $import = new PydiDataImport(
-                $session->id,
-                $this->dimensionId,
-                $this->indicatorId,
-                Auth::id()
-            );
+        $this->loadSessionData();
+        $this->showAddRow = false;
+        $this->editingRowIndex = null;
+        $this->resetNewRow();
 
-            Excel::import($import, $this->datasetFile->getRealPath());
-
-            // Update session record count
-            $session->updateRecordsCount();
-
-            DB::commit();
-
-            $this->resetUploadForm();
-            $this->loadActiveSessions();
-            $this->loadAllSessions();
-            $this->isProcessing = false;
-
-            session()->flash('message', 'File uploaded and processed successfully! ' . $import->getImportedCount() . ' records imported.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            $this->isProcessing = false;
-            session()->flash('error', 'Failed to process file: ' . $e->getMessage());
-        }
+        session()->flash('success', 'Row updated successfully!');
     }
 
-    // Updated method name to match template
-    public function viewSession($sessionId)
+    public function deleteRow($index)
     {
-        $this->selectedSessionId = $sessionId;
-        $this->selectedSession = UploadSession::with(['dataRecords.dimension', 'dataRecords.indicator'])
-            ->where('id', $sessionId)
-            ->where('user_id', Auth::id())
-            ->first();
-
-        if ($this->selectedSession) {
-            $this->selectedSessionRecords = $this->selectedSession->dataRecords;
-            $this->showSessionModal = true;
-        }
-    }
-
-    // Added missing method
-    public function closeSessionModal()
-    {
-        $this->showSessionModal = false;
-        $this->selectedSessionId = null;
-        $this->selectedSession = null;
-        $this->selectedSessionRecords = [];
-    }
-
-    public function viewSessionDetails($sessionId)
-    {
-        $this->selectedSessionId = $sessionId;
-        $this->selectedSessionRecords = PydiDataRecord::where('upload_session_id', $sessionId)
-            ->with(['dimension', 'indicator'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $this->showSessionDetails = true;
-    }
-
-    public function closeSessionDetails()
-    {
-        $this->showSessionDetails = false;
-        $this->selectedSessionId = null;
-        $this->selectedSessionRecords = [];
-    }
-
-    public function submitSession($sessionId)
-    {
-        $session = UploadSession::where('id', $sessionId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        if (!$session->isActive()) {
-            session()->flash('error', 'Session cannot be submitted.');
+        if (!$this->currentSession) {
             return;
         }
 
-        DB::beginTransaction();
-        try {
+        $row = $this->rows[$index];
+
+        DB::transaction(function () use ($row) {
+            PydiDataRecord::where('id', $row['id'])->delete();
+            $this->currentSession->updateRecordsCount();
+        });
+
+        $this->loadSessionData();
+        session()->flash('success', 'Row deleted successfully!');
+    }
+
+    public function cancelAddRow()
+    {
+        $this->showAddRow = false;
+        $this->editingRowIndex = null;
+        $this->resetNewRow();
+    }
+
+    public function submitForReview()
+    {
+        if (!$this->currentSession || empty($this->rows)) {
+            session()->flash('error', 'Please add at least one row before submitting.');
+            return;
+        }
+
+        DB::transaction(function () {
+            // Update all draft records to submitted
+            PydiDataRecord::where('upload_session_id', $this->currentSession->id)
+                ->where('status', 'draft')
+                ->update([
+                    'status' => 'submitted',
+                    'submitted_at' => now(),
+                ]);
+
             // Mark session as submitted
-            $session->markAsSubmitted();
+            $this->currentSession->markAsSubmitted();
+        });
 
-            // Mark all draft records in this session as submitted
-            $session->draftRecords()->update([
-                'status' => 'submitted',
-                'submitted_at' => now(),
-            ]);
+        $this->currentSession = null;
+        $this->rows = [];
 
-            DB::commit();
-
-            $this->loadActiveSessions();
-            $this->loadAllSessions();
-            $this->closeSessionDetails();
-            $this->closeSessionModal();
-
-            session()->flash('message', 'Session submitted successfully!');
-        } catch (\Exception $e) {
-            DB::rollback();
-            session()->flash('error', 'Failed to submit session: ' . $e->getMessage());
-        }
+        session()->flash('success', 'Dataset submitted for review successfully!');
     }
 
-    public function cancelSession($sessionId)
+    public function cancelSession()
     {
-        $session = UploadSession::where('id', $sessionId)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        if (!$session->isActive()) {
-            session()->flash('error', 'Session cannot be cancelled.');
+        if (!$this->currentSession) {
             return;
         }
 
-        DB::beginTransaction();
-        try {
+        DB::transaction(function () {
+            // Delete all draft records
+            PydiDataRecord::where('upload_session_id', $this->currentSession->id)
+                ->where('status', 'draft')
+                ->delete();
+
             // Mark session as cancelled
-            $session->markAsCancelled();
+            $this->currentSession->markAsCancelled();
+        });
 
-            // Delete all draft records in this session
-            $session->draftRecords()->delete();
+        $this->currentSession = null;
+        $this->rows = [];
 
-            DB::commit();
-
-            $this->loadActiveSessions();
-            $this->loadAllSessions();
-            $this->closeSessionDetails();
-            $this->closeSessionModal();
-
-            session()->flash('message', 'Session cancelled successfully!');
-        } catch (\Exception $e) {
-            DB::rollback();
-            session()->flash('error', 'Failed to cancel session: ' . $e->getMessage());
-        }
+        session()->flash('success', 'Dataset cancelled successfully!');
     }
 
-    public function deleteRecord($recordId)
+    public function getRegionName($regionCode)
     {
-        $record = PydiDataRecord::where('id', $recordId)
-            ->where('user_id', Auth::id())
-            ->where('status', 'draft')
-            ->firstOrFail();
-
-        try {
-            $sessionId = $record->upload_session_id;
-            $record->delete();
-
-            // Update session record count
-            $session = UploadSession::find($sessionId);
-            if ($session) {
-                $session->updateRecordsCount();
-
-                // If no records left, delete the session
-                if ($session->dataRecords()->count() === 0) {
-                    $session->delete();
-                }
-            }
-
-            $this->loadActiveSessions();
-            $this->loadAllSessions();
-
-            // Refresh session details if viewing
-            if ($this->selectedSessionId == $sessionId) {
-                $this->viewSessionDetails($sessionId);
-            }
-
-            session()->flash('message', 'Record deleted successfully!');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to delete record: ' . $e->getMessage());
-        }
-    }
-
-    public function downloadTemplate()
-    {
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="pydi_template.csv"',
-        ];
-
-        $callback = function() {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Region', 'Sex', 'Age', 'Value', 'Remarks']);
-
-            // Add sample data
-            fputcsv($file, ['NCR', 'Male', '0-4', '1234.56', 'Sample data']);
-            fputcsv($file, ['NCR', 'Female', '5-9', '2345.67', 'Sample data']);
-            fputcsv($file, ['Region I', 'Both', 'All', '3456.78', 'Sample data']);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $region = collect($this->regions)->firstWhere('region_code', $regionCode);
+        return $region ? $region->region_description : $regionCode;
     }
 
     public function render()
