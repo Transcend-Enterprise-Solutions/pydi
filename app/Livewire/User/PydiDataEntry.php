@@ -23,6 +23,7 @@ class PydiDataEntry extends Component
     public $sessionNotes = '';
     public $showCreateSession = false;
 
+
     // Form properties for data entry
     public $rows = [];
     public $newRow = [
@@ -47,6 +48,11 @@ class PydiDataEntry extends Component
     // UI state
     public $showAddRow = false;
     public $editingRowIndex = null;
+
+    public $showViewSubmitted = false;
+    public $submittedSessions = [];
+    public $selectedSubmittedSession = null;
+    public $submittedSessionData = [];
 
     protected $rules = [
         'sessionName' => 'required|string|max:255',
@@ -76,6 +82,39 @@ class PydiDataEntry extends Component
         $this->loadDropdownData();
         $this->loadActiveSession();
     }
+//view functions
+    public function showSubmittedDatasets()
+    {
+
+        $this->submittedSessions = UploadSession::where('user_id', Auth::id())
+            ->where('status', 'submitted')
+            ->orderBy('submitted_at', 'desc')
+            ->get();
+
+        $this->showViewSubmitted = true;
+    }
+
+    public function loadSubmittedSessionData($sessionId)
+    {
+        $this->selectedSubmittedSession = UploadSession::find($sessionId);
+
+        $this->submittedSessionData = PydiDataRecord::where('upload_session_id', $sessionId)
+            ->with(['dimension', 'indicator'])
+            ->get()
+            ->map(function ($record) {
+                return [
+                    'dimension_name' => $record->dimension->name,
+                    'indicator_name' => $record->indicator->name,
+                    'region' => $this->getRegionName($record->region),
+                    'sex' => $record->sex,
+                    'age' => $record->age,
+                    'value' => number_format($record->value, 4),
+                    'remarks' => $record->remarks ?: '-',
+                ];
+            })->toArray();
+    }
+
+
 
     public function loadDropdownData()
     {

@@ -21,6 +21,145 @@
                 </div>
             @endif
 
+            <!-- View Submitted Datasets Button -->
+            @if(!$currentSession)
+                <div class="flex justify-end mb-6">
+                    <button
+                        wire:click="showSubmittedDatasets"
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition duration-200"
+                    >
+                        View Submitted Datasets
+                    </button>
+                </div>
+            @endif
+
+            <!-- View Submitted Datasets Modal -->
+            @if($showViewSubmitted)
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" wire:click="showViewSubmitted = false">
+                    <div class="relative top-10 mx-auto p-5 border w-4/5 max-w-6xl shadow-lg rounded-md bg-white" wire:click.stop>
+                        <div class="mt-3">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Submitted Datasets</h3>
+
+                            <!-- Session Selection -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Dataset
+                                </label>
+                                <select
+                                    wire:model="selectedSubmittedSession"
+                                    wire:change="loadSubmittedSessionData($event.target.value)"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                >
+                                    <option value="">Select a dataset</option>
+                                    @foreach($submittedSessions as $session)
+                                        <option value="{{ $session->id }}">
+                                            {{ $session->session_name }} (Submitted: {{ $session->submitted_at->format('M d, Y h:i A') }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Session Info -->
+                            @if($selectedSubmittedSession)
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                    <div>
+                                        <h3 class="text-lg font-medium text-blue-900">Dataset Information</h3>
+                                        <p class="text-blue-700">{{ $selectedSubmittedSession->session_name }}</p>
+                                        @if($selectedSubmittedSession->notes)
+                                            <p class="text-sm text-blue-600 mt-1">{{ $selectedSubmittedSession->notes }}</p>
+                                        @endif
+                                        <p class="text-sm text-blue-600 mt-1">
+                                            Created: {{ $selectedSubmittedSession->created_at->format('M d, Y h:i A') }}
+                                        </p>
+                                        <p class="text-sm text-blue-600 mt-1">
+                                            Submitted: {{ $selectedSubmittedSession->submitted_at->format('M d, Y h:i A') }}
+                                        </p>
+                                        <p class="text-sm text-blue-600 mt-1">
+                                            Records: {{ $selectedSubmittedSession->total_records }}
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <!-- Data Table -->
+                            @if(!empty($submittedSessionData))
+                                <div class="bg-white rounded-lg shadow overflow-hidden">
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Dimension
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Indicator
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Region
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Sex
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Age
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Value
+                                                    </th>
+                                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Remarks
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach($submittedSessionData as $row)
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['dimension_name'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['indicator_name'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['region'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['sex'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['age'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {{ $row['value'] }}
+                                                        </td>
+                                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                                            {{ $row['remarks'] }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @elseif($selectedSubmittedSession)
+                                <div class="text-center py-8">
+                                    <div class="text-gray-500 text-lg">No data found in this dataset.</div>
+                                </div>
+                            @endif
+
+                            <div class="flex justify-end mt-6">
+                                <button
+                                    wire:click="showViewSubmitted = false"
+                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-200"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if(session()->has('error'))
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     {{ session('error') }}
