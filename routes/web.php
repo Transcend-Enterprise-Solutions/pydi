@@ -3,10 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\DimensionIndicatorManager;
+use App\Livewire\Admin\ViewDatasets;
 use App\Livewire\Admin\UserList;
 use App\Livewire\User\PydiDataEntry;
+use App\Livewire\User\InputDatasets;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+
 
 
 Route::redirect('/', '/login');
@@ -21,6 +24,7 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/representatives', UserList::class)->name('representatives');
     Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
+    Route::get('/view-datasets', ViewDatasets::class)->name('view-datasets');
 });
 
 
@@ -29,6 +33,7 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
 /* Homeowner account role --------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:user'])->group(function () {
     Route::get('/data-entry', PydiDataEntry::class)->name('data-entry');
+    Route::get('/input-datasets', InputDatasets::class)->name('input-datasets');
 });
 
 
