@@ -47,7 +47,7 @@
                         <div class="mb-6">
                             <label for="session_selection" class="block text-sm font-medium">Session</label>
                             <div class="mt-1 flex space-x-4">
-                                <select wire:model="selectedSessionId" class="dark:bg-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select wire:model.live="selectedSessionId" class="dark:bg-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Create New Session</option>
                                     @foreach($activeSessions as $session)
                                         <option value="{{ $session->id }}">{{ $session->session_name }} ({{ $session->dataRecords->count() }} records)</option>
@@ -369,12 +369,12 @@
     </div>
 
     <!-- Loading Indicator -->
-    <div wire:loading class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+    {{-- <div wire:loading class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white p-4 rounded-lg shadow-lg">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             <p class="mt-2 text-sm text-gray-600">Processing...</p>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Success/Error Messages -->
     @if (session()->has('message'))
