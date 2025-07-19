@@ -9,7 +9,7 @@
     <link rel="icon" href="/images/nyc-logo_orig.png" type="image/x-icon">
 
 
-    <title>{{ isset($title) ? ('NYC PYDI - ' . $title) : 'NYC PYDI' }}</title>
+    <title>{{ isset($title) ? 'NYC PYDI - ' . $title : 'NYC PYDI' }}</title>
 
 
     <!-- Fonts -->

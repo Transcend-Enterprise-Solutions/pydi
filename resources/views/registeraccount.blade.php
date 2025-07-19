@@ -9,7 +9,6 @@
 
     <title>NYC PYDI</title>
 
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,19 +18,20 @@
     <!-- Scripts -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-Dah69xa3.css') }}">
 
     @livewireStyles
     <style>
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             overflow-x: hidden;
         }
 
-        .left-side{
+        .left-side {
             width: 70%;
         }
 
@@ -65,6 +65,7 @@
             from {
                 transform: translateX(100%);
             }
+
             to {
                 transform: translateX(0);
             }
@@ -84,11 +85,11 @@
             transform: translateX(100%);
         }
 
-        @media (max-width: 768px){
-            .left-side{
+        @media (max-width: 768px) {
+            .left-side {
                 width: 100%;
-            }   
-            
+            }
+
             .right-side img {
                 right: -200px;
             }
@@ -99,8 +100,9 @@
 <body class="font-inter antialiased bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
 
     <main class="bg-gradient-to-br from-white to-gray-100 main-container">
-        <div class="fixed top-0 left-0 flex w-full h-full bg-cover bg-center bg-no-repeat" style="background-image: url(images/bg.jpg); background-color: rgba(255, 255, 255, 0.5); background-blend-mode: overlay;">
-        </div>  
+        <div class="fixed top-0 left-0 flex w-full h-full bg-cover bg-center bg-no-repeat"
+            style="background-image: url(images/bg.jpg); background-color: rgba(255, 255, 255, 0.5); background-blend-mode: overlay;">
+        </div>
         <div class="relative flex overflow-hidden justify-center lg:justify-between" style="z-index: 99">
 
             <!-- Content -->
@@ -113,10 +115,13 @@
             </div>
 
             <!-- Image -->
-            <div class="hidden sm:block md:hidden lg:block bottom-0 right-0 sm:w-0 md:w-0 lg:w-1/2 overflow-hidden right-side-content h-full fixed top-0" aria-hidden="true">
+            <div class="hidden sm:block md:hidden lg:block bottom-0 right-0 sm:w-0 md:w-0 lg:w-1/2 overflow-hidden right-side-content h-full fixed top-0"
+                aria-hidden="true">
                 <div class="flex items-center justify-center w-full h-full login-logo animate-slide-in-right-delay">
-                    <div class="flex items-center justify-center bg-white/80 backdrop-blur-md border border-white/90 rounded-full shadow-xl" style="width: 250px; height: 250px;">
-                        <img class="object-contain" src="{{ asset('/images/nyc_logo.png') }}" style="width: 220px" alt="Authentication image" />
+                    <div class="flex items-center justify-center bg-white/80 backdrop-blur-md border border-white/90 rounded-full shadow-xl"
+                        style="width: 250px; height: 250px;">
+                        <img class="object-contain" src="{{ asset('/images/nyc_logo.png') }}" style="width: 220px"
+                            alt="Authentication image" />
                     </div>
                 </div>
             </div>
@@ -124,7 +129,7 @@
 
 
         <div class="right-side fixed top-0 animate-slide-in-right">
-            <img src="/images/Vector.png" alt="login bg" >
+            <img src="/images/Vector.png" alt="login bg">
         </div>
     </main>
 
