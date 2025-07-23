@@ -98,6 +98,23 @@
                                 </div>
                             </a>
                         </li>
+
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
+                        @if (in_array(Request::segment(1), ['manage-pydi-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
+                            x-data="{ open: {{ in_array(Request::segment(1), ['manage-pydi-datasets']) ? 1 : 0 }} }">
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition {{ request()->is('manage-pydi-datasets*') ? '!text-blue-500' : '' }}"
+                                href="{{ route('manage-pydi-datasets') }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="bi bi-display text-slate-400 dark:text-slate-300 mr-3"></i>
+                                        <span
+                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                            Manage PYDI Datasets
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
                     @endif
 
                     <!-- user tabs------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
@@ -133,6 +150,23 @@
                                         <span
                                             class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
                                             Input Datasets
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
+                        @if (in_array(Request::segment(1), ['pydi-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
+                            x-data="{ open: {{ in_array(Request::segment(1), ['pydi-datasets']) ? 1 : 0 }} }">
+                            <a class="block text-gray-800 dark:text-gray-100 truncate transition {{ request()->is('pydi-datasets*') ? '!text-blue-500' : '' }}"
+                                href="{{ route('pydi-datasets') }}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="bi bi-clipboard-data text-slate-400 dark:text-slate-300 mr-3"></i>
+                                        <span
+                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                            PYDI Datasets
                                         </span>
                                     </div>
                                 </div>

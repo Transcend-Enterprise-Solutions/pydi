@@ -3,21 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\DimensionIndicatorManager;
-use App\Livewire\Admin\ViewDatasets;
-use App\Livewire\Admin\UserList;
-use App\Livewire\User\PydiDataEntry;
-use App\Livewire\User\InputDatasets;
+
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
 
+use App\Livewire\User\{PydiDataEntry, InputDatasets, PydiDatasetDetailIndex, PydiDatasetIndex};
+use App\Livewire\Admin\{ViewDatasets, UserList, ManagePydiIndex, ManagePydiDetailIndex};
+use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
-Route::redirect('/', '/login');
+Route::redirect('/', '/landing');
 Route::get('/register', function () {
-    return view('registeraccount'); })->name('register');
-
-
-
+    return view('registeraccount');
+})->name('register');
 
 /* Admin account role ------------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
@@ -25,18 +23,22 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     Route::get('/representatives', UserList::class)->name('representatives');
     Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
     Route::get('/view-datasets', ViewDatasets::class)->name('view-datasets');
+
+    Route::get('/manage-pydi-datasets', ManagePydiIndex::class)->name('manage-pydi-datasets');
+    Route::get('/manage-pydi-datasets/{id}', ManagePydiDetailIndex::class)->name('manage-pydi-dataset-details');
 });
-
-
-
 
 /* Homeowner account role --------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:user'])->group(function () {
     Route::get('/data-entry', PydiDataEntry::class)->name('data-entry');
     Route::get('/input-datasets', InputDatasets::class)->name('input-datasets');
+    Route::get('/pydi-datasets', PydiDatasetIndex::class)->name('pydi-datasets');
+    Route::get('/pydi-datasets/{id}', PydiDatasetDetailIndex::class)->name('pydi-dataset-details');
 });
 
 
+Route::get('/landing', HomeIndex::class)->name('landing');
+Route::get('/advocacy/{id}', AdvocacyIndex::class)->name('advocacy');
 
 
 

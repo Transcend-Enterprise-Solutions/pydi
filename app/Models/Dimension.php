@@ -110,4 +110,9 @@ class Dimension extends Model
     {
         return $query->has('dataRecords');
     }
+
+    public function pydiDatasetDetals()
+    {
+        return $this->hasMany(PydiDatasetDetail::class, 'dimension_id', 'id');
+    }
 }
