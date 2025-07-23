@@ -15,10 +15,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet" />
 
     <!-- Scripts -->
-    <script defer src="build/assets/app-D9BebNPI.js"></script>
+    <script defer src="build/assets/app-BUdMCiQf.js"></script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="build/assets/app-DDRs7vCM.css">
+    <link rel="stylesheet" href="build/assets/app-CdO2ehrx.css">
 
     @livewireStyles
 

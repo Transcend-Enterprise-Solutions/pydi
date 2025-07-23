@@ -17,6 +17,12 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
+    <!-- Scripts -->
+    <script defer src="build/assets/app-BUdMCiQf.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="build/assets/app-CdO2ehrx.css">
+
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
