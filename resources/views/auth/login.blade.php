@@ -49,7 +49,7 @@
                 <div>
                     <x-label for="email" value="{{ __('Email') }}" />
                     <x-input id="email" type="email" name="email" :value="old('email')" required autofocus
-                    class="w-full h-10 px-2 py-1 text-black rounded-lg appearance-none bg-white/80 backdrop-blur-md border border-zinc-200 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm" />
+                        class="w-full h-10 px-2 py-1 text-black rounded-lg appearance-none bg-white/80 backdrop-blur-md border border-zinc-200 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm" />
                 </div>
                 <div class="relative w-full" x-data="{ show: false }">
                     <x-label for="password" value="{{ __('Password') }}" />
@@ -67,30 +67,36 @@
                 <!-- Remember Me Checkbox -->
                 <div class="flex items-center justify-between w-full mt-6">
                     <!-- Remember Me Checkbox -->
-                        <div class="flex items-center">
-                            <input
-                                id="remember_me"
-                                type="checkbox"
-                                wire:model.defer="remember"
-                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <label for="remember_me" class="ml-2 block text-sm text-gray-400">
-                                {{ __('Remember me') }}
-                            </label>
-                        </div>
-                        <!-- Forgot Password Link -->
-                        @if (Route::has('password.request'))
-                            <a class="text-sm underline hover:no-underline text-gray-400" href="{{ route('password.request') }}">
-                                {{ __('Forgot Password?') }}
-                            </a>
-                        @endif
+                    <div class="flex items-center">
+                        <input id="remember_me" type="checkbox" wire:model.defer="remember"
+                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                        <label for="remember_me" class="ml-2 block text-sm text-gray-400">
+                            {{ __('Remember me') }}
+                        </label>
                     </div>
+                    <!-- Forgot Password Link -->
+                    @if (Route::has('password.request'))
+                        <a class="text-sm underline hover:no-underline text-gray-400"
+                            href="{{ route('password.request') }}">
+                            {{ __('Forgot Password?') }}
+                        </a>
+                    @endif
                 </div>
-                <div class="flex items-center justify-between mt-6">
-                    <x-button>
-                        {{ __('Sign in') }}
-                    </x-button>
-                </div>
+            </div>
+            <div class="flex items-center justify-between gap-3 mt-6">
+
+
+                <a href="{{ url('/') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium transition">
+                    <i class="bi bi-house-door"></i>
+                    Home
+                </a>
+
+                <x-button class="flex items-center gap-2">
+                    {{ __('Sign in') }}
+                </x-button>
+            </div>
+
         </form>
         <x-validation-errors class="mt-4" />
         @error('login')

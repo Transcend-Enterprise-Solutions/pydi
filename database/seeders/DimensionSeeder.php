@@ -18,78 +18,78 @@ class DimensionSeeder extends Seeder
                 'name' => 'Active Citizenship',
                 'description' => 'Programs promoting civic responsibility, volunteerism, and nation-building.',
                 'image' => '/images/advocacies/active-citizenship.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Agriculture',
                 'description' => 'Support for farming, agri-business, and sustainable food production.',
                 'image' => '/images/advocacies/agriculture.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Digital Media Citizenship',
                 'description' => 'Digital literacy and responsible use of technology and social media.',
                 'image' => '/images/advocacies/digital-media.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Economic Empowerment',
                 'description' => 'Programs for youth livelihood, employment, and entrepreneurship.',
                 'image' => '/images/advocacies/economic-empowerment.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Education',
                 'description' => 'Access to quality education, scholarships, and learning programs.',
                 'image' => '/images/advocacies/education.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Environment',
                 'description' => 'Environmental conservation, climate action, and sustainable living.',
                 'image' => '/images/advocacies/environment.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Global Mobility',
                 'description' => 'International exchange, travel opportunities, and cultural immersion.',
                 'image' => '/images/advocacies/global-mobility.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Governance',
                 'description' => 'Promoting transparency, accountability, and participatory governance.',
                 'image' => '/images/advocacies/governance.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Health',
                 'description' => 'Initiatives for physical, mental, and community health awareness.',
                 'image' => '/images/advocacies/health.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Peace-Building and Security',
                 'description' => 'Youth involvement in conflict resolution and security initiatives.',
                 'image' => '/images/advocacies/peace-security.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
             [
                 'name' => 'Social Inclusion and Equity',
                 'description' => 'Promoting equality, diversity, and inclusion among youth.',
                 'image' => '/images/advocacies/social-inclusion.png',
-                'created_at' => now(),
-                'updated_at' => now()
+
+
             ],
         ];
 
@@ -109,377 +109,318 @@ class DimensionSeeder extends Seeder
             // Active Citizenship
             [
                 'dimension_id' => $dimensionIds['Active Citizenship'],
-                'name' => 'Percentage who are members of youth organizations',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth organization membership',
+                'description' => 'Percentage who are members of youth organizations',
             ],
             [
                 'dimension_id' => $dimensionIds['Active Citizenship'],
-                'name' => 'Youth volunteerism rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth volunteerism',
+                'description' => 'Youth volunteerism rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Active Citizenship'],
-                'name' => 'Youth attendance in organizational meetings',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Organizational meeting attendance',
+                'description' => 'Youth attendance in organizational meetings',
             ],
             [
                 'dimension_id' => $dimensionIds['Active Citizenship'],
-                'name' => 'Percentage of youth accessing internet for interaction and posting of opinions for discussing civic and political issues',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Civic digital engagement',
+                'description' => 'Percentage of youth accessing internet for interaction and posting of opinions for discussing civic and political issues',
             ],
 
             // Agriculture
             [
                 'dimension_id' => $dimensionIds['Agriculture'],
-                'name' => 'Percentage of young people who have accessed agricultural programs and services',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Agricultural program access',
+                'description' => 'Percentage of young people who have accessed agricultural programs and services',
             ],
             [
                 'dimension_id' => $dimensionIds['Agriculture'],
-                'name' => 'Percentage of young people who have accessed business capital and livelihood projects (in agriculture)',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Agricultural capital access',
+                'description' => 'Percentage of young people who have accessed business capital and livelihood projects (in agriculture)',
             ],
             [
                 'dimension_id' => $dimensionIds['Agriculture'],
-                'name' => 'Percentage of youth who own agricultural land titles',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth agricultural land ownership',
+                'description' => 'Percentage of youth who own agricultural land titles',
             ],
             [
                 'dimension_id' => $dimensionIds['Agriculture'],
-                'name' => 'Percentage of youth employment in agriculture',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth in agricultural employment',
+                'description' => 'Percentage of youth employment in agriculture',
             ],
             [
                 'dimension_id' => $dimensionIds['Agriculture'],
-                'name' => 'Percentage of youth taking agriculture-related courses',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Agriculture course enrollment',
+                'description' => 'Percentage of youth taking agriculture-related courses',
             ],
 
             // Digital Media Citizenship
             [
                 'dimension_id' => $dimensionIds['Digital Media Citizenship'],
-                'name' => 'Uses or skillful in using the internet, computers, social media, or ICT in general',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Digital skills',
+                'description' => 'Uses or skillful in using the internet, computers, social media, or ICT in general',
             ],
             [
                 'dimension_id' => $dimensionIds['Digital Media Citizenship'],
-                'name' => 'Understands social and broadcast media content or has digital literacy',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Digital literacy',
+                'description' => 'Understands social and broadcast media content or has digital literacy',
             ],
             [
                 'dimension_id' => $dimensionIds['Digital Media Citizenship'],
-                'name' => 'Percentage of youth with access to computers or ICT devices',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'ICT device access',
+                'description' => 'Percentage of youth with access to computers or ICT devices',
             ],
 
             // Economic Empowerment
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth entrepreneurship rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth entrepreneurship',
+                'description' => 'Youth entrepreneurship rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth unemployment rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth unemployment',
+                'description' => 'Youth unemployment rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth underemployment rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth underemployment',
+                'description' => 'Youth underemployment rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth vulnerable employment Rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Vulnerable youth employment',
+                'description' => 'Youth vulnerable employment Rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth not in education, employment, or training (NEET) as percent of youth population',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'NEET youth rate',
+                'description' => 'Youth not in education, employment, or training (NEET) as percent of youth population',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Youth mean hours of work in a week (targeted to be at least 40 hours per week)',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth weekly work hours',
+                'description' => 'Youth mean hours of work in a week (targeted to be at least 40 hours per week)',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Percentage of youth in professional, technical, managerial, and administrative jobs',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth in professional jobs',
+                'description' => 'Percentage of youth in professional, technical, managerial, and administrative jobs',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Average hourly earnings of female and male employees',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Gender earnings comparison',
+                'description' => 'Average hourly earnings of female and male employees',
             ],
             [
                 'dimension_id' => $dimensionIds['Economic Empowerment'],
-                'name' => 'Number of female and male children aged 5-17 years old in child labor by age',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Child labor statistics',
+                'description' => 'Number of female and male children aged 5-17 years old in child labor by age',
             ],
 
             // Education
             [
                 'dimension_id' => $dimensionIds['Education'],
-                'name' => 'Proportion among youth who completed tertiary education (college education)',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Tertiary education completion',
+                'description' => 'Proportion among youth who completed tertiary education (college education)',
             ],
             [
                 'dimension_id' => $dimensionIds['Education'],
-                'name' => 'Percentage of youth grantees of scholarships and educational assistance at the tertiary level',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Scholarship recipients',
+                'description' => 'Percentage of youth grantees of scholarships and educational assistance at the tertiary level',
             ],
             [
                 'dimension_id' => $dimensionIds['Education'],
-                'name' => 'Youth functional literacy rate; numeracy rate; ages 15-29',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth literacy rates',
+                'description' => 'Youth functional literacy rate; numeracy rate; ages 15-29',
             ],
 
             // Environment
             [
                 'dimension_id' => $dimensionIds['Environment'],
-                'name' => 'Percentage of youth organizations that actively participate in advocating for and implementing environment-related laws, policies, ordinances, and programs',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth environmental advocacy',
+                'description' => 'Percentage of youth organizations that actively participate in advocating for and implementing environment-related laws, policies, ordinances, and programs',
             ],
             [
                 'dimension_id' => $dimensionIds['Environment'],
-                'name' => 'Youth involvement in environmental activities',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Environmental activity participation',
+                'description' => 'Youth involvement in environmental activities',
             ],
 
             // Global Mobility
             [
                 'dimension_id' => $dimensionIds['Global Mobility'],
-                'name' => 'Student outbound mobility rate at the tertiary level',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Outbound student mobility',
+                'description' => 'Student outbound mobility rate at the tertiary level',
             ],
             [
                 'dimension_id' => $dimensionIds['Global Mobility'],
                 'name' => 'Youth exchange students',
-                'created_at' => now(),
-                'updated_at' => now()
+                'description' => 'Youth exchange students',
             ],
             [
                 'dimension_id' => $dimensionIds['Global Mobility'],
-                'name' => 'Youth volunteers abroad',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth volunteering abroad',
+                'description' => 'Youth volunteers abroad',
             ],
             [
                 'dimension_id' => $dimensionIds['Global Mobility'],
                 'name' => 'International youth professionals',
-                'created_at' => now(),
-                'updated_at' => now()
+                'description' => 'International youth professionals',
             ],
 
             // Governance
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'Youth voter registration rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth voter registration',
+                'description' => 'Youth voter registration rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'SK youth voter registration rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'SK voter registration',
+                'description' => 'SK youth voter registration rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'Youth voter turnout rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth voter turnout',
+                'description' => 'Youth voter turnout rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'SK voter turnout rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'SK voter turnout',
+                'description' => 'SK voter turnout rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'Ratio of youth and non-youth workers in government service',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth in government workforce',
+                'description' => 'Ratio of youth and non-youth workers in government service',
             ],
             [
                 'dimension_id' => $dimensionIds['Governance'],
-                'name' => 'Percentage of youth who are represented in the key decision-making positions in the public sector',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth in public leadership',
+                'description' => 'Percentage of youth who are represented in the key decision-making positions in the public sector',
             ],
 
             // Health
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Use of illegal drugs; Years of life lost 15-39 years old (ASEAN)',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Illegal drug use',
+                'description' => 'Use of illegal drugs; Years of life lost 15-39 years old (ASEAN)',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Proportion with HIV infection',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'HIV infection rate',
+                'description' => 'Proportion with HIV infection',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Coverage of essential health services by age',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Essential health coverage',
+                'description' => 'Coverage of essential health services by age',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Proportion suffering from significant mental health problems; Years of life lost 15-39 (ASEAN)',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth mental health issues',
+                'description' => 'Proportion suffering from significant mental health problems; Years of life lost 15-39 (ASEAN)',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Road traffic accident injuries and drowning/submersion incidents',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Traffic accidents and drowning',
+                'description' => 'Road traffic accident injuries and drowning/submersion incidents',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Teenage pregnancy rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Teen pregnancy rate',
+                'description' => 'Teenage pregnancy rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Health'],
-                'name' => 'Suicide deaths',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth suicide rate',
+                'description' => 'Suicide deaths',
             ],
 
             // Peace-Building and Security
             [
                 'dimension_id' => $dimensionIds['Peace-Building and Security'],
-                'name' => 'Percentage of youth who are involved in peace-making and peace-building activities',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth peace engagement',
+                'description' => 'Percentage of youth who are involved in peace-making and peace-building activities',
             ],
             [
                 'dimension_id' => $dimensionIds['Peace-Building and Security'],
-                'name' => 'Number and percentage of youth in the leadership of relevant organizations involved in preventing and addressing conflict',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth in conflict resolution',
+                'description' => 'Number and percentage of youth in the leadership of relevant organizations involved in preventing and addressing conflict',
             ],
             [
                 'dimension_id' => $dimensionIds['Peace-Building and Security'],
-                'name' => 'Youth offender rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth offending rate',
+                'description' => 'Youth offender rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Peace-Building and Security'],
-                'name' => 'Youth recidivism rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth reoffending rate',
+                'description' => 'Youth recidivism rate',
             ],
 
             // Social Inclusion and Equity
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Proportion of seats held by young women in Congress and LGUs',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Young women in government',
+                'description' => 'Proportion of seats held by young women in Congress and LGUs',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Proportion of youth population with severe disabilities receiving disability cash benefit',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Disabled youth benefits',
+                'description' => 'Proportion of youth population with severe disabilities receiving disability cash benefit',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
                 'name' => 'Youth poverty rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'description' => 'Youth poverty rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
                 'name' => 'Youth subsistence rate',
-                'created_at' => now(),
-                'updated_at' => now()
+                'description' => 'Youth subsistence rate',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Proportion of women aged 15-30 years who make their own informed decisions regarding sexual relations, contraceptive use, and reproductive health care',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => "Women's reproductive autonomy",
+                'description' => "Proportion of women aged 15-30 years who make their own informed decisions regarding sexual relations, contraceptive use, and reproductive health care",
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Percentage of population with access to electricity',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Electricity access rate',
+                'description' => 'Percentage of population with access to electricity',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Percentage of population with access to toilet facilities',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Sanitation access',
+                'description' => 'Percentage of population with access to toilet facilities',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Youth hunger incidence',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Youth hunger rate',
+                'description' => 'Youth hunger incidence',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Ratio of young men to young women in professional and management positions',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Gender leadership parity',
+                'description' => 'Ratio of young men to young women in professional and management positions',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Ratio of young men to young women who are represented in governance structures in school',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'School governance gender parity',
+                'description' => 'Ratio of young men to young women who are represented in governance structures in school',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Proportion of young women elected as SK chairpersons',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Female SK leaders',
+                'description' => 'Proportion of young women elected as SK chairpersons',
             ],
             [
                 'dimension_id' => $dimensionIds['Social Inclusion and Equity'],
-                'name' => 'Percentage of women aged 20-24 years married or in union before age 18',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Child marriage rate',
+                'description' => 'Percentage of women aged 20-24 years married or in union before age 18',
             ],
         ];
 

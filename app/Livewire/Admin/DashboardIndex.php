@@ -1,32 +1,37 @@
 <?php
 
-namespace App\Livewire\Landing;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use App\Models\{Dimension, PydiDataset};
 
-#[Layout('layouts.land')]
-#[Title('PYDI Home')]
-class AdvocacyIndex extends Component
+#[Layout('layouts.app')]
+#[Title('PYDI Dashboard')]
+class DashboardIndex extends Component
 {
     public $advocacyInfo;
     public $yearOptions = [];
-    public $demensions = [];
+    public $dimensions = [];
     public $ageOptions = ['1-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65+', 'All Ages'];
     public $selectedAge = 'All Ages';
     public $selectedYear = '';
+    public $selectedDimension = "";
     public $selectedAdvocacy = '';
 
     public $chartLabels = ['Male', 'Female', 'Others'];
     public $chartData = [0, 0, 0];
     public $totalSum = 0;
+    public $loading = false;
 
-    public function mount($id)
+    public function mount()
     {
-        $this->demensions = Dimension::all();
+        $id = Dimension::orderBy('id', 'asc')->first()?->id;
+        $this->dimensions = Dimension::orderBy('name')->get();
+
         $this->selectedAdvocacy = $id;
         $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetals'])->findOrFail($id);
+
 
         // Fetch unique years from PydiDataset (descending order)
         $this->yearOptions = PydiDataset::select('year')
@@ -43,7 +48,6 @@ class AdvocacyIndex extends Component
         $this->updateChartData();
     }
 
-
     public function updatedSelectedYear()
     {
         $this->updateChartData();
@@ -54,8 +58,21 @@ class AdvocacyIndex extends Component
         $this->updateChartData();
     }
 
+    public function updatedSelectedDimension($value)
+    {
+        $this->loading = true;
+
+        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetals'])
+            ->findOrFail($value);
+
+        $this->updateChartData();
+        $this->loading = false;
+    }
+
     protected function updateChartData()
     {
+        $this->loading = true;
+
         $datasetDetails = Dimension::with(['pydiDatasetDetals' => function ($query) {
             if ($this->selectedAge !== "All Ages") {
                 if (str_contains($this->selectedAge, '+')) {
@@ -101,6 +118,7 @@ class AdvocacyIndex extends Component
         }
 
         $this->dispatch('chart-updated', data: $this->chartData);
+        $this->loading = false;
     }
 
     public function updatedSelectedAdvocacy($value)
@@ -118,9 +136,6 @@ class AdvocacyIndex extends Component
 
     public function render()
     {
-        return view('livewire.landing.advocacy-index', [
-            'chartLabels' => $this->chartLabels,
-            'chartData'   => $this->chartData,
-        ]);
+        return view('livewire.admin.dashboard-index');
     }
 }

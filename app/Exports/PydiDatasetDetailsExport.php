@@ -45,7 +45,7 @@ class PydiDatasetDetailsExport implements FromCollection, WithHeadings, WithEven
             'Philippine Region',
             'Sex',
             'Age',
-            'Content',
+            'Value',
         ];
     }
 
@@ -61,7 +61,7 @@ class PydiDatasetDetailsExport implements FromCollection, WithHeadings, WithEven
                 $sheet->getColumnDimension('C')->setWidth(40);
                 $sheet->getColumnDimension('D')->setWidth(10);
                 $sheet->getColumnDimension('E')->setWidth(10);
-                $sheet->getColumnDimension('F')->setWidth(40);
+                $sheet->getColumnDimension('F')->setWidth(10);
 
                 // Allow free text for "Sex" column (remove validation)
                 $validation = new DataValidation();

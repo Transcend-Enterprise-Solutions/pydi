@@ -4,14 +4,14 @@ namespace App\Livewire\User;
 
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
-use Livewire\WithPagination;
+use Livewire\{WithPagination, WithFileUploads};
 use App\Models\PydiDataset;
 
 #[Layout('layouts.app')]
 #[Title('PYDI Datasets')]
 class PydiDatasetIndex extends Component
 {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $showEntries = 10;
     public $search = '';
@@ -22,9 +22,13 @@ class PydiDatasetIndex extends Component
     public $showMessageModal = false;
     public $feedbackMessage = '';
 
+    public $showRequestEditModal = false;
+    public $selectedEntryId;
+
     // Submit Dataset
     public $showConfirmSend = false;
     public $selectedId = null;
+    public $file;
 
     public $datasetId, $name, $description, $year;
 
@@ -42,6 +46,7 @@ class PydiDatasetIndex extends Component
     public function create()
     {
         $this->reset(['datasetId', 'name', 'description', 'year']);
+        $this->year = date('Y');
         $this->editMode = false;
         $this->showModal = true;
     }
@@ -115,12 +120,44 @@ class PydiDatasetIndex extends Component
     public function sendConfirmed()
     {
         if ($this->selectedId) {
-            PydiDataset::find($this->selectedId)->update(['is_submitted' => true, 'status' => 'pending', 'submitted_at' => now()]);
+            $dataset = PydiDataset::find($this->selectedId);
+
+            $this->validate([
+                'file' => 'nullable|file|max:2048',
+            ]);
+
+            if ($this->file) {
+                $filePath = $this->file->store('attachments', 'public');
+                $dataset->file_path = $filePath;
+            }
+
+            $dataset->is_submitted = true;
+            $dataset->status = 'pending';
+            $dataset->submitted_at = now();
+            $dataset->save();
 
             session()->flash('success', 'Dataset has been sent successfully!');
         }
 
-        $this->reset(['showConfirmSend', 'selectedId']);
+        $this->reset(['showConfirmSend', 'selectedId', 'file']);
+    }
+
+    // request edit
+    public function requestEdit($id)
+    {
+        $this->selectedEntryId = $id;
+        $this->showRequestEditModal = true;
+    }
+
+    public function confirmRequestEdit()
+    {
+        $entry = PydiDataset::find($this->selectedEntryId);
+        $entry->update([
+            'is_request_edit' => true,
+        ]);
+
+        session()->flash('success', 'Edit request has been sent successfully!');
+        $this->showRequestEditModal = false;
     }
 
     public function render()

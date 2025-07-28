@@ -132,13 +132,66 @@
                                             <span
                                                 class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
                                         @endif
-                                        <!-- message -->
+
+
                                         @if ($row->finalized_at)
-                                            <span wire:click="message({{ $row->id }})"
-                                                class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                <i class="bi bi-chat-left-text"></i>
-                                            </span>
+                                            <div class="relative group inline-flex">
+                                                <span wire:click="message({{ $row->id }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                                    <i class="bi bi-chat-left-text"></i>
+                                                </span>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                    <div
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        View feedback
+                                                        <div
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @endif
+
+                                        @if ($row->file_path)
+                                            <div class="relative group inline-flex">
+                                                <a href="{{ Storage::url($row->file_path) }}" target="_blank"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </a>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                    <div
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        View attached file
+                                                        <div
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($row->is_request_edit === 1)
+                                            <!-- Edit Request Button with Tooltip -->
+                                            <div class="relative group inline-flex">
+                                                <span wire:click="showEditRequest({{ $row->id }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-yellow-600 rounded-md cursor-pointer hover:bg-yellow-100 transition">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </span>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                    <div
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        Pending Edit Request
+                                                        <div
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                     </div>
                                 </td>
 
@@ -350,4 +403,37 @@
             </div>
         </div>
     @endif
+
+    <!-- Edit Request Approval Modal -->
+    @if ($showEditRequestModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Process Edit Request</h3>
+                    <button wire:click="$set('showEditRequestModal', false)" title="Close"
+                        class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">
+                        This entry has requested edits. Please review and choose to approve or reject the request.
+                    </p>
+                </div>
+
+                <div class="flex justify-between gap-3">
+                    <button wire:click="processEditRequest('reject')" title="Reject the edit request"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none transition">
+                        <i class="bi bi-x-circle mr-1"></i> Reject
+                    </button>
+                    <button wire:click="processEditRequest('approve')" title="Approve the edit request"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none transition">
+                        <i class="bi bi-check-circle mr-1"></i> Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>

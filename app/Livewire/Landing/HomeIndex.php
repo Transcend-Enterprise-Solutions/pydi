@@ -16,7 +16,7 @@ class HomeIndex extends Component
 
     public function mount()
     {
-        $this->dimensions = Dimension::get();
+        $this->dimensions = Dimension::with(['indicators', 'pydiDatasetDetals'])->get();
     }
 
     public function render()
