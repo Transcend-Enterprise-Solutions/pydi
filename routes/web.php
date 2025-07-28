@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\File;
 
 
 use App\Livewire\User\{PydiDataEntry, InputDatasets, PydiDatasetDetailIndex, PydiDatasetIndex};
-use App\Livewire\Admin\{ViewDatasets, UserList, ManagePydiIndex, ManagePydiDetailIndex};
+use App\Livewire\Admin\{ViewDatasets, UserList, ManagePydiIndex, ManagePydiDetailIndex, DashboardIndex};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
 Route::redirect('/', '/landing');
@@ -19,7 +19,8 @@ Route::get('/register', function () {
 
 /* Admin account role ------------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
     Route::get('/representatives', UserList::class)->name('representatives');
     Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
     Route::get('/view-datasets', ViewDatasets::class)->name('view-datasets');

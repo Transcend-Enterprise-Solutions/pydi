@@ -1,12 +1,10 @@
 <div class="w-full">
+    <h2 class="text-xl font-bold mb-3 pt-0">PYDI ({{ $datasetInfo->name }})</h2>
     <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-bold">PYDI ({{ $datasetInfo->name }})</h2>
-
-            <!-- Upload Form -->
             <div class="flex gap-2 items-center">
                 <input type="text" wire:model.live="search" placeholder="Search..."
-                    class="w-32 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                    class="w-52 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                 <select wire:model.live="showEntries"
                     class="w-16 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <option value="5">5</option>
@@ -14,21 +12,66 @@
                     <option value="25">25</option>
                     <option value="50">50</option>
                 </select>
+            </div>
 
-                <button wire:click="$set('showImportModal', true)"
-                    class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">
-                    <i class="bi bi-file-arrow-down"></i> Upload
-                </button>
+            <!-- Upload Form -->
+            <div class="flex gap-2 items-center">
+                <div x-data="{ open: false }" class="relative inline-block text-left">
+                    <button @click="open = !open"
+                        class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition flex items-center gap-2">
+                        <i class="bi bi-list"></i> Actions
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
 
-                <button wire:click="$set('showExportModal', true)"
-                    class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">
-                    <i class="bi bi-file-arrow-up"></i> Generate
-                </button>
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" @click.away="open = false"
+                        class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <ul class="py-2 text-sm">
+                            <!-- Manual Input -->
+                            <li>
+                                <button wire:click="create"
+                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                    <i class="bi bi-pencil-square text-blue-500 mr-2"></i>
+                                    Add Entry (Manual)
+                                </button>
+                            </li>
 
-                <button onclick="window.history.back()"
-                    class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">
+                            <!-- Download Template -->
+                            <li>
+                                <button wire:click="$set('showFormatModal', true)"
+                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                    <i class="bi bi-filetype-csv text-green-500 mr-2"></i>
+                                    Download CSV/XLSX Template
+                                </button>
+                            </li>
+
+                            <!-- Upload Data -->
+                            <li>
+                                <button wire:click="$set('showImportModal', true)"
+                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                    <i class="bi bi-cloud-upload text-indigo-500 mr-2"></i>
+                                    Import Data
+                                </button>
+                            </li>
+
+                            <!-- Export/Generate Report -->
+                            <li>
+                                <button wire:click="$set('showExportModal', true)"
+                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                    <i class="bi bi-bar-chart-fill text-purple-500 mr-2"></i>
+                                    Generate Report
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <a href="{{ route('pydi-datasets') }}"
+                    class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">
                     <i class="bi bi-skip-backward"></i>
-                </button>
+                </a>
 
             </div>
         </div>
@@ -45,8 +88,11 @@
                         <th class="px-4 py-2 border">Region</th>
                         <th class="px-4 py-2 border">Sex</th>
                         <th class="px-4 py-2 border">Age</th>
-                        <th class="px-4 py-2 border w-52">Value of Indicator</th>
-                        <th class="px-4 py-2 border">Action</th>
+                        <th class="px-4 py-2 border">Value</th>
+                        @if ($datasetInfo->status !== 'approved' || $datasetInfo->is_request_edit === 2)
+                            <th class="px-4 py-2 border">Action</th>
+                        @endif
+
                     </tr>
                 </thead>
                 <tbody>
@@ -58,22 +104,23 @@
                             <td class="px-4 py-2 border">{{ $detail->sex }}</td>
                             <td class="px-4 py-2 border">{{ $detail->age }}</td>
                             <td class="px-4 py-2 border">{{ Str::limit($detail->content, 50) }}</td>
-                            {{-- <td class="px-4 py-2 border">{{ $detail->created_at->format('M d, Y') }}</td> --}}
-                            <!-- Action Buttons -->
-                            <td class="px-4 py-2 border">
-                                <div class="flex justify-center gap-2">
-                                    <!-- Edit -->
-                                    <span wire:click="edit({{ $detail->id }})"
-                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </span>
-                                    <!-- Delete -->
-                                    <span wire:click="confirmDelete({{ $detail->id }})"
-                                        class="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-md cursor-pointer hover:bg-red-200 transition">
-                                        <i class="bi bi-trash"></i>
-                                    </span>
-                                </div>
-                            </td>
+                            @if ($datasetInfo->status !== 'approved' || $datasetInfo->is_request_edit === 2)
+                                <!-- Action Buttons -->
+                                <td class="px-4 py-2 border">
+                                    <div class="flex justify-center gap-2">
+                                        <!-- Edit -->
+                                        <span wire:click="edit({{ $detail->id }})"
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </span>
+                                        <!-- Delete -->
+                                        <span wire:click="confirmDelete({{ $detail->id }})"
+                                            class="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-md cursor-pointer hover:bg-red-200 transition">
+                                            <i class="bi bi-trash"></i>
+                                        </span>
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                     @empty
 
@@ -90,38 +137,204 @@
         </div>
     </div>
 
-    <!-- Import Modal -->
-    @if ($showImportModal ?? false)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold">Upload Dataset Details</h3>
-                    <!-- Download Format -->
-                    <button wire:click="downloadTemplate"
-                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                        CSV/XLSX Format
-                    </button>
+    <!-- Edit and Create Modal -->
+    @if ($showModal)
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4">
+                    {{ $editMode ? 'Edit Dataset Details' : 'Add Dataset Details' }}
+                </h3>
+
+                <!-- Dimension -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Dimension</label>
+                    <select wire:model.live="dimension" class="border rounded w-full px-3 py-2">
+                        <option value="">Please Select</option>
+                        @foreach ($dimensions as $row)
+                            <option value="{{ $row->id }}">{{ $row->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('dimension')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <input type="file" wire:model="file" class="w-full mb-4 border rounded px-3 py-2">
-                @error('file')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
+                <!-- Indicator -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Indicator</label>
+                    <select wire:model="indicator" class="border rounded w-full px-3 py-2">
+                        <option value="">Please Select</option>
+                        @foreach ($indicators as $row)
+                            <option value="{{ $row->id }}">{{ $row->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('indicator')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
 
+                <!-- Region -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Region</label>
+                    <select wire:model="region" class="border rounded w-full px-3 py-2">
+                        <option value="">Please Select</option>
+                        @foreach ($regions as $row)
+                            <option value="{{ $row->id }}">{{ $row->region_description }}</option>
+                        @endforeach
+                    </select>
+                    @error('region')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Age and Sex -->
+                <div class="mb-4 flex gap-2">
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium">Age</label>
+                        <input type="text" wire:model="age" class="border rounded w-full px-3 py-2"
+                            placeholder="Enter Age">
+                        @error('age')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="w-1/2">
+                        <label class="block text-sm font-medium">Sex</label>
+                        <select wire:model="sex" class="border rounded w-full px-3 py-2">
+                            <option value="">Select</option>
+                            @foreach ($gender as $row)
+                                <option value="{{ $row }}">{{ $row }}</option>
+                            @endforeach
+                        </select>
+                        @error('sex')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Value -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Value of Indicator</label>
+                    <input type="number" wire:model="value" class="border rounded w-full px-3 py-2"
+                        placeholder="Enter Value">
+                    @error('value')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Buttons -->
                 <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showImportModal', false)" class="px-4 py-2 border rounded">Cancel</button>
-                    <button wire:click="import" wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                        <span wire:loading.remove wire:target="import">Upload</span>
-                        <span wire:loading wire:target="import"><i class="fas fa-spinner fa-spin"></i>
-                            Uploading...</span>
+                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded">Cancel</button>
+                    <button wire:click="save" wire:loading.attr="disabled"
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2">
+                        <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
+                        <span wire:loading wire:target="save" class="flex items-center gap-2">
+                            <i class="fas fa-spinner fa-spin"></i> {{ $editMode ? 'Updating...' : 'Saving...' }}
+                        </span>
                     </button>
                 </div>
             </div>
         </div>
     @endif
 
-    <!-- Export Modal -->
+    <!-- Template Modal -->
+    @if ($showFormatModal)
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4">Download CSV/XLSX Template</h3>
+
+                <!-- Dimension Dropdown -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Dimension</label>
+                    <select wire:model="selectedDimension" class="border rounded w-full px-3 py-2">
+                        <option value="">-- Select Dimension --</option>
+                        @foreach ($dimensions as $dimension)
+                            <option value="{{ $dimension->id }}">{{ $dimension->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('selectedDimension')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-2 mt-6">
+                    <button wire:click="$set('showFormatModal', false)" class="px-4 py-2 border rounded">
+                        Cancel
+                    </button>
+                    <button wire:click="downloadTemplate" wire:loading.attr="disabled"
+                        class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        <span wire:loading.remove wire:target="downloadTemplate">Download</span>
+                        <span wire:loading wire:target="downloadTemplate">
+                            <i class="fas fa-spinner fa-spin"></i> Preparing...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Upload Modal -->
+    @if ($showImportModal)
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4">Upload Dataset Details</h3>
+
+                <!-- Dimension Dropdown -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Dimension</label>
+                    <select wire:model="selectedDimension" class="border rounded w-full px-3 py-2">
+                        <option value="">-- Select Dimension --</option>
+                        @foreach ($dimensions as $dimension)
+                            <option value="{{ $dimension->id }}">{{ $dimension->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('selectedDimension')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <input type="file" wire:model="file" class="border rounded w-full px-3 py-2">
+                    @error('file')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-2 mt-6">
+                    <!-- Cancel Button -->
+                    <button wire:click="$set('showImportModal', false)" class="px-4 py-2 border rounded">
+                        Cancel
+                    </button>
+
+                    <!-- Upload Button -->
+                    <div>
+                        {{-- Show Upload button only when file is NOT uploading --}}
+                        <span wire:loading.remove wire:target="file">
+                            <button wire:click="import"
+                                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="import">Upload</span>
+                                <span wire:loading wire:target="import">
+                                    <i class="fas fa-spinner fa-spin"></i> Uploading...
+                                </span>
+                            </button>
+                        </span>
+
+                        {{-- Show "Uploading..." state when file IS uploading --}}
+                        <span wire:loading wire:target="file">
+                            <button class="px-4 py-2 bg-gray-400 text-white rounded" disabled>
+                                Uploading...
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+    <!-- Generate Modal -->
     @if ($showExportModal ?? false)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -138,104 +351,8 @@
                 </div>
 
                 <div class="flex justify-end mt-6">
-                    <button wire:click="$set('showExportModal', false)" class="px-4 py-2 border rounded">Close</button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Edit Modal -->
-    @if ($showModal)
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">Edit Dataset Details</h3>
-
-                <!-- Dimension -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Dimension</label>
-                    <select wire:model.live="edit_dimension" class="border rounded w-full px-3 py-2">
-                        <option value="">Please Select</option>
-                        @foreach ($dimensions as $row)
-                            <option value="{{ $row->id }}">{{ $row->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('edit_dimension')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Indicator -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Indicator</label>
-                    <select wire:model="edit_indicator" class="border rounded w-full px-3 py-2">
-                        <option value="">Please Select</option>
-                        @foreach ($indicators as $row)
-                            <option value="{{ $row->id }}">{{ $row->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('edit_indicator')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Region -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Region</label>
-                    <select wire:model="edit_region" class="border rounded w-full px-3 py-2">
-                        <option value="">Please Select</option>
-                        @foreach ($regions as $row)
-                            <option value="{{ $row->id }}">{{ $row->region_description }}</option>
-                        @endforeach
-                    </select>
-                    @error('edit_region')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Age and Sex -->
-                <div class="mb-3 flex gap-2">
-                    <div class="w-1/2">
-                        <label class="block text-sm font-medium">Age</label>
-                        <input type="text" wire:model="edit_age" class="border rounded w-full px-3 py-2"
-                            placeholder="Enter Age">
-                        @error('edit_age')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="w-1/2">
-                        <label class="block text-sm font-medium">Sex</label>
-                        <select wire:model="edit_sex" class="border rounded w-full px-3 py-2">
-                            <option value="">Select</option>
-                            @foreach ($gender as $row)
-                                <option value="{{ $row }}">{{ $row }}</option>
-                            @endforeach
-                        </select>
-                        @error('edit_sex')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Value of Indicator -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Value of Indicator</label>
-                    <textarea wire:model="edit_content" class="border rounded w-full px-3 py-2" placeholder="Enter Value"></textarea>
-                    @error('edit_content')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded">Cancel</button>
-                    <button wire:click="save" wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2">
-                        <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
-                        <span wire:loading wire:target="save" class="flex items-center gap-2">
-                            <i class="fas fa-spinner fa-spin"></i> {{ $editMode ? 'Updating...' : 'Saving...' }}
-                        </span>
-                    </button>
+                    <button wire:click="$set('showExportModal', false)"
+                        class="px-4 py-2 border rounded">Close</button>
                 </div>
             </div>
         </div>
@@ -264,7 +381,4 @@
             </div>
         </div>
     @endif
-
-
-
 </div>

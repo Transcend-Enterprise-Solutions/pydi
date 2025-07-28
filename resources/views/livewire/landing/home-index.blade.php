@@ -98,6 +98,19 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($dimensions as $index => $dimension)
+                    @php
+                        $totalProjects = $dimension->pydiDatasetDetals->count();
+                        $rawSum = $dimension->pydiDatasetDetals->sum('content');
+
+                        if ($rawSum < 1000) {
+                            $totalSum = $rawSum . '+';
+                        } elseif ($rawSum < 1000000) {
+                            $totalSum = number_format($rawSum / 1000, 1) . 'K+';
+                        } else {
+                            $totalSum = number_format($rawSum / 1000000, 1) . 'M+';
+                        }
+                    @endphp
+
                     <div class="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fadeInUp"
                         style="animation-delay: {{ $index * 0.1 + 0.2 }}s">
                         <div class="relative h-48 overflow-hidden">
@@ -113,10 +126,11 @@
                                 <span
                                     class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                     <i class="bi bi-people-fill mr-2"></i>
-                                    {{ $dimension['participants'] ?? '150+' }} Participants
+                                    {{ $totalSum }} Participants
                                 </span>
-                                <span class="text-2xl font-bold text-purple-600">{{ $dimension['projects'] ?? '20+' }}
-                                    Projects</span>
+                                <span class="text-2xl font-bold text-purple-600">
+                                    {{ $dimension['projects'] ?? $totalProjects }} Projects
+                                </span>
                             </div>
                             <p class="text-gray-600 mb-4">{{ $dimension['description'] }}</p>
                             <a href="{{ route('advocacy', $dimension['id']) }}"
@@ -128,6 +142,7 @@
                     </div>
                 @endforeach
             </div>
+
         </div>
     </section>
 

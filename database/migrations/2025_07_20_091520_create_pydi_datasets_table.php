@@ -18,7 +18,9 @@ return new class extends Migration
             $table->text('description');
             $table->year('year');
             $table->enum('status', ['pending', 'approved', 'rejected', 'needs_revision'])->default('pending');
+            $table->string('file_path')->nullable();
             $table->boolean('is_submitted')->default(false);
+            $table->boolean('is_request_edit')->default(false);
             $table->timestamp('submitted_at')->nullable();
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->onDelete('set null');
             $table->text('feedback')->nullable();

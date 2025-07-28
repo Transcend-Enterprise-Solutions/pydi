@@ -4,11 +4,23 @@
 
             <h1 class="text-3xl font-bold text-gray-800">Our Advocacies ({{ $advocacyInfo->name ?? 'Advocacy' }})</h1>
 
-            <a href="{{ url()->previous() }}"
-                class="flex items-center justify-between text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="bi bi-skip-backward mr-2"></i>
-                Back
-            </a>
+            <div class="flex gap-2 items-center">
+
+                <select wire:model.live="selectedAdvocacy"
+                    class="w-42 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                    @foreach ($demensions as $row)
+                        <option value="{{ $row->id }}">{{ $row->name }}</option>
+                    @endforeach
+                </select>
+
+                <a href="{{ url('/') }}"
+                    class="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm flex items-center gap-2">
+                    <i class="bi bi-skip-backward mr-1"></i>
+                    <span>Back</span>
+                </a>
+            </div>
+
+
         </div>
 
         <!-- Intro Section -->
@@ -52,7 +64,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="text-blue-600 font-bold text-2xl mb-1">
-                        {{ $advocacyInfo->pydiDatasetDetals->count() ?? '15K+' }}
+                        {{ number_format($totalSum) }}
                     </div>
                     <div class="text-gray-600 text-sm">Survey Respondents</div>
                 </div>

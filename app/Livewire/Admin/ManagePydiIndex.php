@@ -29,6 +29,10 @@ class ManagePydiIndex extends Component
 
     public $datasetId, $name, $description, $year;
 
+    public $showEditRequestModal = false;
+    public $selectedEditRequestId;
+    public $approveReason = '';
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'description' => 'required|string',
@@ -136,6 +140,33 @@ class ManagePydiIndex extends Component
         $this->feedbackMessage = $dataset->feedback ?? 'No feedback provided yet.';
         $this->showMessageModal = true;
     }
+
+    public function showEditRequest($id)
+    {
+        $this->selectedEditRequestId = $id;
+        $this->showEditRequestModal = true;
+    }
+
+    public function processEditRequest($status)
+    {
+        $action = $status === 'approve' ? 2 : 3;
+
+        $entry = PydiDataset::find($this->selectedEditRequestId);
+
+        if ($entry) {
+            $entry->update([
+                'is_request_edit' => $action
+            ]);
+            session()->flash('success', 'Edit request has been processed successfully!');
+        } else {
+            session()->flash('error', 'Dataset not found.');
+        }
+
+        $this->showEditRequestModal = false;
+    }
+
+
+
 
     public function render()
     {
