@@ -5,16 +5,16 @@
                 <h2 class="text-xl font-bold">PYDI Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
-                        class="w-32 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-52 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
-                        class="w-16 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-16 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
                     <button wire:click="create()"
-                        class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">
+                        class="bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-600 transition">
                         <i class="bi bi-plus-lg"></i> Add Dataset
                     </button>
                 </div>
@@ -22,12 +22,12 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="overflow-x-auto">
+            <div class="w-full">
                 <table class="table-auto w-full text-left border border-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="px-4 py-2 border">#</th>
-                            <th class="px-4 py-2 border">title</th>
+                            <th class="px-4 py-2 border">Title</th>
                             <th class="px-4 py-2 border">Description</th>
                             <th class="px-4 py-2 border">Year</th>
                             <th class="px-4 py-2 border">Status</th>
@@ -115,108 +115,70 @@
                                     @endif
                                 </td>
 
-                                <!-- Action Buttons -->
-                                <td class="px-4 py-2 border">
-                                    <div class="flex justify-center gap-1">
-                                        @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                            @if (!$row->is_submitted)
-                                                <!-- Submit Button with Tooltip -->
-                                                <div class="relative group">
-                                                    <span wire:click="confirmSend({{ $row->id }})"
-                                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                        <i class="bi bi-send-arrow-up"></i>
-                                                    </span>
-                                                    <div
-                                                        class="absolute z-10 hidden group-hover:flex -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                        <div
-                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                            Submit for review
-                                                            <div
-                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endif
+                                <!-- Action Buttons as Dropdown -->
+                                <td class="px-4 py-2 border text-center">
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <!-- Dropdown Trigger -->
+                                        <button @click="open = !open"
+                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                            aria-label="Toggle actions menu" title="More actions">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
 
-                                            <!-- Edit Button with Tooltip -->
-                                            <div class="relative group">
-                                                <span wire:click="edit({{ $row->id }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                    <i class="bi bi-pencil-fill"></i>
-                                                </span>
-                                                <div
-                                                    class="absolute z-10 hidden group-hover:flex -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                    <div
-                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                        Edit entry
-                                                        <div
-                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
+                                        <!-- Dropdown Menu -->
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                            class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
+                                            <ul
+                                                class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
 
-                                        @if ($row->status === 'approved' && !$row->is_request_edit)
-                                            <!-- Request Edit Button (shown only for approved/rejected entries) -->
-                                            <div class="relative group">
-                                                <span wire:click="requestEdit({{ $row->id }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                    <i class="bi bi-file-text-fill"></i>
-                                                </span>
-                                                <div
-                                                    class="absolute z-10 hidden group-hover:flex -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                    <div
-                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                        Request edit
-                                                        <div
-                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
+                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
+                                                    @if (!$row->is_submitted)
+                                                        <li>
+                                                            <button wire:click="confirmSend({{ $row->id }})"
+                                                                class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                                <i class="bi bi-send-arrow-up"></i> Submit for Review
+                                                            </button>
+                                                        </li>
+                                                    @endif
 
-                                        <!-- Details Button with Tooltip -->
-                                        <div class="relative group">
-                                            <a href="{{ route('pydi-dataset-details', $row->id) }}"
-                                                class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                                            </a>
-                                            <div
-                                                class="absolute z-10 hidden group-hover:flex -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                <div
-                                                    class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                    View details
-                                                    <div
-                                                        class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                    <li>
+                                                        <button wire:click="edit({{ $row->id }})"
+                                                            class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                            <i class="bi bi-pencil-fill"></i> Edit Details
+                                                        </button>
+                                                    </li>
+                                                @endif
+
+                                                @if ($row->status === 'approved' && !$row->is_request_edit)
+                                                    <li>
+                                                        <button wire:click="requestEdit({{ $row->id }})"
+                                                            class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                            <i class="bi bi-file-text-fill"></i> Request Edit
+                                                        </button>
+                                                    </li>
+                                                @endif
+
+                                                <li>
+                                                    <a href="{{ route('pydi-dataset-details', $row->id) }}"
+                                                        class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Manage
+                                                        Datasets
+                                                    </a>
+                                                </li>
+
+                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
+                                                    <li>
+                                                        <button wire:click="confirmDelete({{ $row->id }})"
+                                                            class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
+                                                            <i class="bi bi-trash-fill"></i> Delete Dataset
+                                                        </button>
+                                                    </li>
+                                                @endif
+                                            </ul>
                                         </div>
-
-                                        @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                            <!-- Delete Button with Tooltip -->
-                                            <div class="relative group">
-                                                <span wire:click="confirmDelete({{ $row->id }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                    <i class="bi bi-trash-fill"></i>
-                                                </span>
-                                                <div
-                                                    class="absolute z-10 hidden group-hover:flex -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                    <div
-                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                        Delete entry
-                                                        <div
-                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     </div>
                                 </td>
+
                             </tr>
                         @empty
                             <tr>
@@ -341,6 +303,7 @@
         </div>
     @endif
 
+    <!-- Confirm Submit Modal -->
     @if ($showConfirmSend)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">

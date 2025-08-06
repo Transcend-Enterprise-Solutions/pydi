@@ -17,19 +17,15 @@ class CheckRole
                 return $next($request);
             }
 
-            if($user->active_status == 1) {
-                if ($user->user_role === 'user') {
-                    return redirect()->route('data-entry');
-                } else {
-                    return redirect()->route('dashboard');
-                }
-            }else{
+            if ($user->active_status == 1) {
+                return redirect()->route('dashboard');
+            } else {
                 Auth::logout();
                 session()->invalidate();
                 session()->regenerateToken();
 
                 // Return to login with appropriate message based on status
-                switch($user->active_status) {
+                switch ($user->active_status) {
                     case 0:
                         return redirect()->route('login')
                             ->withErrors(['login' => 'Your account is pending approval. Please wait for admin verification.']);
@@ -41,7 +37,6 @@ class CheckRole
                             ->withErrors(['login' => 'Account status is invalid. Please contact the administrator.']);
                 }
             }
-
         }
 
         return redirect('/login');

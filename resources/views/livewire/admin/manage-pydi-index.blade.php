@@ -5,7 +5,7 @@
                 <h2 class="text-xl font-bold">Manage PYDI Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
-                        class="w-32 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-52 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
                         class="w-16 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="5">5</option>
@@ -96,12 +96,12 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="overflow-x-auto">
+            <div class="w-full">
                 <table class="table-auto w-full text-left border border-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
                             <th class="px-4 py-2 border">Account Name</th>
-                            <th class="px-4 py-2 border">title</th>
+                            <th class="px-4 py-2 border">Title</th>
                             <th class="px-4 py-2 border">Description</th>
                             <th class="px-4 py-2 border">Year</th>
                             <th class="px-4 py-2 border">Status</th>
@@ -209,40 +209,41 @@
                                 </td>
 
                                 <!-- Action Buttons -->
-                                <td class="px-4 py-2 border">
-                                    <div class="flex justify-center gap-2">
+                                <td class="px-4 py-2 border text-center">
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <!-- Trigger -->
+                                        <button @click="open = !open"
+                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                            title="Actions">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
 
-                                        @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                            <!-- Take Action -->
-                                            <span wire:click="openActionModal({{ $row->id }})"
-                                                class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition"
-                                                title="Take Action">
-                                                <i class="bi bi-gear"></i>
-                                            </span>
-                                            <!-- Edit -->
-                                            <span wire:click="edit({{ $row->id }})"
-                                                class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </span>
-                                        @endif
+                                        <!-- Dropdown Menu -->
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                            class="absolute z-50 right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden">
 
-                                        <!-- Monitor -->
-                                        <a href="{{ route('manage-pydi-dataset-details', $row->id) }}"
-                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                            <i class="bi bi-clipboard-data"></i>
-                                        </a>
+                                            <ul class="text-sm text-gray-700 dark:text-gray-200">
+                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
+                                                    <li>
+                                                        <button wire:click="openActionModal({{ $row->id }})"
+                                                            class="w-full flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                            <i class="bi bi-gear mr-2"></i> Take Action
+                                                        </button>
+                                                    </li>
+                                                @endif
 
-                                        @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                            <!-- Delete -->
-                                            <span wire:click="confirmDelete({{ $row->id }})"
-                                                class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                <i class="bi bi-trash"></i>
-                                            </span>
-                                        @endif
+                                                <li>
+                                                    <a href="{{ route('manage-pydi-dataset-details', $row->id) }}"
+                                                        class="w-full flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                        <i class="bi bi-clipboard-data mr-2"></i> Monitor Dataset
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
-                            </tr>
-                        @empty
+
+                            @empty
                             <tr>
                                 <td colspan="7" class="text-center py-4 text-gray-500">
                                     No records found.
@@ -258,84 +259,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal (Used for Create & Edit) -->
-    @if ($showModal)
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">
-                    {{ $editMode ? 'Edit Dataset' : 'Create New Dataset' }}
-                </h3>
-
-                @php $currentYear = now()->year; @endphp
-
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Name</label>
-                    <input type="text" wire:model="name" class="border rounded w-full px-3 py-2"
-                        placeholder="Enter Name">
-                    @error('name')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Description</label>
-                    <textarea wire:model="description" class="border rounded w-full px-3 py-2" placeholder="Enter Description"></textarea>
-                    @error('description')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Year</label>
-                    <select wire:model="year" class="border rounded w-full px-3 py-2">
-                        <option value="">Select Year</option>
-                        @for ($i = 0; $i < 5; $i++)
-                            <option value="{{ $currentYear + $i }}">{{ $currentYear + $i }}</option>
-                        @endfor
-                    </select>
-                    @error('year')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded">Cancel</button>
-                    <button wire:click="save" wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2">
-                        <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
-                        <span wire:loading wire:target="save" class="flex items-center gap-2">
-                            <i class="fas fa-spinner fa-spin"></i> {{ $editMode ? 'Updating...' : 'Saving...' }}
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Delete Confirmation Modal -->
-    @if ($showDeleteModal)
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
-                <h3 class="text-lg font-bold mb-2">Delete Dataset</h3>
-                <p class="text-gray-600 mb-4">Are you sure you want to delete this dataset? This action cannot be
-                    undone.</p>
-
-                <div class="flex justify-center gap-4">
-                    <button wire:click="$set('showDeleteModal', false)" class="px-4 py-2 border rounded">
-                        Cancel
-                    </button>
-                    <button wire:click="delete" wire:loading.attr="disabled"
-                        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2">
-                        <span wire:loading.remove wire:target="delete">Delete</span>
-                        <span wire:loading wire:target="delete" class="flex items-center gap-2">
-                            <i class="fas fa-spinner fa-spin"></i> Deleting...
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
 
     <!-- Action Confirmation Modal -->
     @if ($showActionModal)

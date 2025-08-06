@@ -26,7 +26,7 @@ class AdvocacyIndex extends Component
     {
         $this->demensions = Dimension::all();
         $this->selectedAdvocacy = $id;
-        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetals'])->findOrFail($id);
+        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])->findOrFail($id);
 
         // Fetch unique years from PydiDataset (descending order)
         $this->yearOptions = PydiDataset::select('year')
@@ -56,7 +56,7 @@ class AdvocacyIndex extends Component
 
     protected function updateChartData()
     {
-        $datasetDetails = Dimension::with(['pydiDatasetDetals' => function ($query) {
+        $datasetDetails = Dimension::with(['pydiDatasetDetails' => function ($query) {
             if ($this->selectedAge !== "All Ages") {
                 if (str_contains($this->selectedAge, '+')) {
                     $ageMin = rtrim($this->selectedAge, '+');
@@ -70,22 +70,22 @@ class AdvocacyIndex extends Component
             $query->whereHas('pydiDataset', function ($subQuery) {
                 $subQuery->where('year', $this->selectedYear);
             });
-        }, 'pydiDatasetDetals.pydiDataset'])
+        }, 'pydiDatasetDetails.pydiDataset'])
             ->where('id', $this->advocacyInfo->id)
             ->first();
 
-        if ($datasetDetails && $datasetDetails->pydiDatasetDetals->isNotEmpty()) {
+        if ($datasetDetails && $datasetDetails->pydiDatasetDetails->isNotEmpty()) {
             $totals = ['Male' => 0, 'Female' => 0, 'Others' => 0];
             $this->totalSum = 0;
 
-            foreach ($datasetDetails->pydiDatasetDetals as $detail) {
+            foreach ($datasetDetails->pydiDatasetDetails as $detail) {
                 $sex = ucfirst(strtolower($detail->sex ?? 'Others'));
 
                 if (!isset($totals[$sex])) {
                     $sex = 'Others';
                 }
 
-                $value = (int) $detail->content;
+                $value = (int) $detail->value;
                 $totals[$sex] += $value;
                 $this->totalSum += $value;
             }
@@ -105,7 +105,7 @@ class AdvocacyIndex extends Component
 
     public function updatedSelectedAdvocacy($value)
     {
-        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetals'])
+        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])
             ->findOrFail($value);
 
         // Reset year and age filters

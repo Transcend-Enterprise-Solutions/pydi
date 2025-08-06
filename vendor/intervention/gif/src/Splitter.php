@@ -5,22 +5,27 @@ declare(strict_types=1);
 namespace Intervention\Gif;
 
 use ArrayIterator;
+use GdImage;
+use Intervention\Gif\Exceptions\EncoderException;
 use IteratorAggregate;
 use Traversable;
 
+/**
+ * @implements IteratorAggregate<GifDataStream>
+ */
 class Splitter implements IteratorAggregate
 {
     /**
-     * Single frames
+     * Single frames resolved to GifDataStream
      *
-     * @var array
+     * @var array<GifDataStream>
      */
     protected array $frames = [];
 
     /**
      * Delays of each frame
      *
-     * @var array
+     * @var array<int>
      */
     protected array $delays = [];
 
@@ -31,12 +36,13 @@ class Splitter implements IteratorAggregate
      */
     public function __construct(protected GifDataStream $stream)
     {
+        //
     }
 
     /**
      * Iterator
      *
-     * @return Traversable
+     * @return Traversable<GifDataStream>
      */
     public function getIterator(): Traversable
     {
@@ -46,7 +52,7 @@ class Splitter implements IteratorAggregate
     /**
      * Get frames
      *
-     * @return array
+     * @return array<GifDataStream>
      */
     public function getFrames(): array
     {
@@ -56,7 +62,7 @@ class Splitter implements IteratorAggregate
     /**
      * Get delays
      *
-     * @return array
+     * @return array<int>
      */
     public function getDelays(): array
     {
@@ -144,19 +150,18 @@ class Splitter implements IteratorAggregate
     /**
      * Return array of GD library resources for each frame
      *
-     * @return array
+     * @throws EncoderException
+     * @return array<GdImage>
      */
     public function toResources(): array
     {
         $resources = [];
 
         foreach ($this->frames as $frame) {
-            if (is_a($frame, GifDataStream::class)) {
-                $resource = imagecreatefromstring($frame->encode());
-                imagepalettetotruecolor($resource);
-                imagesavealpha($resource, true);
-                $resources[] = $resource;
-            }
+            $resource = imagecreatefromstring($frame->encode());
+            imagepalettetotruecolor($resource);
+            imagesavealpha($resource, true);
+            $resources[] = $resource;
         }
 
         return $resources;
@@ -165,7 +170,8 @@ class Splitter implements IteratorAggregate
     /**
      * Return array of coalesced GD library resources for each frame
      *
-     * @return array
+     * @throws EncoderException
+     * @return array<GdImage>
      */
     public function coalesceToResources(): array
     {

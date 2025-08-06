@@ -26,15 +26,13 @@ return new class extends Migration
                 ->constrained('indicators')
                 ->cascadeOnDelete();
 
-            $table->unsignedInteger('philippine_region_id');
-            $table->foreign('philippine_region_id')
-                ->references('id')
-                ->on('philippine_regions')
+            $table->foreignId('philippine_region_id')
+                ->constrained('philippine_regions')
                 ->cascadeOnDelete();
 
             $table->string('sex');
             $table->string('age');
-            $table->text('content')->nullable();
+            $table->integer('value');
             $table->timestamps();
         });
     }

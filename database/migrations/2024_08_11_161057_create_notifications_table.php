@@ -19,7 +19,7 @@ class CreateNotificationsTable extends Migration
             $table->integer('doc_request_id')->nullable();
             $table->string('type');
             $table->string('notif');
-            $table->boolean('read')->default(false); // To mark if the notification is read
+            $table->boolean('read')->default(false);
             $table->timestamps();
         });
     }

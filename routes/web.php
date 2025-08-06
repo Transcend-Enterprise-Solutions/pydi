@@ -1,15 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\DimensionIndicatorManager;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
-
-use App\Livewire\User\{PydiDataEntry, InputDatasets, PydiDatasetDetailIndex, PydiDatasetIndex};
-use App\Livewire\Admin\{ViewDatasets, UserList, ManagePydiIndex, ManagePydiDetailIndex, DashboardIndex};
+use App\Livewire\DashboardIndex;
+use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpIndicatorIndex, PydpDatasetIndex, PydpDatasetDetailIndex};
+use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, ManagePydpIndex, ManagePydpDetailIndex};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
 Route::redirect('/', '/landing');
@@ -17,22 +16,35 @@ Route::get('/register', function () {
     return view('registeraccount');
 })->name('register');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
+});
+
 /* Admin account role ------------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
-    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
+    // Settings
+    Route::get('/cover-year', CoverYearIndex::class)->name('cover-year');
     Route::get('/representatives', UserList::class)->name('representatives');
     Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
-    Route::get('/view-datasets', ViewDatasets::class)->name('view-datasets');
 
+    // Manage PYDP Datasets
+    Route::get('/manage-pydp-datasets', ManagePydpIndex::class)->name('manage-pydp-datasets');
+    Route::get('/manage-pydp-datasets/{id}', ManagePydpDetailIndex::class)->name('manage-pydp-dataset-details');
+
+    // Manage PYDI Datasets
     Route::get('/manage-pydi-datasets', ManagePydiIndex::class)->name('manage-pydi-datasets');
     Route::get('/manage-pydi-datasets/{id}', ManagePydiDetailIndex::class)->name('manage-pydi-dataset-details');
 });
 
 /* Homeowner account role --------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:user'])->group(function () {
-    Route::get('/data-entry', PydiDataEntry::class)->name('data-entry');
-    Route::get('/input-datasets', InputDatasets::class)->name('input-datasets');
+    Route::get('/pydp-indicators', PydpIndicatorIndex::class)->name('pydp-indicators');
+
+    // PYDP Datasets
+    Route::get('/pydp-datasets', PydpDatasetIndex::class)->name('pydp-datasets');
+    Route::get('/pydp-dataset-details/{id}', PydpDatasetDetailIndex::class)->name('pydp-dataset-details');
+
+    // PYDI Datasets
     Route::get('/pydi-datasets', PydiDatasetIndex::class)->name('pydi-datasets');
     Route::get('/pydi-datasets/{id}', PydiDatasetDetailIndex::class)->name('pydi-dataset-details');
 });

@@ -29,14 +29,16 @@
                     <div x-show="open" @click.away="open = false"
                         class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                         <ul class="py-2 text-sm">
-                            <!-- Manual Input -->
-                            <li>
-                                <button wire:click="create"
-                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
-                                    <i class="bi bi-pencil-square text-blue-500 mr-2"></i>
-                                    Add Entry (Manual)
-                                </button>
-                            </li>
+                            @if ($datasetInfo->status !== 'approved')
+                                <!-- Manual Input -->
+                                <li>
+                                    <button wire:click="create"
+                                        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                        <i class="bi bi-pencil-square text-blue-500 mr-2"></i>
+                                        Add Entry (Manual)
+                                    </button>
+                                </li>
+                            @endif
 
                             <!-- Download Template -->
                             <li>
@@ -47,14 +49,16 @@
                                 </button>
                             </li>
 
-                            <!-- Upload Data -->
-                            <li>
-                                <button wire:click="$set('showImportModal', true)"
-                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
-                                    <i class="bi bi-cloud-upload text-indigo-500 mr-2"></i>
-                                    Import Data
-                                </button>
-                            </li>
+                            @if ($datasetInfo->status !== 'approved')
+                                <!-- Upload Data -->
+                                <li>
+                                    <button wire:click="$set('showImportModal', true)"
+                                        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                        <i class="bi bi-cloud-upload text-indigo-500 mr-2"></i>
+                                        Import Data
+                                    </button>
+                                </li>
+                            @endif
 
                             <!-- Export/Generate Report -->
                             <li>
@@ -79,7 +83,7 @@
         @include('livewire.user.session-flash')
 
         <!-- Table -->
-        <div class="overflow-x-auto">
+        <div class="w-full">
             <table class="table-auto w-full text-left border border-gray-200">
                 <thead class="bg-gray-100">
                     <tr>
@@ -89,8 +93,9 @@
                         <th class="px-4 py-2 border">Sex</th>
                         <th class="px-4 py-2 border">Age</th>
                         <th class="px-4 py-2 border">Value</th>
-                        @if ($datasetInfo->status !== 'approved' || $datasetInfo->is_request_edit === 2)
-                            <th class="px-4 py-2 border">Action</th>
+
+                        @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
+                            <th class="px-4 py-2 border text-center">Actions</th>
                         @endif
 
                     </tr>
@@ -103,24 +108,42 @@
                             <td class="px-4 py-2 border">{{ $detail->region->region_description }}</td>
                             <td class="px-4 py-2 border">{{ $detail->sex }}</td>
                             <td class="px-4 py-2 border">{{ $detail->age }}</td>
-                            <td class="px-4 py-2 border">{{ Str::limit($detail->content, 50) }}</td>
-                            @if ($datasetInfo->status !== 'approved' || $datasetInfo->is_request_edit === 2)
-                                <!-- Action Buttons -->
-                                <td class="px-4 py-2 border">
-                                    <div class="flex justify-center gap-2">
-                                        <!-- Edit -->
-                                        <span wire:click="edit({{ $detail->id }})"
-                                            class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </span>
-                                        <!-- Delete -->
-                                        <span wire:click="confirmDelete({{ $detail->id }})"
-                                            class="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-600 rounded-md cursor-pointer hover:bg-red-200 transition">
-                                            <i class="bi bi-trash"></i>
-                                        </span>
+                            <td class="px-4 py-2 border">{{ $detail->value }}</td>
+
+                            @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
+                                <td class="px-4 py-2 border text-center">
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <!-- Dropdown Trigger -->
+                                        <button @click="open = !open"
+                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                            aria-label="Toggle actions" title="More actions">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+
+                                        <!-- Dropdown Menu -->
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                            class="absolute z-50 right-0 mt-2 w-40 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
+                                            <ul class="text-sm text-gray-700 dark:text-gray-200">
+                                                <!-- Edit -->
+                                                <li>
+                                                    <button wire:click="edit({{ $detail->id }})"
+                                                        class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                        <i class="bi bi-pencil-square"></i> Edit
+                                                    </button>
+                                                </li>
+                                                <!-- Delete -->
+                                                <li>
+                                                    <button wire:click="confirmDelete({{ $detail->id }})"
+                                                        class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             @endif
+
                         </tr>
                     @empty
 

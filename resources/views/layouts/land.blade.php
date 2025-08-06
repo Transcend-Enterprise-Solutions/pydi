@@ -141,6 +141,7 @@
                         class="block px-3 py-2 rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
                         <i class="bi bi-speedometer2 mr-2"></i>Dashboard
                     </a>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -158,6 +159,7 @@
                         <i class="bi bi-person-plus mr-2"></i>Register
                     </a>
                 @endauth
+
             </div>
         </div>
     </nav>

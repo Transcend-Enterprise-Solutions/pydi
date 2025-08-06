@@ -13,16 +13,16 @@ class CommentExtension extends AbstractExtension
     /**
      * Comment blocks
      *
-     * @var array
+     * @var array<string>
      */
     protected array $comments = [];
 
     /**
      * Get all or one comment
      *
-     * @return mixed
+     * @return array<string>
      */
-    public function getComments()
+    public function getComments(): array
     {
         return $this->comments;
     }
