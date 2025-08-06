@@ -7,7 +7,6 @@ use Livewire\Component;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
 
-
 class Login extends Component
 {
     public $email;
@@ -32,28 +31,26 @@ class Login extends Component
         if (Auth::attempt($credentials, $this->remember)) {
             $user = Auth::user();
 
-            if($user->active_status == 1) {
-                if ($user->user_role === 'sa') {
-                    return app(LoginResponse::class)->toResponse($this->request)->intended('/dashboard');
-                } else {
-                    return app(LoginResponse::class)->toResponse($this->request)->intended('/data-entry');
-                }
+            if ($user->active_status == 1) {
+                // Redirect based on role
+                return redirect()->to('/dashboard');
             }
-            elseif($user->active_status == 2){// Deactivated user
-                Auth::logout();
-                session()->invalidate();
-                session()->regenerateToken();
-                $this->addError('login', 'Your account has been deactivated. Please contact the administrator.');
-            }else{
-                Auth::logout();
-                session()->invalidate();
-                session()->regenerateToken();
-                $this->addError('login', 'Your account is pending approval. Please wait for admin verification.');
-            }
+
+            // If account is deactivated or pending
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+
+            $message = $user->active_status == 2
+                ? 'Your account has been deactivated. Please contact the administrator.'
+                : 'Your account is pending approval. Please wait for admin verification.';
+
+            $this->addError('login', $message);
         } else {
             $this->addError('login', 'Invalid credentials.');
         }
     }
+
 
     public function render()
     {
@@ -66,4 +63,3 @@ class Login extends Component
         $this->showPassword = !$this->showPassword;
     }
 }
-

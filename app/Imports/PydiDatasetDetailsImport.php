@@ -60,7 +60,7 @@ class PydiDatasetDetailsImport implements ToModel, WithHeadingRow
                 'philippine_region_id'  => $region->id,
                 'sex'                   => $row['sex'],
                 'age'                   => intval($row['age']),
-                'content'               => intval($row['value']),
+                'value'               => intval($row['value']),
             ]);
         } catch (\Exception $e) {
             $this->errors[] = [

@@ -48,13 +48,14 @@
             <div class="space-y-4 w-full">
                 <div>
                     <x-label for="email" value="{{ __('Email') }}" />
-                    <x-input id="email" type="email" name="email" :value="old('email')" required autofocus
+                    <x-input id="email" type="email" name="email" :value="old('email')"
+                        placeholder="Enter Email Address" required autofocus
                         class="w-full h-10 px-2 py-1 text-black rounded-lg appearance-none bg-white/80 backdrop-blur-md border border-zinc-200 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm" />
                 </div>
                 <div class="relative w-full" x-data="{ show: false }">
                     <x-label for="password" value="{{ __('Password') }}" />
                     <x-input id="password" x-bind:type="show ? 'text' : 'password'" name="password" required
-                        autocomplete="current-password" wire:model.live="password"
+                        placeholder="Enter Password" autocomplete="current-password" wire:model.live="password"
                         class="w-full h-10 px-2 py-1 text-black rounded-lg appearance-none bg-white/80 backdrop-blur-md border border-zinc-200 placeholder-zinc-300 focus:border-zinc-300 focus:outline-none focus:ring-zinc-300 sm:text-sm" />
                     <button type="button" class="absolute top-1/2 right-0 px-3 flex items-center text-sm leading-5"
                         @click="show = !show">

@@ -113,7 +113,7 @@
                     <div class="flex-1">
                         <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                             <!-- Logo -->
-                            <a class="block" href="{{ route('dashboard') }}">
+                            <a class="block" href="{{ url('/') }}">
                                 <img src="/images/nyc_logo.png" alt="logo" class="h-12">
                             </a>
                         </div>

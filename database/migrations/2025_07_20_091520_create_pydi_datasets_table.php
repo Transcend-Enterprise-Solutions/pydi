@@ -13,20 +13,30 @@ return new class extends Migration
     {
         Schema::create('pydi_datasets', function (Blueprint $table) {
             $table->id();
+
+            // Relationships
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('reviewer_id')->nullable()->constrained('users')->onDelete('set null');
+
+            // Metadata
             $table->string('name');
             $table->text('description');
             $table->year('year');
+
+            // Status and workflow
             $table->enum('status', ['pending', 'approved', 'rejected', 'needs_revision'])->default('pending');
-            $table->string('file_path')->nullable();
             $table->boolean('is_submitted')->default(false);
             $table->boolean('is_request_edit')->default(false);
             $table->timestamp('submitted_at')->nullable();
-            $table->foreignId('reviewed_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->text('feedback')->nullable();
             $table->timestamp('finalized_at')->nullable();
-            $table->softDeletes();
+            $table->text('feedback')->nullable();
+
+            // File
+            $table->string('file_path')->nullable();
+
+            // Timestamps
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

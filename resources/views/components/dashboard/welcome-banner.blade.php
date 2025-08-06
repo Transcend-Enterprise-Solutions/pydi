@@ -1,4 +1,4 @@
-<div class="relative bg-indigo-200 dark:bg-indigo-500 p-4 sm:p-6 rounded-sm overflow-hidden mb-8 w-full">
+<div class="relative bg-indigo-200 dark:bg-indigo-500 p-4 sm:p-4 rounded-sm overflow-hidden mb-5 w-full">
 
     <!-- Background illustration -->
     <div class="absolute right-0 top-0 -mt-4 mr-16 pointer-events-none hidden xl:block" aria-hidden="true">
@@ -21,7 +21,8 @@
 
     <!-- Content -->
     <div class="relative">
-        <h1 class="text-2xl md:text-3xl text-slate-800 dark:text-slate-100 font-bold mb-1">Welcome, {{ Auth::user()->name }} 👋</h1>
+        <h1 class="text-2xl md:text-3xl text-slate-800 dark:text-slate-100 font-bold mb-1">Welcome,
+            {{ Auth::user()->name }} 👋</h1>
         <p class="dark:text-indigo-200">PHILIPPINE YOUTH DEVELOPMENT INDEX</p>
     </div>
 

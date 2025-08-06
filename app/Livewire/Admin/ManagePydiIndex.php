@@ -15,9 +15,6 @@ class ManagePydiIndex extends Component
 
     public $showEntries = 10;
     public $search = '';
-    public $showModal = false;
-    public $editMode = false;
-    public $showDeleteModal = false;
 
     public $showActionModal = false;
     public $selectedDatasetId;
@@ -27,82 +24,19 @@ class ManagePydiIndex extends Component
     public $showMessageModal = false;
     public $feedbackMessage = '';
 
-    public $datasetId, $name, $description, $year;
+    public $datasetId;
 
     public $showEditRequestModal = false;
     public $selectedEditRequestId;
     public $approveReason = '';
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'description' => 'required|string',
-        'year' => 'required|integer|min:2000|max:2100'
-    ];
 
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
-    public function create()
-    {
-        $this->reset(['datasetId', 'name', 'description', 'year']);
-        $this->editMode = false;
-        $this->showModal = true;
-    }
-
-    public function edit($id)
-    {
-        $dataset = PydiDataset::findOrFail($id);
-        $this->datasetId = $dataset->id;
-        $this->name = $dataset->name;
-        $this->description = $dataset->description;
-        $this->year = $dataset->year;
-
-        $this->editMode = true;
-        $this->showModal = true;
-    }
-
-    public function save()
-    {
-        $this->validate();
-
-        if ($this->editMode && $this->datasetId) {
-            PydiDataset::findOrFail($this->datasetId)->update([
-                'name' => $this->name,
-                'description' => $this->description,
-                'year' => $this->year,
-            ]);
-            session()->flash('success', 'Dataset updated successfully!');
-        } else {
-            PydiDataset::create([
-                'user_id' => auth()->id(),
-                'name' => $this->name,
-                'description' => $this->description,
-                'year' => $this->year,
-            ]);
-            session()->flash('success', 'Dataset created successfully!');
-        }
-
-        $this->reset(['showModal', 'datasetId', 'name', 'description', 'year', 'editMode']);
-    }
-
-    public function delete()
-    {
-        if ($this->datasetId) {
-            PydiDataset::findOrFail($this->datasetId)->delete();
-            session()->flash('success', 'Dataset deleted successfully!');
-        }
-
-        $this->reset(['showDeleteModal', 'datasetId']);
-    }
-
-    public function confirmDelete($id)
-    {
-        $this->datasetId = $id;
-        $this->showDeleteModal = true;
-    }
-
+    // Action Modal Handling
     public function openActionModal($id)
     {
         $this->selectedDatasetId = $id;
@@ -125,7 +59,7 @@ class ManagePydiIndex extends Component
         $dataset->status = $this->action_status;
         $dataset->feedback = $this->action_feedback ?? null;
         $dataset->is_submitted = $dataset->status !== 'needs_revision';
-        $dataset->reviewed_by = auth()->id();
+        $dataset->reviewer_id = auth()->id();
         $dataset->finalized_at = now();
         $dataset->save();
 
@@ -133,6 +67,7 @@ class ManagePydiIndex extends Component
         $this->showActionModal = false;
     }
 
+    // Message Modal Handling
     public function message($id)
     {
         $dataset = PydiDataset::find($id);
@@ -141,6 +76,7 @@ class ManagePydiIndex extends Component
         $this->showMessageModal = true;
     }
 
+    // Edit Request Handling
     public function showEditRequest($id)
     {
         $this->selectedEditRequestId = $id;
@@ -164,9 +100,6 @@ class ManagePydiIndex extends Component
 
         $this->showEditRequestModal = false;
     }
-
-
-
 
     public function render()
     {

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Intervention\Gif;
 
+use Intervention\Gif\Exceptions\EncoderException;
 use Intervention\Gif\Traits\CanDecode;
 use Intervention\Gif\Traits\CanEncode;
 use ReflectionClass;
+use Stringable;
 
-abstract class AbstractEntity
+abstract class AbstractEntity implements Stringable
 {
     use CanEncode;
     use CanDecode;
@@ -28,6 +30,7 @@ abstract class AbstractEntity
     /**
      * Cast object to string
      *
+     * @throws EncoderException
      * @return string
      */
     public function __toString(): string

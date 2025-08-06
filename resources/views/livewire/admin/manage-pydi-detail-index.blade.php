@@ -52,7 +52,7 @@
                             <td class="px-4 py-2 border">{{ $detail->region->region_description }}</td>
                             <td class="px-4 py-2 border">{{ $detail->sex }}</td>
                             <td class="px-4 py-2 border">{{ $detail->age }}</td>
-                            <td class="px-4 py-2 border">{{ $detail->content }}</td>
+                            <td class="px-4 py-2 border">{{ $detail->value }}</td>
                         </tr>
                     @empty
 

@@ -26,7 +26,7 @@ class FontProcessor extends AbstractFontProcessor
     {
         // no text - no box size
         if (mb_strlen($text) === 0) {
-            return (new Rectangle(0, 0));
+            return new Rectangle(0, 0);
         }
 
         $draw = $this->toImagickDraw($font);
@@ -63,7 +63,7 @@ class FontProcessor extends AbstractFontProcessor
         $draw->setFontSize($this->nativeFontSize($font));
         $draw->setTextAlignment(Imagick::ALIGN_LEFT);
 
-        if ($color) {
+        if ($color instanceof ImagickPixel) {
             $draw->setFillColor($color);
         }
 

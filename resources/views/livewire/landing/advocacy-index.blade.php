@@ -71,7 +71,7 @@
 
                 <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="text-blue-600 font-bold text-2xl mb-1">
-                        {{ $advocacyInfo->pydiDatasetDetals->count() !== 0 ? '100%' : '0%' }}
+                        {{ $advocacyInfo->pydiDatasetDetails->count() !== 0 ? '100%' : '0%' }}
                     </div>
                     <div class="text-gray-600 text-sm">Data Accuracy</div>
                 </div>

@@ -22,4 +22,14 @@ class PydiDataset extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function type()
+    {
+        return $this->belongsTo(PydpType::class, 'pydp_type_id');
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
+    }
 }

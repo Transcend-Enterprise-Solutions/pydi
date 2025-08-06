@@ -70,7 +70,7 @@ abstract class AbstractDriver implements DriverInterface
         }
 
         // return directly and only attach driver if object is already specialized
-        if (($object instanceof SpecializedInterface)) {
+        if ($object instanceof SpecializedInterface) {
             $object->setDriver($this);
 
             return $object;
@@ -88,7 +88,7 @@ abstract class AbstractDriver implements DriverInterface
         }
 
         // create a driver specialized object with the specializable properties of generic object
-        $specialized = (new $specialized_classname(...$object->specializable()));
+        $specialized = new $specialized_classname(...$object->specializable());
 
         // attach driver
         return $specialized->setDriver($this);
@@ -97,19 +97,23 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * {@inheritdoc}
      *
+     * @see DriverInterface::specializeMultiple()
+     *
      * @throws NotSupportedException
      * @throws DriverException
-     * @see DriverInterface::specializeMultiple()
      */
     public function specializeMultiple(array $objects): array
     {
-        return array_map(function ($object) {
-            return $this->specialize(
-                match (true) {
-                    is_string($object) => new $object(),
-                    is_object($object) => $object,
-                }
-            );
-        }, $objects);
+        return array_map(
+            function (string|object $object): ModifierInterface|AnalyzerInterface|EncoderInterface|DecoderInterface {
+                return $this->specialize(
+                    match (true) {
+                        is_string($object) => new $object(),
+                        is_object($object) => $object,
+                    }
+                );
+            },
+            $objects
+        );
     }
 }

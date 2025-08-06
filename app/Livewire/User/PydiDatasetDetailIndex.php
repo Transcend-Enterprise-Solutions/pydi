@@ -3,8 +3,7 @@
 namespace App\Livewire\User;
 
 use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
+use Livewire\{WithPagination, WithFileUploads};
 use Livewire\Attributes\{Title, Layout};
 use App\Models\{PydiDatasetDetail, PydiDataset, Dimension, Indicator, PhilippineRegions};
 use Maatwebsite\Excel\Facades\Excel;
@@ -73,7 +72,7 @@ class PydiDatasetDetailIndex extends Component
         $this->region = $detail->philippine_region_id;
         $this->age = $detail->age;
         $this->sex = $detail->sex;
-        $this->value = $detail->content;
+        $this->value = $detail->value;
 
         $this->editMode = true;
         $this->showModal = true;
@@ -100,7 +99,7 @@ class PydiDatasetDetailIndex extends Component
                 'philippine_region_id' => $this->region,
                 'age' => $this->age,
                 'sex' => $this->sex,
-                'content' => $this->value,
+                'value' => $this->value,
             ]
         );
 
@@ -142,14 +141,6 @@ class PydiDatasetDetailIndex extends Component
             $title . '_template.xlsx'
         );
     }
-
-    // public function handleImportModal()
-    // {
-    //     $this->showImportModal = !$this->showImportModal;
-    //     $this->reset(['file', 'selectedDimension']);
-
-    //     $this->selectedDimension =
-    // }
 
     // import dataset details from file
     public function import()

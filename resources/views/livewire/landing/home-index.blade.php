@@ -99,8 +99,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($dimensions as $index => $dimension)
                     @php
-                        $totalProjects = $dimension->pydiDatasetDetals->count();
-                        $rawSum = $dimension->pydiDatasetDetals->sum('content');
+                        $totalProjects = $dimension->pydiDatasetDetails->count();
+                        $rawSum = $dimension->pydiDatasetDetails->sum('value');
 
                         if ($rawSum < 1000) {
                             $totalSum = $rawSum . '+';

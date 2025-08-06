@@ -8,170 +8,157 @@
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64'" @click.outside="sidebarOpen = false"
         @keydown.escape.window="sidebarOpen = false">
 
-        <div class="flex justify-left mb-10 ml-1" style="width: 200px; height: 32px;">
+        <div class="flex items-center ml-3 my-5" style="height: 40px;">
             <!-- Logo -->
-            <a class="flex items-center" href="{{ route('dashboard') }}">
-                <img class="mx-auto" src="/images/nyc_logo.png" alt="nyc logo" style="width: 45px; height: 40px;">
+            <a href="{{ url('/') }}" class="flex items-center space-x-2  group">
+                <img src="/images/nyc_logo.png" alt="NYC Logo" title="Go to Dashboard"
+                    class="w-16 h-16 object-contain transition duration-200 group-hover:scale-105">
+
                 <span
-                    class="text-black dark:text-white ml-2 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">PYDI</span>
+                    class="text-lg font-semibold text-black dark:text-white lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 transition-opacity duration-300">
+                    NYC - PYDP
+                </span>
             </a>
         </div>
 
-        <div class="space-y-8">
+        <div class="space-y-5">
             <div>
-                <ul class="mt-3">
+                <ul class="">
+                    <!-- Dashboard Section -->
+                    @if (in_array(Auth::user()->user_role, ['sa', 'admin']))
+                        @php
+                            $adminSections = [
+                                'Dashboard' => [
+                                    [
+                                        'route' => 'dashboard',
+                                        'icon' => 'speedometer2',
+                                        'label' => 'Dashboard',
+                                    ],
+                                ],
+                                'Settings' => [
+                                    [
+                                        'route' => 'representatives',
+                                        'icon' => 'people',
+                                        'label' => 'Representatives',
+                                    ],
+                                    [
+                                        'route' => 'dimension-indicator',
+                                        'icon' => 'sliders',
+                                        'label' => 'Dimension Indicators',
+                                    ],
+                                    [
+                                        'route' => 'cover-year',
+                                        'icon' => 'bi bi-sliders2',
+                                        'label' => 'Covered Year (PYDI)',
+                                    ],
+                                ],
+                                'Manage' => [
+                                    [
+                                        'route' => 'manage-pydp-datasets',
+                                        'icon' => 'database',
+                                        'label' => 'Manage PYDP Datasets',
+                                    ],
+                                    [
+                                        'route' => 'manage-pydi-datasets',
+                                        'icon' => 'bar-chart-line',
+                                        'label' => 'Manage PYDI Datasets',
+                                    ],
+                                ],
+                            ];
+                        @endphp
 
-                    <!-- Admin Tabs ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+                        @foreach ($adminSections as $section => $items)
+                            <li
+                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-slate-400">
+                                {{ $section }}
+                            </li>
 
-                    @if (Auth::user()->user_role === 'sa' || Auth::user()->user_role === 'admin')
-                        <!-- Dashboard -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                            @if (in_array(Request::segment(1), ['dashboard'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['dashboard']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('dashboard')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('dashboard') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-speedometer2 text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Dashboard
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                            @foreach ($items as $item)
+                                @php
+                                    $isActive =
+                                        request()->routeIs($item['route']) || request()->is($item['route'] . '*');
+                                @endphp
 
-                        <!-- Agency Rep List -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['representatives'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['representatives']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('representatives')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('representatives') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-person-badge text-slate-400 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Representatives
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-                        <!-- Dimension Indicator Manager -->
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['dimension-indicator'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['dimension-indicator']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('dimension-indicator')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('dimension-indicator') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-bar-chart text-slate-400 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Dimension Indicators
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['view-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['view-datasets']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('view-datasets')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('view-datasets') }}">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-speedometer2 text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            View PYDP Datasets
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['manage-pydi-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['manage-pydi-datasets']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition {{ request()->is('manage-pydi-datasets*') ? '!text-blue-500' : '' }}"
-                                href="{{ route('manage-pydi-datasets') }}">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-display text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Manage PYDI Datasets
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                                <li
+                                    class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] {{ $isActive ? 'bg-gray-200 dark:bg-slate-900' : '' }}">
+                                    <a href="{{ route($item['route']) }}"
+                                        class="flex items-center justify-between block text-gray-800 dark:text-gray-100 transition truncate {{ $isActive ? '!text-blue-500' : '' }}">
+                                        <div class="flex items-center">
+                                            <i
+                                                class="bi bi-{{ $item['icon'] }} text-slate-400 dark:text-slate-300 mr-3 text-lg"></i>
+                                            <span
+                                                class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                                {{ $item['label'] }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endforeach
                     @endif
 
-                    <!-- user tabs------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
-
+                    <!-- User Section -->
                     @if (Auth::user()->user_role === 'user')
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['data-entry'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['data-entry']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('data-entry')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('data-entry') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-clipboard-data text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Data Entry
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                        @php
+                            $userSections = [
+                                'Dashboard' => [
+                                    [
+                                        'route' => 'dashboard',
+                                        'icon' => 'speedometer2',
+                                        'label' => 'Dashboard',
+                                    ],
+                                ],
+                                'Settings' => [
+                                    [
+                                        'route' => 'pydp-indicators',
+                                        'icon' => 'sliders',
+                                        'label' => 'PYDP Indicators',
+                                    ],
+                                ],
+                                'Input Datasets' => [
+                                    [
+                                        'route' => 'pydp-datasets',
+                                        'icon' => 'database',
+                                        'label' => 'PYDP Datasets',
+                                    ],
+                                    [
+                                        'route' => 'pydi-datasets',
+                                        'icon' => 'bar-chart-line',
+                                        'label' => 'PYDI Datasets',
+                                    ],
+                                ],
+                            ];
+                        @endphp
 
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['input-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['input-datasets']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition
-                            @if (Route::is('input-datasets')) {{ '!text-blue-500' }} @endif"
-                                href="{{ route('input-datasets') }}" wire:navigate>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-clipboard-data text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            Input Datasets
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                        @foreach ($userSections as $section => $items)
+                            <li
+                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-slate-400">
+                                {{ $section }}
+                            </li>
 
-                        <li class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))]
-                        @if (in_array(Request::segment(1), ['pydi-datasets'])) {{ 'bg-gray-200 dark:bg-slate-900' }} @endif"
-                            x-data="{ open: {{ in_array(Request::segment(1), ['pydi-datasets']) ? 1 : 0 }} }">
-                            <a class="block text-gray-800 dark:text-gray-100 truncate transition {{ request()->is('pydi-datasets*') ? '!text-blue-500' : '' }}"
-                                href="{{ route('pydi-datasets') }}">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <i class="bi bi-clipboard-data text-slate-400 dark:text-slate-300 mr-3"></i>
-                                        <span
-                                            class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                                            PYDI Datasets
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
+                            @foreach ($items as $item)
+                                @php
+                                    $isActive =
+                                        request()->routeIs($item['route']) || request()->is($item['route'] . '*');
+                                @endphp
+
+                                <li
+                                    class="pl-4 pr-3 py-2 rounded-lg mb-0.5 last:mb-0 bg-[linear-gradient(135deg,var(--tw-gradient-stops))] {{ $isActive ? 'bg-gray-200 dark:bg-slate-900' : '' }}">
+                                    <a href="{{ route($item['route']) }}"
+                                        class="flex items-center justify-between block text-gray-800 dark:text-gray-100 transition truncate {{ $isActive ? '!text-blue-500' : '' }}">
+                                        <div class="flex items-center"> {{-- wire:navigate --}}
+                                            <i
+                                                class="bi bi-{{ $item['icon'] }} text-slate-400 dark:text-slate-300 mr-3 text-lg"></i>
+                                            <span
+                                                class="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                                {{ $item['label'] }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endforeach
+
                     @endif
                 </ul>
             </div>

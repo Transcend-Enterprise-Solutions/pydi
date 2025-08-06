@@ -111,13 +111,13 @@ class Rectangle extends Polygon implements SizeInterface
             case 'center-top':
             case 'middle-top':
                 $x = intval(round($this->width() / 2)) + $offset_x;
-                $y = 0 + $offset_y;
+                $y = $offset_y;
                 break;
 
             case 'top-right':
             case 'right-top':
                 $x = $this->width() - $offset_x;
-                $y = 0 + $offset_y;
+                $y = $offset_y;
                 break;
 
             case 'left':
@@ -125,7 +125,7 @@ class Rectangle extends Polygon implements SizeInterface
             case 'left-middle':
             case 'center-left':
             case 'middle-left':
-                $x = 0 + $offset_x;
+                $x = $offset_x;
                 $y = intval(round($this->height() / 2)) + $offset_y;
                 break;
 
@@ -140,7 +140,7 @@ class Rectangle extends Polygon implements SizeInterface
 
             case 'bottom-left':
             case 'left-bottom':
-                $x = 0 + $offset_x;
+                $x = $offset_x;
                 $y = $this->height() - $offset_y;
                 break;
 
@@ -170,8 +170,8 @@ class Rectangle extends Polygon implements SizeInterface
             default:
             case 'top-left':
             case 'left-top':
-                $x = 0 + $offset_x;
-                $y = 0 + $offset_y;
+                $x = $offset_x;
+                $y = $offset_y;
                 break;
         }
 
@@ -283,45 +283,99 @@ class Rectangle extends Polygon implements SizeInterface
     }
 
     /**
+     * @see SizeInterface::resize()
+     *
      * @throws GeometryException
+     */
+    public function resize(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->resize($this);
+    }
+
+    /**
+     * @see SizeInterface::resizeDown()
+     *
+     * @throws GeometryException
+     */
+    public function resizeDown(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->resizeDown($this);
+    }
+
+    /**
+     * @see SizeInterface::scale()
+     *
+     * @throws GeometryException
+     */
+    public function scale(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->scale($this);
+    }
+
+    /**
+     * @see SizeInterface::scaleDown()
+     *
+     * @throws GeometryException
+     */
+    public function scaleDown(?int $width = null, ?int $height = null): SizeInterface
+    {
+        return $this->resizer($width, $height)->scaleDown($this);
+    }
+
+    /**
+     * @see SizeInterface::cover()
+     *
+     * @throws GeometryException
+     */
+    public function cover(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->cover($this);
+    }
+
+    /**
+     * @see SizeInterface::contain()
+     *
+     * @throws GeometryException
+     */
+    public function contain(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->contain($this);
+    }
+
+    /**
+     * @see SizeInterface::containMax()
+     *
+     * @throws GeometryException
+     */
+    public function containMax(int $width, int $height): SizeInterface
+    {
+        return $this->resizer($width, $height)->containDown($this);
+    }
+
+    /**
+     * Create resizer instance with given target size
+     *
+     * @param null|int $width
+     * @param null|int $height
+     * @throws GeometryException
+     * @return RectangleResizer
      */
     protected function resizer(?int $width = null, ?int $height = null): RectangleResizer
     {
         return new RectangleResizer($width, $height);
     }
 
-    public function resize(?int $width = null, ?int $height = null): SizeInterface
+    /**
+     * Show debug info for the current rectangle
+     *
+     * @return array<string, int|object>
+     */
+    public function __debugInfo(): array
     {
-        return $this->resizer($width, $height)->resize($this);
-    }
-
-    public function resizeDown(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->resizeDown($this);
-    }
-
-    public function scale(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->scale($this);
-    }
-
-    public function scaleDown(?int $width = null, ?int $height = null): SizeInterface
-    {
-        return $this->resizer($width, $height)->scaleDown($this);
-    }
-
-    public function cover(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->cover($this);
-    }
-
-    public function contain(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->contain($this);
-    }
-
-    public function containMax(int $width, int $height): SizeInterface
-    {
-        return $this->resizer($width, $height)->containDown($this);
+        return [
+            'width' => $this->width(),
+            'height' => $this->height(),
+            'pivot' => $this->pivot,
+        ];
     }
 }
