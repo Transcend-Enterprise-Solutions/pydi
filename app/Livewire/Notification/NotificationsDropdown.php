@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Notification;
 
 use Livewire\Component;
@@ -12,24 +13,24 @@ class NotificationsDropdown extends Component
     public $unreadCount;
     public $registrationCount = 0;
 
-    public function mount(){
+    public function mount()
+    {
         $this->refreshNotifications();
     }
 
     public function refreshNotifications()
     {
         $user = Auth::user();
-        $query = NotificationModel::with('docRequest')
-            ->where('read', false)
+        $query = NotificationModel::where('read', false)
             ->latest();
 
         if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             // Get existing notifications
             $this->registrationCount = User::where('active_status', 0)->count();
 
-            $notifications = $query->where(function($q) {
+            $notifications = $query->where(function ($q) {
                 $q->where('type', 'request')
-                ->orWhere('type', 'registration');
+                    ->orWhere('type', 'registration');
             })->get();
 
             $this->notifications = $notifications;
@@ -61,7 +62,7 @@ class NotificationsDropdown extends Component
 
         if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             $query->where('type', 'request')
-            ->orWhere('type', 'registration');
+                ->orWhere('type', 'registration');
         } else {
             $query->where('user_id', $user->id);
         }
@@ -77,7 +78,7 @@ class NotificationsDropdown extends Component
 
         if ($user->user_role === 'sa' || $user->user_role === 'admin') {
             $query->where('type', 'request')
-             ->orWhere('type', 'registration');
+                ->orWhere('type', 'registration');
         } else {
             $query->where('user_id', $user->id);
         }
@@ -113,7 +114,8 @@ class NotificationsDropdown extends Component
     }
 
     // Add method to get notification message
-    private function getRegistrationMessage(){
+    private function getRegistrationMessage()
+    {
         if ($this->registrationCount === 1) {
             return '1 new registration pending approval';
         }
