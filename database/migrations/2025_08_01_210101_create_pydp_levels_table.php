@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pydp_indicators', function (Blueprint $table) {
+        Schema::create('pydp_levels', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pydp_level_id')->nullable()->constrained('pydp_levels')->onDelete('set null');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title')->unique();
             $table->text('content')->nullable();
             $table->boolean('is_active')->default(true);
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pydp_indicators');
+        Schema::dropIfExists('pydp_levels');
     }
 };

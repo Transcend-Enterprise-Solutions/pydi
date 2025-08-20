@@ -6,8 +6,8 @@ use App\Livewire\Admin\DimensionIndicatorManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
-use App\Livewire\DashboardIndex;
-use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpIndicatorIndex, PydpDatasetIndex, PydpDatasetDetailIndex};
+use App\Livewire\{DashboardIndex, UserLogs};
+use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpDatasetIndex, PydpDatasetDetailIndex, PydpLevelController};
 use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, ManagePydpIndex, ManagePydpDetailIndex};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
@@ -18,6 +18,7 @@ Route::get('/register', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
+    Route::get('/logs', UserLogs::class)->name('logs');
 });
 
 /* Admin account role ------------------------------------------------------------------------------*/
@@ -38,7 +39,7 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
 
 /* Homeowner account role --------------------------------------------------------------------------*/
 Route::middleware(['auth', 'checkrole:user'])->group(function () {
-    Route::get('/pydp-indicators', PydpIndicatorIndex::class)->name('pydp-indicators');
+    Route::get('/pydp-levels', PydpLevelController::class)->name('pydp-levels');
 
     // PYDP Datasets
     Route::get('/pydp-datasets', PydpDatasetIndex::class)->name('pydp-datasets');

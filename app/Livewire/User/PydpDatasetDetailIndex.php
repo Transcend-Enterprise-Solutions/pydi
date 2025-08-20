@@ -6,7 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Illuminate\Support\Facades\DB;
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDatasetDetail, PydpDataset, PydpIndicator, Dimension, PydpYear};
+use App\Models\{PydpDatasetDetail, PydpDataset, Dimension, PydpYear, UserLog};
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\DatasetDetailExport;
 
@@ -24,15 +24,19 @@ class PydpDatasetDetailIndex extends Component
     public $yearData = [];
     public $valueId;
     public $remarks;
+    public $total;
+    public $baseline;
 
+    public $showDeleteModal = false;
     public $showModal = false;
     public $editMode = false;
 
     public function mount($id)
     {
-        $dataset = PydpDataset::with('type')->findOrFail($id);
+        $dataset = PydpDataset::with(['type', 'level.indicators'])->findOrFail($id);
         $this->datasetInfo = $dataset;
-        $this->indicators = PydpIndicator::all();
+
+        $this->indicators = $dataset->level->indicators;
         $this->dimensions = Dimension::all();
 
         $years = range((int)$dataset->type->year_start, (int)$dataset->type->year_end);
@@ -42,6 +46,8 @@ class PydpDatasetDetailIndex extends Component
     protected $rules = [
         'dimension' => 'required|exists:dimensions,id',
         'indicator_id' => 'required|exists:pydp_indicators,id',
+        'baseline' => 'required|integer|min:0',
+        'remarks' => 'nullable|string|max:1000',
         'yearData' => 'required|array',
         'yearData.*.physical_target' => 'nullable|numeric',
         'yearData.*.financial_target' => 'nullable|numeric',
@@ -63,6 +69,8 @@ class PydpDatasetDetailIndex extends Component
         $this->valueId = $data->id;
         $this->dimension = $data->dimension_id;
         $this->indicator_id = $data->pydp_indicator_id;
+        $this->baseline = $data->baseline;
+        $this->total = $data->total;
         $this->remarks = $data->remarks;
 
         // Populate year data
@@ -93,6 +101,9 @@ class PydpDatasetDetailIndex extends Component
                     'pydp_dataset_id' => $this->datasetInfo['id'],
                     'dimension_id' => $this->dimension,
                     'pydp_indicator_id' => $this->indicator_id,
+                    'baseline' => $this->baseline,
+                    'total' => $this->total,
+                    'remarks' => $this->remarks,
                 ]);
 
                 // Delete old years and reinsert
@@ -108,12 +119,17 @@ class PydpDatasetDetailIndex extends Component
                         'actual_financial' => $values['financial_actual'] ?? 0,
                     ]);
                 }
+
+                $this->logs("Updated dataset detail ID: {$this->valueId}");
             } else {
                 // Create new detail
                 $detail = PydpDatasetDetail::create([
                     'pydp_dataset_id' => $this->datasetInfo['id'],
                     'dimension_id' => $this->dimension,
                     'pydp_indicator_id' => $this->indicator_id,
+                    'baseline' => $this->baseline,
+                    'total' => $this->total,
+                    'remarks' => $this->remarks,
                 ]);
 
                 foreach ($this->yearData as $year => $values) {
@@ -126,18 +142,41 @@ class PydpDatasetDetailIndex extends Component
                         'actual_financial' => $values['financial_actual'] ?? 0,
                     ]);
                 }
+
+                $this->logs("Created new dataset detail ID: {$detail->id}");
             }
 
             DB::commit();
 
-            session()->flash('success', $this->editMode ? 'Dataset updated successfully.' : 'Dataset created successfully.');
+            session()->flash('success', $this->editMode ? 'Dataset detail updated successfully.' : 'Dataset created successfully.');
             $this->showModal = false;
             $this->reset(['dimension', 'indicator_id', 'yearData', 'remarks', 'valueId', 'editMode']);
             $this->dispatch('refreshTable');
         } catch (\Exception $e) {
-            DB::rollBack();;
+            DB::rollBack();
             $this->addError('save', 'Something went wrong while saving. Please try again.');
         }
+    }
+
+    // Delete Dataset
+    public function confirmDelete($id)
+    {
+        $this->valueId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function delete()
+    {
+        if ($this->valueId) {
+            $dataset = PydpDatasetDetail::findOrFail($this->valueId);
+            $dataset->delete();
+
+            $this->logs("Deleted dataset detail: {$this->valueId}");
+
+            session()->flash('success', 'Dataset detail deleted successfully!');
+        }
+
+        $this->reset(['showDeleteModal', 'valueId']);
     }
 
     public function exportDatasetDetails()
@@ -150,6 +189,13 @@ class PydpDatasetDetailIndex extends Component
         return Excel::download(new DatasetDetailExport($yearRange, $this->datasetInfo['id']), 'dataset_details.xlsx');
     }
 
+    public function logs($action)
+    {
+        UserLog::create([
+            'user_id' => auth()->id(),
+            'action'  => $action,
+        ]);
+    }
 
     public function render()
     {

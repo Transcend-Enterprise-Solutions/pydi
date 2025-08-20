@@ -134,7 +134,7 @@
                                         @endif
 
 
-                                        @if ($row->finalized_at)
+                                        @if ($row->finalized_at && $row->feedback)
                                             <div class="relative group inline-flex">
                                                 <span wire:click="message({{ $row->id }})"
                                                     class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">

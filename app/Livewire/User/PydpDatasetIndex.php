@@ -5,7 +5,7 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDataset, PydpType};
+use App\Models\{PydpDataset, PydpType, UserLog, PydpLevel};
 
 #[Layout('layouts.app')]
 #[Title('PYDP Datasets')]
@@ -15,7 +15,7 @@ class PydpDatasetIndex extends Component
 
     public $showEntries = 10;
     public $search = '';
-    public $types = [];
+    public $types = [], $levels = [];
 
     public $showModal = false;
     public $editMode = false;
@@ -32,7 +32,7 @@ class PydpDatasetIndex extends Component
     public $selectedId = null;
     public $file;
 
-    public $valueId, $title, $description, $type;
+    public $valueId, $title, $description, $type, $level;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -43,6 +43,7 @@ class PydpDatasetIndex extends Component
     public function mount()
     {
         $this->types = PydpType::all();
+        $this->levels = PydpLevel::where('user_id', auth()->id())->get();
     }
 
     public function updatingSearch()
@@ -77,19 +78,28 @@ class PydpDatasetIndex extends Component
         if ($this->editMode) {
             $dataset = PydpDataset::findOrFail($this->valueId);
             $dataset->update([
-                'name' => $this->title,
-                'description' => $this->description,
-            ]);
-        } else {
-            PydpDataset::create([
-                'user_id' => auth()->id(),
                 'pydp_type_id' => $this->type,
+                'pydp_level_id' => $this->level,
                 'name' => $this->title,
                 'description' => $this->description
             ]);
+
+            $this->logs("Updated dataset: {$this->title}");
+            $message = 'Dataset updated successfully.';
+        } else {
+            $dataset = PydpDataset::create([
+                'user_id' => auth()->id(),
+                'pydp_type_id' => $this->type,
+                'pydp_level_id' => $this->level,
+                'name' => $this->title,
+                'description' => $this->description
+            ]);
+
+            $this->logs("Created dataset: {$this->title}");
+            $message = 'Dataset created successfully.';
         }
 
-        session()->flash('success', $this->editMode ? 'Dataset updated successfully.' : 'Dataset created successfully.');
+        session()->flash('success', $message);
         $this->showModal = false;
         $this->reset(['valueId', 'title', 'description', 'type']);
     }
@@ -104,8 +114,13 @@ class PydpDatasetIndex extends Component
     public function delete()
     {
         if ($this->valueId) {
-            PydpDataset::findOrFail($this->valueId)->delete();
-            session()->flash('success', 'Indicator deleted successfully!');
+            $dataset = PydpDataset::findOrFail($this->valueId);
+            $name = $dataset->name;
+            $dataset->delete();
+
+            $this->logs("Deleted dataset: {$name}");
+
+            session()->flash('success', 'Dataset deleted successfully!');
         }
 
         $this->reset(['showDeleteModal', 'valueId']);
@@ -146,6 +161,8 @@ class PydpDatasetIndex extends Component
             $dataset->submitted_at = now();
             $dataset->save();
 
+            $this->logs("Submitted dataset: {$dataset->name}");
+
             session()->flash('success', 'Dataset has been sent successfully!');
         }
 
@@ -166,8 +183,18 @@ class PydpDatasetIndex extends Component
             'is_request_edit' => true,
         ]);
 
+        $this->logs("Requested edit for dataset: {$entry->name}");
+
         session()->flash('success', 'Edit request has been sent successfully!');
         $this->showRequestEditModal = false;
+    }
+
+    public function logs($action)
+    {
+        UserLog::create([
+            'user_id' => auth()->id(),
+            'action'  => $action,
+        ]);
     }
 
     public function render()

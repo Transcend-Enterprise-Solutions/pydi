@@ -16,8 +16,9 @@ return new class extends Migration
 
             // Relationships
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('pydp_type_id')->nullable()->constrained('pydp_types')->onDelete('set null');
             $table->foreignId('reviewer_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('pydp_type_id')->nullable()->constrained('pydp_types')->onDelete('set null');
+            $table->foreignId('pydp_level_id')->nullable()->constrained('pydp_levels')->onDelete('set null');
 
             // Metadata
             $table->string('name');

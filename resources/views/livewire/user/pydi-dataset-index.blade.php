@@ -59,7 +59,7 @@
                                                 class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
                                         @endif
 
-                                        @if ($row->finalized_at)
+                                        @if ($row->finalized_at && $row->feedback)
                                             <!-- Message Button with Tooltip -->
                                             <div class="relative group inline-flex">
                                                 <span wire:click="message({{ $row->id }})"

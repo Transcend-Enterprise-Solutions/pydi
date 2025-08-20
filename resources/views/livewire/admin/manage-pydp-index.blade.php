@@ -102,7 +102,7 @@
                         <tr>
                             <th class="px-4 py-2 border">Account Name</th>
                             <th class="px-4 py-2 border">Title</th>
-                            <th class="px-4 py-2 border">Description</th>
+                            <th class="px-4 py-2 border">Level</th>
                             <th class="px-4 py-2 border">Year Covered</th>
                             <th class="px-4 py-2 border">Status</th>
                             <th class="px-4 py-2 border">Date</th>
@@ -114,9 +114,9 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 border">{{ $row->user->name }}</td>
                                 <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ Str::limit($row->description, 50) }}</td>
+                                <td class="px-4 py-2 border">{{ $row->level->title }}</td>
                                 <td class="px-4 py-2 border">
-                                    {{ $row->type->year_start . '- ' . $row->type->year_end }}
+                                    {{ $row->type->year_start . ' - ' . $row->type->year_end }}
                                 </td>
 
                                 <td class="px-4 py-2 border">
@@ -136,7 +136,7 @@
                                         @endif
 
 
-                                        @if ($row->finalized_at)
+                                        @if ($row->finalized_at && $row->feedback)
                                             <div class="relative group inline-flex">
                                                 <span wire:click="message({{ $row->id }})"
                                                     class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">

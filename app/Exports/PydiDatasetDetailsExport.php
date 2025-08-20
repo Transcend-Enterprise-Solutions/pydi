@@ -32,7 +32,7 @@ class PydiDatasetDetailsExport implements FromCollection, WithHeadings, WithEven
                     'Philippine Region' => $detail->region->region_description ?? '',
                     'Sex'               => $detail->sex ?? '',
                     'Age'               => $detail->age ?? '',
-                    'Content'           => $detail->content ?? '',
+                    'Content'           => $detail->value ?? '',
                 ];
             });
     }
