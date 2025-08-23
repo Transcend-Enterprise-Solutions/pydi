@@ -13,7 +13,7 @@ class AdvocacyIndex extends Component
     public $advocacyInfo;
     public $yearOptions = [];
     public $demensions = [];
-    public $ageOptions = ['1-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65+', 'All Ages'];
+    public $ageOptions = ['15-17', '18-24', '25-30 ', 'All Ages'];
     public $selectedAge = 'All Ages';
     public $selectedYear = '';
     public $selectedAdvocacy = '';

@@ -32,6 +32,7 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
         $mapped = [
             $row->dimension->name,
             $row->indicator->content,
+            $row->baseline ?? '',
         ];
 
         foreach ($this->yearRange as $year) {
@@ -42,20 +43,31 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
             $mapped[] = $yearData->actual_financial ?? '';
         }
 
+        $mapped[] = $row->total ?? '';
+        $mapped[] = $row->remarks ?? '';
+
         return $mapped;
     }
 
     public function headings(): array
     {
-        $row1 = ['Dimension', 'Indicator'];
-        $row2 = ['', ''];
-        $row3 = ['', ''];
+        $row1 = ['Dimension', 'Indicator', 'Baseline'];
+        $row2 = ['', '', ''];
+        $row3 = ['', '', ''];
 
         foreach ($this->yearRange as $year) {
             $row1 = array_merge($row1, [$year, '', '', '']);
             $row2 = array_merge($row2, ['Target', '', 'Actual', '']);
             $row3 = array_merge($row3, ['Physical', 'Financial', 'Physical', 'Financial']);
         }
+
+        $row1[] = 'Total';
+        $row2[] = '';
+        $row3[] = '';
+
+        $row1[] = 'Remarks';
+        $row2[] = '';
+        $row3[] = '';
 
         return [$row1, $row2, $row3];
     }
@@ -64,42 +76,59 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                /** @var Worksheet $sheet */
                 $sheet = $event->sheet->getDelegate();
 
-                $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(2 + count($this->yearRange) * 4);
+                $staticColumns = 3; // Dimension, Indicator, Baseline
+                $yearColumns = count($this->yearRange) * 4;
+                $extraColumns = 2; // Total + Remarks
+                $lastColumnIndex = $staticColumns + $yearColumns + $extraColumns;
+
+                $lastColumn = Coordinate::stringFromColumnIndex($lastColumnIndex);
                 $lastRow = $sheet->getHighestRow();
 
                 $fullRange = "A1:{$lastColumn}{$lastRow}";
 
-                // Style: Center alignment and bold header
+                // Style headers
                 $sheet->getStyle("A1:{$lastColumn}3")->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                     ->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle("A1:{$lastColumn}3")->getFont()->setBold(true);
 
                 // Merge static headers
-                $sheet->mergeCells('A1:A3'); // PPA
+                $sheet->mergeCells('A1:A3'); // Dimension
                 $sheet->mergeCells('B1:B3'); // Indicator
+                $sheet->mergeCells('C1:C3'); // Baseline
 
-                $colIndex = 3; // C column index
+                // Merge Total column
+                $totalColIndex = $lastColumnIndex - 1; // before Remarks
+                $sheet->mergeCells(Coordinate::stringFromColumnIndex($totalColIndex) . "1:" . Coordinate::stringFromColumnIndex($totalColIndex) . "3");
 
+                // Merge Remarks column
+                $sheet->mergeCells(Coordinate::stringFromColumnIndex($lastColumnIndex) . "1:" . Coordinate::stringFromColumnIndex($lastColumnIndex) . "3");
+
+                // Merge year headers
+                $colIndex = 4; // Start at column D
                 foreach ($this->yearRange as $year) {
-                    $start = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
-                    $end = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 3);
+                    $start = Coordinate::stringFromColumnIndex($colIndex);
+                    $end = Coordinate::stringFromColumnIndex($colIndex + 3);
 
                     $sheet->mergeCells("{$start}1:{$end}1"); // Year
-                    $sheet->mergeCells("{$start}2:" . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1) . "2"); // Target
-                    $sheet->mergeCells(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 2) . "2:{$end}2"); // Actual
+                    $sheet->mergeCells("{$start}2:" . Coordinate::stringFromColumnIndex($colIndex + 1) . "2"); // Target
+                    $sheet->mergeCells(Coordinate::stringFromColumnIndex($colIndex + 2) . "2:{$end}2"); // Actual
 
                     $colIndex += 4;
                 }
 
-                // Freeze the top 3 header rows
-                $sheet->freezePane('C4');
+                // Freeze first 3 rows + first 3 columns
+                $sheet->freezePane(Coordinate::stringFromColumnIndex(4) . "4");
 
-                // ✅ Apply Border to All Used Cells
-                $sheet->getStyle($fullRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+                // Borders
+                $sheet->getStyle($fullRange)->getBorders()->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                // Wrap text for Remarks
+                $sheet->getStyle(Coordinate::stringFromColumnIndex($lastColumnIndex) . "4:" . Coordinate::stringFromColumnIndex($lastColumnIndex) . $lastRow)
+                    ->getAlignment()->setWrapText(true);
             }
         ];
     }

@@ -28,7 +28,8 @@
                         <tr>
                             <th class="px-4 py-2 border">#</th>
                             <th class="px-4 py-2 border">Title</th>
-                            <th class="px-4 py-2 border">Description</th>
+                            <th class="px-4 py-2 border">Level</th>
+                            <th class="px-4 py-2 border">Year Covered</th>
                             <th class="px-4 py-2 border">Status</th>
                             <th class="px-4 py-2 border">Date</th>
                             <th class="px-4 py-2 border text-center">Actions</th>
@@ -39,7 +40,10 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 border">{{ $tableDatas->firstItem() + $index }}</td>
                                 <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->description }}</td>
+                                <td class="px-4 py-2 border">{{ $row->level->title }}</td>
+                                <td class="px-4 py-2 border">
+                                    {{ $row->type->year_start . ' - ' . $row->type->year_end }}
+                                </td>
                                 <td class="px-4 py-2 border w-auto">
                                     <div class="flex justify-start items-center">
                                         @if ($row->status === 'approved')
@@ -56,7 +60,7 @@
                                                 class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
                                         @endif
 
-                                        @if ($row->finalized_at)
+                                        @if ($row->finalized_at && $row->feedback)
                                             <!-- Message Button with Tooltip -->
                                             <div class="relative group inline-flex">
                                                 <span wire:click="message({{ $row->id }})"
@@ -219,8 +223,23 @@
                     @enderror
                 </div>
 
+                <!-- level -->
+                <div class="mb-3">
+                    <label class="block text-sm font-medium">Level</label>
+                    <select wire:model="level" class="border rounded w-full px-3 py-2">
+                        <option value="">Please Select</option>
+                        @foreach ($levels as $row)
+                            <option value="{{ $row->id }}">
+                                {{ $row->title }}</option>
+                        @endforeach
+                    </select>
+                    @error('level')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 <!-- Type -->
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-sm font-medium">Year Covered</label>
                     <select wire:model="type" class="border rounded w-full px-3 py-2">
                         <option value="">Please Select</option>

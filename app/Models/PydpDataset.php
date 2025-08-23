@@ -23,6 +23,11 @@ class PydpDataset extends Model
         return $this->belongsTo(PydpType::class, 'pydp_type_id');
     }
 
+    public function level()
+    {
+        return $this->belongsTo(PydpLevel::class, 'pydp_level_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

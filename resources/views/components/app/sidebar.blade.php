@@ -49,7 +49,12 @@
                                     [
                                         'route' => 'cover-year',
                                         'icon' => 'bi bi-sliders2',
-                                        'label' => 'Covered Year (PYDI)',
+                                        'label' => 'Covered Year (PYDP)',
+                                    ],
+                                    [
+                                        'route' => 'logs',
+                                        'icon' => 'activity',
+                                        'label' => Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs',
                                     ],
                                 ],
                                 'Manage' => [
@@ -110,9 +115,14 @@
                                 ],
                                 'Settings' => [
                                     [
-                                        'route' => 'pydp-indicators',
+                                        'route' => 'pydp-levels',
                                         'icon' => 'sliders',
-                                        'label' => 'PYDP Indicators',
+                                        'label' => 'PYDP Levels',
+                                    ],
+                                    [
+                                        'route' => 'logs',
+                                        'icon' => 'activity',
+                                        'label' => Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs',
                                     ],
                                 ],
                                 'Input Datasets' => [

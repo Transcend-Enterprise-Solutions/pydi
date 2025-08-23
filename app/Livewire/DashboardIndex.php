@@ -12,11 +12,13 @@ class DashboardIndex extends Component
 {
     public $advocacyInfo;
     public $yearOptions = [];
+    public $indicators = [];
     public $dimensions = [];
-    public $ageOptions = ['1-14', '15-24', '25-34', '35-44', '45-54', '55-64', '65+', 'All Ages'];
+    public $ageOptions = ['15-17', '18-24', '25-30 ', 'All Ages'];
     public $selectedAge = 'All Ages';
     public $selectedYear = '';
-    public $selectedDimension = "";
+    public $selectedDimension = ""; // can be empty = all
+    public $selectedIndicator = "";
     public $selectedAdvocacy = '';
 
     public $chartLabels = ['Male', 'Female', 'Others'];
@@ -26,24 +28,16 @@ class DashboardIndex extends Component
 
     public function mount()
     {
-        $id = Dimension::orderBy('id', 'asc')->first()?->id;
         $this->dimensions = Dimension::orderBy('name')->get();
+        $this->selectedDimension = "";
 
-        $this->selectedAdvocacy = $id;
-        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])->findOrFail($id);
-
-
-        // Fetch unique years from PydiDataset (descending order)
         $this->yearOptions = PydiDataset::select('year')
             ->distinct()
             ->orderBy('year', 'desc')
             ->pluck('year')
             ->toArray();
 
-        // Default year is the current year if available, otherwise the latest year from the DB
-        $this->selectedYear = in_array(date('Y'), $this->yearOptions)
-            ? date('Y')
-            : ($this->yearOptions[0] ?? null);
+        $this->selectedYear = in_array(date('Y'), $this->yearOptions) ? date('Y') : ($this->yearOptions[0] ?? null);
 
         $this->updateChartData();
     }
@@ -52,7 +46,6 @@ class DashboardIndex extends Component
     {
         $this->updateChartData();
     }
-
     public function updatedSelectedAge()
     {
         $this->updateChartData();
@@ -62,9 +55,21 @@ class DashboardIndex extends Component
     {
         $this->loading = true;
 
-        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])
-            ->findOrFail($value);
+        if (empty($value)) {
+            $this->advocacyInfo = null; // All dimensions
+            $this->indicators = [];
+        } else {
+            $this->advocacyInfo = Dimension::with('indicators')->findOrFail($value);
+            $this->indicators = $this->advocacyInfo->indicators;
+        }
 
+        $this->updateChartData();
+        $this->loading = false;
+    }
+
+    public function updatedSelectedIndicator($value)
+    {
+        $this->loading = true;
         $this->updateChartData();
         $this->loading = false;
     }
@@ -73,8 +78,9 @@ class DashboardIndex extends Component
     {
         $this->loading = true;
 
-        $datasetDetails = Dimension::with(['pydiDatasetDetails' => function ($query) {
-            if ($this->selectedAge !== "All Ages") {
+        // Base query: fetch all or selected dimensions
+        $dimensionsQuery = Dimension::with(['pydiDatasetDetails' => function ($query) {
+            if ($this->selectedAge !== 'All Ages') {
                 if (str_contains($this->selectedAge, '+')) {
                     $ageMin = rtrim($this->selectedAge, '+');
                     $query->where('age', '>=', $ageMin);
@@ -84,6 +90,10 @@ class DashboardIndex extends Component
                 }
             }
 
+            if (!empty($this->selectedIndicator)) {
+                $query->where('indicator_id', $this->selectedIndicator);
+            }
+
             if (auth()->user()->user_role === 'user') {
                 $query->whereHas('pydiDataset', function ($subQuery) {
                     $subQuery->where('user_id', auth()->id());
@@ -91,38 +101,38 @@ class DashboardIndex extends Component
             }
 
             $query->whereHas('pydiDataset', function ($subQuery) {
-                $subQuery->where('year', $this->selectedYear);
-                $subQuery->where('status', 'approved');
+                $subQuery->where('year', $this->selectedYear)
+                    ->where('status', 'approved');
             });
-        }, 'pydiDatasetDetails.pydiDataset'])
-            ->where('id', $this->advocacyInfo->id)
-            ->first();
+        }, 'pydiDatasetDetails.pydiDataset']);
 
-        if ($datasetDetails && $datasetDetails->pydiDatasetDetails->isNotEmpty()) {
-            $totals = ['Male' => 0, 'Female' => 0, 'Others' => 0];
-            $this->totalSum = 0;
+        if (!empty($this->selectedDimension)) {
+            $dimensionsQuery->where('id', $this->selectedDimension);
+        }
 
-            foreach ($datasetDetails->pydiDatasetDetails as $detail) {
+        $datasetDetails = $dimensionsQuery->get();
+
+        // Initialize totals
+        $totals = ['Male' => 0, 'Female' => 0, 'Others' => 0];
+        $this->totalSum = 0;
+
+        // Sum values for all selected dimensions
+        foreach ($datasetDetails as $dimension) {
+            foreach ($dimension->pydiDatasetDetails as $detail) {
                 $sex = ucfirst(strtolower($detail->sex ?? 'Others'));
+                if (!isset($totals[$sex])) $sex = 'Others';
 
-                if (!isset($totals[$sex])) {
-                    $sex = 'Others';
-                }
-
-                $value = (int) $detail->value;
+                $value = (int)$detail->value;
                 $totals[$sex] += $value;
                 $this->totalSum += $value;
             }
-
-            $this->chartData = [
-                $totals['Male'],
-                $totals['Female'],
-                $totals['Others'],
-            ];
-        } else {
-            $this->chartData = [0, 0, 0];
-            $this->totalSum = 0;
         }
+
+        $this->chartData = [
+            $totals['Male'],
+            $totals['Female'],
+            $totals['Others'],
+        ];
 
         $this->dispatch('chart-updated', data: $this->chartData);
         $this->loading = false;
@@ -130,14 +140,9 @@ class DashboardIndex extends Component
 
     public function updatedSelectedAdvocacy($value)
     {
-        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])
-            ->findOrFail($value);
-
-        // Reset year and age filters
+        $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])->findOrFail($value);
         $this->selectedYear = $this->yearOptions[0] ?? '';
         $this->selectedAge = 'All Ages';
-
-        // Update chart data based on the new advocacy
         $this->updateChartData();
     }
 

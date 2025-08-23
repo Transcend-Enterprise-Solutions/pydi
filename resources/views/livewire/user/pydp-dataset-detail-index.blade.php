@@ -71,7 +71,10 @@
                         <tr>
                             <th class="px-4 py-2 border">PYDP Center</th>
                             <th class="px-4 py-2 border">Indicator</th>
+                            <th class="px-4 py-2 border">Baseline</th>
                             <th class="px-4 py-2 border">Year Data</th>
+                            <th class="px-4 py-2 border">Total</th>
+                            <th class="px-4 py-2 border">Remarks</th>
 
                             @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
                                 <th class="px-4 py-2 border text-center">Actions</th>
@@ -85,6 +88,9 @@
                                     {{ $row->dimension->name }}</td>
                                 <td class="px-4 py-2 border text-center text-xs align-middle">
                                     {{ $row->indicator->title }}</td>
+                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                                    {{ number_format($row->baseline, 2) }}
+                                </td>
 
                                 <td class="px-4 py-2 border align-middle">
                                     @php
@@ -128,6 +134,11 @@
                                     @endif
                                 </td>
 
+                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                                    {{ number_format($row->total, 2) }}</td>
+                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                                    {{ $row->remarks ?? '-' }}</td>
+
                                 @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
                                     <td class="px-4 py-2 border text-center align-middle">
                                         <div x-data="{ open: false }" class="relative inline-block text-left">
@@ -160,7 +171,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-gray-500">
+                                <td colspan="7" class="text-center py-4 text-gray-500">
                                     No records found.
                                 </td>
                             </tr>
@@ -179,29 +190,53 @@
     <!-- Modal (Used for Create & Edit) -->
     @if ($showModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 my-8 p-8">
-                <h3 class="text-2xl font-bold mb-6">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 my-5 p-8">
+                <h3 class="text-xl font-bold mb-6">
                     {{ $editMode ? 'Edit Dataset Details' : 'Create New Dataset Details' }}
                 </h3>
 
-                {{-- Form Section --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- Dimension --}}
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Dimension</label>
-                        <select wire:model="dimension" class="border rounded w-full px-3 py-2">
-                            <option value="">Please Select</option>
-                            @foreach ($dimensions as $row)
-                                <option value="{{ $row->id }}">{{ $row->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('dimension')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
+                {{-- Scrollable Section for Year Inputs --}}
+                <div class="max-h-[70vh] overflow-y-auto mt-6 pr-2">
+
+                    {{-- Form Section --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {{-- Dimension --}}
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Dimension</label>
+                            <select wire:model="dimension" class="border rounded w-full px-3 py-2">
+                                <option value="">Please Select</option>
+                                @foreach ($dimensions as $row)
+                                    <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('dimension')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Baseline --}}
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Baseline</label>
+                            <input type="number" wire:model="baseline" class="border rounded w-full px-3 py-2"
+                                placeholder="Enter baseline value">
+                            @error('baseline')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Total --}}
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Actual Total</label>
+                            <input type="number" wire:model="total" class="border rounded w-full px-3 py-2"
+                                placeholder="Enter total value">
+                            @error('total')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
                     {{-- Indicator --}}
-                    <div>
+                    <div class="mt-6">
                         <label class="block text-sm font-medium mb-1">Indicator</label>
                         <select wire:model="indicator_id" class="border rounded w-full px-3 py-2">
                             <option value="">Please Select</option>
@@ -213,10 +248,17 @@
                             <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
-                </div>
 
-                {{-- Scrollable Section for Year Inputs --}}
-                <div class="max-h-[60vh] overflow-y-auto mt-6 pr-2">
+                    {{-- Remarks --}}
+                    <div class="my-6">
+                        <label class="block text-sm font-medium mb-1">Remarks</label>
+                        <textarea wire:model="remarks" rows="2" class="border rounded w-full px-3 py-2"
+                            placeholder="Enter remarks here"></textarea>
+                        @error('remarks')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     @foreach ($yearRange as $year)
                         <div class="border rounded p-4 mb-4 bg-gray-50">
                             <h4 class="text-lg font-semibold mb-3">Year {{ $year }}</h4>
@@ -282,6 +324,29 @@
         </div>
     @endif
 
+    <!-- Delete Confirmation Modal -->
+    @if ($showDeleteModal)
+        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
+                <h3 class="text-lg font-bold mb-2">Delete Dataset</h3>
+                <p class="text-gray-600 mb-4">Are you sure you want to delete this dataset? This action cannot be
+                    undone.</p>
+
+                <div class="flex justify-center gap-4">
+                    <button wire:click="$set('showDeleteModal', false)" class="px-4 py-2 border rounded">
+                        Cancel
+                    </button>
+                    <button wire:click="delete" wire:loading.attr="disabled"
+                        class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2">
+                        <span wire:loading.remove wire:target="delete">Delete</span>
+                        <span wire:loading wire:target="delete" class="flex items-center gap-2">
+                            <i class="fas fa-spinner fa-spin"></i> Deleting...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 
 
 </div>

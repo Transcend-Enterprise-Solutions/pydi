@@ -4,7 +4,7 @@
     <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <div class="space-y-1">
-                <h2 class="text-xl font-semibold text-gray-800">PYDI {{ $advocacyInfo->name }} Support Levels</h2>
+                <h2 class="text-xl font-semibold text-gray-800">PYDI Support Levels</h2>
                 <p class="text-sm text-gray-500">Breakdown by gender and age group</p>
             </div>
 
@@ -15,8 +15,21 @@
                         class="absolute -top-2 left-2 px-1 text-xs font-medium text-gray-500 bg-white">Dimension</label>
                     <select id="dimension-select" wire:model.live="selectedDimension"
                         class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-48">
+                        <option value="">All Dimensions</option>
                         @foreach ($dimensions as $dimension)
                             <option value="{{ $dimension->id }}">{{ $dimension->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="relative">
+                    <label for="dimension-select"
+                        class="absolute -top-2 left-2 px-1 text-xs font-medium text-gray-500 bg-white">Indicator</label>
+                    <select id="dimension-select" wire:model.live="selectedIndicator"
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-72">
+                        <option value="">All Indicators</option>
+                        @foreach ($indicators as $indicator)
+                            <option value="{{ $indicator->id }}">{{ $indicator->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -66,7 +79,7 @@
         </div>
 
         <!-- Gender Breakdown -->
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             @foreach (['Male', 'Female', 'Others'] as $index => $gender)
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div class="flex items-center justify-between">
@@ -77,13 +90,32 @@
                             </h3>
                         </div>
                         <div
-                            class="text-2xl font-bold @if ($index === 0) text-blue-600 @elseif($index === 1) text-green-600 @else text-red-600 @endif">
+                            class="text-2xl font-bold
+                        @if ($index === 0) text-blue-600
+                        @elseif($index === 1) text-green-600
+                        @else text-red-600 @endif">
                             {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
                         </div>
                     </div>
                 </div>
             @endforeach
+
+            {{-- ✅ Add Total Card --}}
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Total</p>
+                        <h3 class="text-xl font-semibold text-gray-900 mt-1">
+                            {{ number_format($totalSum) }}
+                        </h3>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600">
+                        {{ $totalSum != 0 ? '100%' : '0%' }}
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 </div>
 

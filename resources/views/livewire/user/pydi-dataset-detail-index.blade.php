@@ -347,7 +347,7 @@
                         {{-- Show "Uploading..." state when file IS uploading --}}
                         <span wire:loading wire:target="file">
                             <button class="px-4 py-2 bg-gray-400 text-white rounded" disabled>
-                                Uploading...
+                                Please Wait...
                             </button>
                         </span>
                     </div>

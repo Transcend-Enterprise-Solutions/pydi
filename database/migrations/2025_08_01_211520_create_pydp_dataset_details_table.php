@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('pydp_dataset_id')->nullable()->constrained('pydp_datasets')->onDelete('set null');
             $table->foreignId('dimension_id')->nullable()->constrained('dimensions')->onDelete('set null');
             $table->foreignId('pydp_indicator_id')->nullable()->constrained('pydp_indicators')->onDelete('set null');
+            $table->integer('baseline')->nullable();
+            $table->integer('total')->nullable();
+            $table->text('remarks')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
