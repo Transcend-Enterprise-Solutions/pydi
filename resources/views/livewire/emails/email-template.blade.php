@@ -37,6 +37,12 @@
                                 </a>
                             </div>
                         @endif
+
+                        @if($isAdmin)
+                            <p class="message">Best regards,</p>
+                            <p style="font-weight: bold; font-size: 16px">PYDI Secretariat, National Youth Commission</p> 
+                            <p style="line-height: 10px">(02) 1234-5678, info@pydi.gov.ph</p>
+                        @endif  
                     </div>
                 </div>
             </div>

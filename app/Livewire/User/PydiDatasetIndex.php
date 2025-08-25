@@ -2,10 +2,14 @@
 
 namespace App\Livewire\User;
 
+use App\Mail\UserActionNotif;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
 use App\Models\PydiDataset;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
 #[Title('PYDI Datasets')]
@@ -136,6 +140,20 @@ class PydiDatasetIndex extends Component
             $dataset->submitted_at = now();
             $dataset->save();
 
+            $userInfo = User::where('users.id', $dataset->user_id)
+                        ->join('user_data', 'user_data.user_id', 'users.id')
+                        ->first();
+
+            $details = null;
+            if($userInfo){
+                $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+                'Representative: ' . $userInfo->name . '<br>' .
+                'PYDI Dataset: ' . $dataset->name . '<br>' .
+                'Description: ' . $dataset->description;
+            }
+
+            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_dataset_submission','PYDI', $details));
+
             session()->flash('success', 'Dataset has been sent successfully!');
         }
 
@@ -155,6 +173,20 @@ class PydiDatasetIndex extends Component
         $entry->update([
             'is_request_edit' => true,
         ]);
+
+        $userInfo = User::where('users.id', $entry->user_id)
+                ->join('user_data', 'user_data.user_id', 'users.id')
+                ->first();
+
+        $details = null;
+        if($userInfo){
+            $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+            'Representative: ' . $userInfo->name . '<br>' .
+            'PYDI Dataset: ' . $entry->name . '<br>' .
+            'Description: ' . $entry->description;
+        }
+
+        Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_request_edit_notif', 'PYDI',  $details));
 
         session()->flash('success', 'Edit request has been sent successfully!');
         $this->showRequestEditModal = false;

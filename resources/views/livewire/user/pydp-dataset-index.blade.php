@@ -36,9 +36,9 @@
                                 <th class="px-4 py-2 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y dark:divide-gray-700">
                             @forelse ($tableDatas as $index => $row)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                <tr class="">
                                     <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
                                     <td class="px-4 py-2">{{ $row->name }}</td>
                                     <td class="px-4 py-2">{{ $row->level->title }}</td>

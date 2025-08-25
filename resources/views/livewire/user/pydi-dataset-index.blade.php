@@ -22,8 +22,8 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-                <div class="w-full text-xs overflow-auto">
+            <div class="rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="w-full text-xs">
                     <table class="table-auto w-full text-left text-xs">
                         <thead class="bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
                             <tr>
@@ -36,9 +36,9 @@
                                 <th class="px-4 py-2 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y dark:divide-gray-700">
                             @forelse ($tableDatas as $index => $row)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                <tr class="">
                                     <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
                                     <td class="px-4 py-2">{{ $row->name }}</td>
                                     <td class="px-4 py-2">{{ Str::limit($row->description, 50) }}</td>
@@ -103,7 +103,7 @@
                                             @include('livewire.user.request-statuses')
                                         </div>
                                     </td>
-                                    <td class="px-4 py-2 border text-gray-600 text-xs">
+                                    <td class="px-4 py-2 text-xs">
                                         <div>
                                             <span class="font-semibold text-gray-800">Created:</span>
                                             {{ $row->created_at->format('M d, Y') }}
@@ -117,7 +117,7 @@
                                     </td>
 
                                     <!-- Action Buttons as Dropdown -->
-                                    <td class="px-4 py-2 border text-center">
+                                    <td class="px-4 py-2 text-center">
                                         <div x-data="{ open: false }" class="relative inline-block text-left">
                                             <!-- Dropdown Trigger -->
                                             <button @click="open = !open"

@@ -2,10 +2,14 @@
 
 namespace App\Livewire\Admin;
 
+use App\Mail\AdminActionNotif;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\WithPagination;
 use App\Models\PydpDataset;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
 #[Title('Manage PYDP Datasets')]
@@ -61,8 +65,22 @@ class ManagePydpIndex extends Component
         $dataset->finalized_at = now();
         $dataset->save();
 
+        $userInfo = User::where('users.id', $dataset->user_id)->first();
+
+
+        $details = null;
+        if($dataset){
+            $status = str_replace('_', ' ', $this->action_status);
+            $details = 'Submission Status: ' . ucfirst($status) . '<br>';
+            if($this->action_feedback){
+                $details .= 'Feedback: ' . $this->action_feedback;
+            }
+        }
+
         session()->flash('success', 'Dataset status updated successfully!');
         $this->showActionModal = false;
+
+        Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydp_admin_action_notif', $details));
     }
 
     public function message($id)
@@ -89,6 +107,17 @@ class ManagePydpIndex extends Component
             $entry->update([
                 'is_request_edit' => $action
             ]);
+            
+            $userInfo = User::where('users.id', $entry->user_id)->first();
+
+
+            $details = 'Request Status: ' . ucfirst($status) . '<br>';
+            if($this->action_feedback){
+                $details .= 'Feedback: ' . $this->action_feedback;
+            }
+
+            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
+
             session()->flash('success', 'Edit request has been processed successfully!');
         } else {
             session()->flash('error', 'Dataset not found.');

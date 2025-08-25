@@ -4,12 +4,12 @@
             <div class="w-full mb-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Email Templates Manager</h2>
-                    <button 
+                    {{-- <button 
                         wire:click="createTemplate" 
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                     >
                         Create New Template
-                    </button>
+                    </button> --}}
                 </div>
 
                 @if (session()->has('message'))
@@ -28,7 +28,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300">
@@ -48,20 +48,20 @@
                                             {{ $template->is_active ? 'Active' : 'Inactive' }}
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm font-medium space-x-2">
                                         <button 
                                             wire:click="editTemplate({{ $template->id }})"
                                             class="text-indigo-600 hover:text-indigo-900"
                                         >
                                             Edit
                                         </button>
-                                        <button 
+                                        {{-- <button 
                                             wire:click="deleteTemplate({{ $template->id }})"
                                             onclick="return confirm('Are you sure you want to delete this template?')"
                                             class="text-red-600 hover:text-red-900"
                                         >
                                             Delete
-                                        </button>
+                                        </button> --}}
                                     </td>
                                 </tr>
                             @empty
@@ -94,13 +94,13 @@
                                     <div class="grid grid-cols-1 mb-4">
                                         <div>
                                             <label class="block text-sm font-medium">Template Name</label>
-                                            <input 
+                                            <p class="text-md font-semibold text-gray-700 dark:text-gray-200">{{ $name }}</p>
+                                            {{-- <input 
                                                 type="text" 
                                                 wire:model="name" 
                                                 class="mt-1 block dark:bg-slate-700 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                 placeholder="e.g., training_invitation"
-                                                {{-- readonly --}}
-                                            >
+                                            > --}}
                                             @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                         </div>
                                     </div>
@@ -140,7 +140,7 @@
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="block text-sm font-medium mb-2">Message Body</label>
+                                        <label class="block text-sm font-medium mb-2">Message Body (Insert &lt;br&gt; syntax to add new line)</label>
                                         <textarea wire:model="message_body" rows="5"
                                             class="mt-1 block w-full dark:bg-slate-700 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         ></textarea>

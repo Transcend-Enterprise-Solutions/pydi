@@ -9,19 +9,21 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class UserDatasetSubmissionNotif extends Mailable
+class UserActionNotif extends Mailable
 {
     use Queueable, SerializesModels;
     
     protected $adminEmail;
     protected $templateName;
+    protected $type;
     protected $notifDetails;
 
-    public function __construct($adminEmail, $templateName, $notifDetails = null)
+    public function __construct($adminEmail, $templateName, $type, $notifDetails = null)
     {
         $this->adminEmail = $adminEmail;
         $this->templateName = $templateName;
         $this->notifDetails = $notifDetails;
+        $this->type = $type;
     }
 
     public function build()
@@ -37,12 +39,13 @@ class UserDatasetSubmissionNotif extends Mailable
 
         return $this->from($this->adminEmail)
             ->view('livewire.emails.email-template')
-            ->subject($template->subject)
+            ->subject($this->type . ' ' . $template->subject)
             ->with([
                 'header' => $template->header,
                 'greetings' => $template->greetings,
                 'message_body' => $template->message_body,
                 'notifDetails' => $this->notifDetails,
+                'isAdmin' => false,
                 'footer' => $template->footer,
                 'action_button_text' => $template->action_button_text,
                 'action_button_url' => $template->action_button_url,
@@ -52,7 +55,7 @@ class UserDatasetSubmissionNotif extends Mailable
     public function envelope(): Envelope
     {
         $template = EmailTemplate::getByName($this->templateName);
-        $subject = $template ? $template->subject : 'PYDI Email Notif';
+        $subject = $template ? $this->type . ' ' . $template->subject : 'PYDI Email Notif';
         
         return new Envelope(
             subject: $subject,
