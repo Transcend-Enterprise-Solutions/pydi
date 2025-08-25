@@ -69,8 +69,9 @@
                 <table class="table-auto w-full text-left border border-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2 border">Level</th>
+                            <!-- Changed order: PYDP Center first, then Level -->
                             <th class="px-4 py-2 border">PYDP Center</th>
+                            <th class="px-4 py-2 border">Level</th>
                             <th class="px-4 py-2 border">Indicator</th>
                             <th class="px-4 py-2 border">Baseline</th>
                             <th class="px-4 py-2 border">Year Data</th>
@@ -85,11 +86,12 @@
                     <tbody>
                         @forelse ($tableDatas as $row)
                             <tr class="hover:bg-gray-50 align-middle">
+                                <!-- Changed order: PYDP Center first, then Level -->
+                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                                    {{ $row->dimension->name }}</td>
                                 <td class="px-4 py-2 border text-center text-xs align-middle">
                                     {{ $row->indicator->level->title ?? 'N/A' }}
                                 </td>
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ $row->dimension->name }}</td>
                                 <td class="px-4 py-2 border text-center text-xs align-middle">
                                     {{ $row->indicator->title }}</td>
                                 <td class="px-4 py-2 border text-center text-xs align-middle">
@@ -203,21 +205,7 @@
 
                     {{-- Form Section --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {{-- Level --}}
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Level</label>
-                            <select wire:model.live="level_id" class="border rounded w-full px-3 py-2">
-                                <option value="">Please Select</option>
-                                @foreach ($levels as $level)
-                                    <option value="{{ $level->id }}">{{ $level->title }}</option>
-                                @endforeach
-                            </select>
-                            @error('level_id')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Dimension --}}
+                        {{-- Dimension (now first column) --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Dimension</label>
                             <select wire:model="dimension" class="border rounded w-full px-3 py-2">
@@ -231,33 +219,50 @@
                             @enderror
                         </div>
 
+                        {{-- Level and Indicator on the same row --}}
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Level --}}
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Level</label>
+                                <select wire:model.live="level_id" class="border rounded w-full px-3 py-2">
+                                    <option value="">Please Select</option>
+                                    @foreach ($levels as $level)
+                                        <option value="{{ $level->id }}">{{ $level->title }}</option>
+                                    @endforeach
+                                </select>
+                                @error('level_id')
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Indicator --}}
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Indicator</label>
+                                <select wire:model="indicator_id" class="border rounded w-full px-3 py-2"
+                                    {{ !$level_id ? 'disabled' : '' }}>
+                                    <option value="">Please Select</option>
+                                    @if ($level_id)
+                                        @foreach ($this->indicators as $row)
+                                            <option value="{{ $row->id }}">{{ $row->title }}</option>
+                                        @endforeach
+                                    @else
+                                        <option value="">Please select a level first</option>
+                                    @endif
+                                </select>
+                                @error('indicator_id')
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         {{-- Baseline --}}
                         <div>
                             <label class="block text-sm font-medium mb-1">Baseline</label>
                             <input type="number" wire:model="baseline" class="border rounded w-full px-3 py-2"
                                 placeholder="Enter baseline value">
                             @error('baseline')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        {{-- Indicator --}}
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Indicator</label>
-                            <select wire:model="indicator_id" class="border rounded w-full px-3 py-2"
-                                {{ !$level_id ? 'disabled' : '' }}>
-                                <option value="">Please Select</option>
-                                @if ($level_id)
-                                    @foreach ($this->indicators as $row)
-                                        <option value="{{ $row->id }}">{{ $row->title }}</option>
-                                    @endforeach
-                                @else
-                                    <option value="">Please select a level first</option>
-                                @endif
-                            </select>
-                            @error('indicator_id')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
