@@ -58,7 +58,6 @@ class ManagePydpIndex extends Component
 
         $dataset = PydpDataset::findOrFail($this->selectedDatasetId);
 
-
         $dataset->status = $this->action_status;
         $dataset->feedback = $this->action_feedback ?? null;
         $dataset->is_submitted = $dataset->status !== 'needs_revision';
@@ -139,7 +138,11 @@ class ManagePydpIndex extends Component
 
     public function render()
     {
-        $query = PydpDataset::with(['type', 'user'])
+        $query = PydpDataset::with([
+            'type',
+            'user',
+            'details.indicator.level'
+        ])
             ->whereNotNull('submitted_at')
             ->when($this->search, function ($q) {
                 $q->where(function ($sub) {

@@ -22,7 +22,7 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
 
     public function collection()
     {
-        return PydpDatasetDetail::with(['dimension', 'indicator', 'years'])
+        return PydpDatasetDetail::with(['dimension', 'indicator.level', 'years'])
             ->where('pydp_dataset_id', $this->datasetId)
             ->get();
     }
@@ -31,6 +31,7 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
     {
         $mapped = [
             $row->dimension->name,
+            $row->indicator->level->title ?? 'N/A',
             $row->indicator->content,
             $row->baseline ?? '',
         ];
@@ -51,9 +52,9 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
 
     public function headings(): array
     {
-        $row1 = ['Dimension', 'Indicator', 'Baseline'];
-        $row2 = ['', '', ''];
-        $row3 = ['', '', ''];
+        $row1 = ['Dimension', 'Level', 'Indicator', 'Baseline'];
+        $row2 = ['', '', '', ''];
+        $row3 = ['', '', '', ''];
 
         foreach ($this->yearRange as $year) {
             $row1 = array_merge($row1, [$year, '', '', '']);
@@ -78,7 +79,7 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $staticColumns = 3; // Dimension, Indicator, Baseline
+                $staticColumns = 4; // Dimension, Level, Indicator, Baseline
                 $yearColumns = count($this->yearRange) * 4;
                 $extraColumns = 2; // Total + Remarks
                 $lastColumnIndex = $staticColumns + $yearColumns + $extraColumns;
@@ -96,8 +97,9 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
 
                 // Merge static headers
                 $sheet->mergeCells('A1:A3'); // Dimension
-                $sheet->mergeCells('B1:B3'); // Indicator
-                $sheet->mergeCells('C1:C3'); // Baseline
+                $sheet->mergeCells('B1:B3'); // Level
+                $sheet->mergeCells('C1:C3'); // Indicator
+                $sheet->mergeCells('D1:D3'); // Baseline
 
                 // Merge Total column
                 $totalColIndex = $lastColumnIndex - 1; // before Remarks
@@ -107,7 +109,7 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
                 $sheet->mergeCells(Coordinate::stringFromColumnIndex($lastColumnIndex) . "1:" . Coordinate::stringFromColumnIndex($lastColumnIndex) . "3");
 
                 // Merge year headers
-                $colIndex = 4; // Start at column D
+                $colIndex = 5; // Start at column E (after Dimension, Level, Indicator, Baseline)
                 foreach ($this->yearRange as $year) {
                     $start = Coordinate::stringFromColumnIndex($colIndex);
                     $end = Coordinate::stringFromColumnIndex($colIndex + 3);
@@ -119,8 +121,8 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
                     $colIndex += 4;
                 }
 
-                // Freeze first 3 rows + first 3 columns
-                $sheet->freezePane(Coordinate::stringFromColumnIndex(4) . "4");
+                // Freeze first 3 rows + first 4 columns (now including Level)
+                $sheet->freezePane(Coordinate::stringFromColumnIndex(5) . "4");
 
                 // Borders
                 $sheet->getStyle($fullRange)->getBorders()->getAllBorders()
@@ -129,6 +131,11 @@ class DatasetDetailExport implements FromCollection, WithMapping, WithHeadings, 
                 // Wrap text for Remarks
                 $sheet->getStyle(Coordinate::stringFromColumnIndex($lastColumnIndex) . "4:" . Coordinate::stringFromColumnIndex($lastColumnIndex) . $lastRow)
                     ->getAlignment()->setWrapText(true);
+
+                // Auto-size columns for better readability
+                foreach (range('A', $lastColumn) as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
             }
         ];
     }

@@ -114,7 +114,21 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 border">{{ $row->user->name }}</td>
                                 <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->level->title }}</td>
+                                <td class="px-4 py-2 border">
+                                    @php
+                                        $levels = $row->details->pluck('indicator.level.title')->unique()->filter()->values();
+                                    @endphp
+
+                                    @if($levels->count() > 0)
+                                        @foreach($levels as $index => $level)
+                                            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded mr-1 mb-1">
+                                                {{ $level }}
+                                            </span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-gray-400 italic">No levels</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-2 border">
                                     {{ $row->type->year_start . ' - ' . $row->type->year_end }}
                                 </td>

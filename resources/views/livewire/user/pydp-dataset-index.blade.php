@@ -22,44 +22,41 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="rounded-lg border border-gray-200 dark:border-gray-700">
-                <div class="w-full text-xs">
-                    <table class="table-auto w-full text-left">
-                        <thead class="bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
-                            <tr>
-                                <th class="px-4 py-2">#</th>
-                                <th class="px-4 py-2">Title</th>
-                                <th class="px-4 py-2">Level</th>
-                                <th class="px-4 py-2">Year Covered</th>
-                                <th class="px-4 py-2">Status</th>
-                                <th class="px-4 py-2 text-center">Date</th>
-                                <th class="px-4 py-2 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y dark:divide-gray-700">
-                            @forelse ($tableDatas as $index => $row)
-                                <tr class="">
-                                    <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
-                                    <td class="px-4 py-2">{{ $row->name }}</td>
-                                    <td class="px-4 py-2">{{ $row->level->title }}</td>
-                                    <td class="px-4 py-2">
-                                        {{ $row->type->year_start . ' - ' . $row->type->year_end }}
-                                    </td>
-                                    <td class="px-4 py-2 w-auto">
-                                        <div class="flex justify-start items-center">
-                                            @if ($row->status === 'approved')
-                                                <span
-                                                    class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
-                                            @elseif ($row->status === 'rejected')
-                                                <span
-                                                    class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
-                                            @elseif ($row->status === 'needs_revision')
-                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
-                                                    Revision</span>
-                                            @else
-                                                <span
-                                                    class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
-                                            @endif
+            <div class="w-full">
+                <table class="table-auto w-full text-left border border-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-2 border">#</th>
+                            <th class="px-4 py-2 border">Title</th>
+                            <th class="px-4 py-2 border">Year Covered</th>
+                            <th class="px-4 py-2 border">Status</th>
+                            <th class="px-4 py-2 border">Date</th>
+                            <th class="px-4 py-2 border text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($tableDatas as $index => $row)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 border">{{ $tableDatas->firstItem() + $index }}</td>
+                                <td class="px-4 py-2 border">{{ $row->name }}</td>
+                                <td class="px-4 py-2 border">
+                                    {{ $row->type->year_start . ' - ' . $row->type->year_end }}
+                                </td>
+                                <td class="px-4 py-2 border w-auto">
+                                    <div class="flex justify-start items-center">
+                                        @if ($row->status === 'approved')
+                                            <span
+                                                class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
+                                        @elseif ($row->status === 'rejected')
+                                            <span
+                                                class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
+                                        @elseif ($row->status === 'needs_revision')
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
+                                                Revision</span>
+                                        @else
+                                            <span
+                                                class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
+                                        @endif
 
                                             @if ($row->finalized_at && $row->feedback)
                                                 <!-- Message Button with Tooltip -->
@@ -221,21 +218,6 @@
                     <label class="block text-sm font-medium">Description</label>
                     <textarea wire:model="description" class="border rounded w-full px-3 py-2 dark:bg-slate-700" placeholder="Enter Description"></textarea>
                     @error('description')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- level -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Level</label>
-                    <select wire:model="level" class="border rounded w-full px-3 py-2 dark:bg-slate-700">
-                        <option value="">Please Select</option>
-                        @foreach ($levels as $row)
-                            <option value="{{ $row->id }}">
-                                {{ $row->title }}</option>
-                        @endforeach
-                    </select>
-                    @error('level')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
