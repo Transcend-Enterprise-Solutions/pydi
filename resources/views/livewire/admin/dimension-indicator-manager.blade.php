@@ -257,36 +257,30 @@
     <!-- Indicator Modal -->
     @if ($showIndicatorModal)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             {{ $editingIndicatorId ? 'Edit Indicator' : 'Add New Indicator' }}
                         </h3>
                         <button wire:click="closeIndicatorModal" class="text-gray-500 dark:text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
                     @if ($selectedDimensionId)
-                        <div
-                            class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md mb-4 border border-blue-100 dark:border-blue-800">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md mb-4 border border-blue-100 dark:border-blue-800">
                             <p class="text-sm text-blue-700 dark:text-blue-300">
-                                Adding indicator to: <strong
-                                    class="font-medium">{{ $dimensions->find($selectedDimensionId)->name ?? 'Unknown' }}</strong>
+                                Adding indicator to: <strong class="font-medium">{{ $dimensions->find($selectedDimensionId)->name ?? 'Unknown' }}</strong>
                             </p>
                         </div>
                     @endif
 
                     <form wire:submit.prevent="saveIndicator" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name
-                                *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name *</label>
                             <input type="text" wire:model.defer="indicatorName"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             @error('indicatorName')
@@ -295,26 +289,31 @@
                         </div>
 
                         <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                             <textarea wire:model.defer="indicatorDescription" rows="3"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Measurement
-                                Unit</label>
-                            <input type="text" wire:model.defer="indicatorUnit" placeholder="e.g., kg, %, years"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Measurement Unit</label>
+                            <select wire:model.defer="indicatorUnit"
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Measurement Unit</option>
+                                <option value="frequency">Frequency or Count</option>
+                                <option value="percentage">Percentage or Rate</option>
+                            </select>
+                            @error('indicatorUnit')
+                                <span class="text-red-500 text-sm dark:text-red-400">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4">
                             <button type="button" wire:click="closeIndicatorModal"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-300">
+                                    class="px-4 py-2 text-gray-600 dark:text-gray-300">
                                 Cancel
                             </button>
                             <button type="submit"
-                                class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-md">
+                                    class="bg-blue-600 dark:bg-blue-700 text-white px-6 py-2 rounded-md">
                                 {{ $editingIndicatorId ? 'Update' : 'Create' }}
                             </button>
                         </div>

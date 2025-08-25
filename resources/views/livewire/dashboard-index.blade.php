@@ -5,7 +5,18 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <div class="space-y-1">
                 <h2 class="text-xl font-semibold text-gray-800">PYDI Support Levels</h2>
-                <p class="text-sm text-gray-500">Breakdown by gender and age group</p>
+                <p class="text-sm text-gray-500">
+                    Breakdown by gender and age group
+                    @if($isPercentage)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-2">
+                            Percentage Values
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
+                            Frequency Values
+                        </span>
+                    @endif
+                </p>
             </div>
 
             <!-- Filters -->
@@ -23,13 +34,16 @@
                 </div>
 
                 <div class="relative">
-                    <label for="dimension-select"
+                    <label for="indicator-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium text-gray-500 bg-white">Indicator</label>
-                    <select id="dimension-select" wire:model.live="selectedIndicator"
+                    <select id="indicator-select" wire:model.live="selectedIndicator"
                         class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-72">
                         <option value="">All Indicators</option>
                         @foreach ($indicators as $indicator)
-                            <option value="{{ $indicator->id }}">{{ $indicator->name }}</option>
+                            <option value="{{ $indicator->id }}">
+                                {{ $indicator->name }}
+                                <small class="text-gray-500">({{ ucfirst($indicator->measurement_unit) }})</small>
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -86,7 +100,11 @@
                         <div>
                             <p class="text-sm font-medium text-gray-600">{{ $gender }}</p>
                             <h3 class="text-xl font-semibold text-gray-800 mt-1">
-                                {{ number_format($chartData[$index] ?? 0) }}
+                                @if($isPercentage)
+                                    {{ number_format($chartData[$index] ?? 0, 1) }}%
+                                @else
+                                    {{ number_format($chartData[$index] ?? 0) }}
+                                @endif
                             </h3>
                         </div>
                         <div
@@ -94,23 +112,35 @@
                         @if ($index === 0) text-blue-600
                         @elseif($index === 1) text-green-600
                         @else text-red-600 @endif">
-                            {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
+                            @if($isPercentage)
+                                {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
+                            @else
+                                {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
+                            @endif
                         </div>
                     </div>
                 </div>
             @endforeach
 
-            {{-- ✅ Add Total Card --}}
+            {{-- Total Card --}}
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-700">Total</p>
                         <h3 class="text-xl font-semibold text-gray-900 mt-1">
-                            {{ number_format($totalSum) }}
+                            @if($isPercentage)
+                                {{ number_format($totalSum, 1) }}%
+                            @else
+                                {{ number_format($totalSum) }}
+                            @endif
                         </h3>
                     </div>
                     <div class="text-2xl font-bold text-purple-600">
-                        {{ $totalSum != 0 ? '100%' : '0%' }}
+                        @if($isPercentage)
+                            Avg
+                        @else
+                            {{ $totalSum != 0 ? '100%' : '0%' }}
+                        @endif
                     </div>
                 </div>
             </div>
@@ -124,9 +154,13 @@
     <script>
         document.addEventListener('livewire:init', () => {
             let chart;
+            let currentMeasurementUnit = 'frequency';
+            let currentIsPercentage = false;
 
-            const initChart = (labels, data) => {
+            const initChart = (labels, data, measurementUnit = 'frequency', isPercentage = false) => {
                 const ctx = document.getElementById('advocacyChart').getContext('2d');
+                currentMeasurementUnit = measurementUnit;
+                currentIsPercentage = isPercentage;
 
                 // Destroy existing chart if it exists
                 if (chart) {
@@ -152,7 +186,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Participants',
+                            label: isPercentage ? 'Percentage' : 'Participants',
                             data: data,
                             backgroundColor: gradientColors,
                             borderColor: colors.map(c => c.replace('0.9', '1')),
@@ -186,23 +220,26 @@
                                 },
                                 callbacks: {
                                     label: (context) => {
-                                        const total = context.dataset.data.reduce((a, b) => a + b,
-                                            0);
                                         const value = context.parsed.y;
-                                        const percentage = total > 0 ? Math.round((value / total) *
-                                            100) : 0;
-                                        return `${value} (${percentage}%)`;
+                                        if (isPercentage) {
+                                            return `${value.toFixed(1)}%`;
+                                        } else {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                            return `${value.toLocaleString()} (${percentage}%)`;
+                                        }
                                     },
-                                    title: (context) => `${context[0].label} Participants`
+                                    title: (context) => {
+                                        const suffix = isPercentage ? 'Percentage' : 'Participants';
+                                        return `${context[0].label} ${suffix}`;
+                                    }
                                 }
-                            },
-                            datalabels: {
-                                display: false // We'll enable this if we want to show values on bars
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                max: isPercentage ? 100 : undefined, // Set max to 100 for percentage
                                 grid: {
                                     drawBorder: false,
                                     color: 'rgba(0,0,0,0.05)'
@@ -210,8 +247,13 @@
                                 ticks: {
                                     color: 'rgba(0,0,0,0.6)',
                                     padding: 8,
-                                    callback: (value) => Number(value) === value ? value
-                                        .toLocaleString() : value
+                                    callback: (value) => {
+                                        if (isPercentage) {
+                                            return value + '%';
+                                        } else {
+                                            return Number(value) === value ? value.toLocaleString() : value;
+                                        }
+                                    }
                                 }
                             },
                             x: {
@@ -230,13 +272,25 @@
             };
 
             // Initialize chart with initial data
-            initChart(@js($chartLabels), @js($chartData));
+            initChart(@js($chartLabels), @js($chartData), @js($measurementUnit), @js($isPercentage));
 
             // Update chart when data changes
             Livewire.on('chart-updated', (event) => {
+                const eventData = Array.isArray(event) ? event[0] : event;
+                const data = eventData.data || eventData;
+                const measurementUnit = eventData.measurementUnit || 'frequency';
+                const isPercentage = eventData.isPercentage || false;
+
                 if (chart) {
-                    chart.data.datasets[0].data = event.data;
-                    chart.update();
+                    // If measurement unit changed, reinitialize chart
+                    if (currentMeasurementUnit !== measurementUnit || currentIsPercentage !== isPercentage) {
+                        initChart(@js($chartLabels), data, measurementUnit, isPercentage);
+                    } else {
+                        // Just update data
+                        chart.data.datasets[0].data = data;
+                        chart.data.datasets[0].label = isPercentage ? 'Percentage' : 'Participants';
+                        chart.update();
+                    }
                 }
             });
         });

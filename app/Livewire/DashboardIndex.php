@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
-use App\Models\{Dimension, PydiDataset};
+use App\Models\{Dimension, PydiDataset, Indicator};
 
 #[Layout('layouts.app')]
 #[Title('Dashboard')]
@@ -26,6 +26,10 @@ class DashboardIndex extends Component
     public $totalSum = 0;
     public $loading = false;
 
+    // New properties for measurement unit handling
+    public $measurementUnit = 'frequency'; // default
+    public $isPercentage = false;
+
     public function mount()
     {
         $this->dimensions = Dimension::orderBy('name')->get();
@@ -46,6 +50,7 @@ class DashboardIndex extends Component
     {
         $this->updateChartData();
     }
+
     public function updatedSelectedAge()
     {
         $this->updateChartData();
@@ -58,11 +63,20 @@ class DashboardIndex extends Component
         if (empty($value)) {
             $this->advocacyInfo = null; // All dimensions
             $this->indicators = [];
+            $this->measurementUnit = 'frequency'; // Reset to default
+            $this->isPercentage = false;
         } else {
             $this->advocacyInfo = Dimension::with('indicators')->findOrFail($value);
             $this->indicators = $this->advocacyInfo->indicators;
+            // Set measurement unit based on first indicator if available
+            if (!empty($this->indicators)) {
+                $firstIndicator = is_array($this->indicators) ? reset($this->indicators) : $this->indicators->first();
+                $this->measurementUnit = $firstIndicator->measurement_unit ?? 'frequency';
+                $this->isPercentage = $this->measurementUnit === 'percentage';
+            }
         }
 
+        $this->selectedIndicator = ""; // Reset indicator selection
         $this->updateChartData();
         $this->loading = false;
     }
@@ -70,6 +84,26 @@ class DashboardIndex extends Component
     public function updatedSelectedIndicator($value)
     {
         $this->loading = true;
+
+        // Update measurement unit based on selected indicator
+        if (!empty($value)) {
+            $indicator = Indicator::find($value);
+            if ($indicator) {
+                $this->measurementUnit = $indicator->measurement_unit ?? 'frequency';
+                $this->isPercentage = $this->measurementUnit === 'percentage';
+            }
+        } else {
+            // If no specific indicator selected, use dimension's first indicator or default
+            if (!empty($this->selectedDimension) && !empty($this->indicators)) {
+                $firstIndicator = is_array($this->indicators) ? reset($this->indicators) : $this->indicators->first();
+                $this->measurementUnit = $firstIndicator->measurement_unit ?? 'frequency';
+                $this->isPercentage = $this->measurementUnit === 'percentage';
+            } else {
+                $this->measurementUnit = 'frequency';
+                $this->isPercentage = false;
+            }
+        }
+
         $this->updateChartData();
         $this->loading = false;
     }
@@ -114,6 +148,7 @@ class DashboardIndex extends Component
 
         // Initialize totals
         $totals = ['Male' => 0, 'Female' => 0, 'Others' => 0];
+        $counts = ['Male' => 0, 'Female' => 0, 'Others' => 0]; // For percentage calculation
         $this->totalSum = 0;
 
         // Sum values for all selected dimensions
@@ -122,10 +157,32 @@ class DashboardIndex extends Component
                 $sex = ucfirst(strtolower($detail->sex ?? 'Others'));
                 if (!isset($totals[$sex])) $sex = 'Others';
 
-                $value = (int)$detail->value;
-                $totals[$sex] += $value;
-                $this->totalSum += $value;
+                $value = (float)$detail->value;
+
+                if ($this->isPercentage) {
+                    // For percentage, we might want to average or handle differently
+                    // This depends on your business logic
+                    $totals[$sex] += $value;
+                    $counts[$sex]++;
+                } else {
+                    // For frequency, sum as before
+                    $totals[$sex] += $value;
+                }
             }
+        }
+
+        // Calculate final values based on measurement unit
+        if ($this->isPercentage) {
+            // For percentage, calculate average if multiple entries
+            foreach ($totals as $sex => $total) {
+                if ($counts[$sex] > 0) {
+                    $totals[$sex] = $total / $counts[$sex];
+                    $this->totalSum += $totals[$sex];
+                }
+            }
+        } else {
+            // For frequency, use sum as before
+            $this->totalSum = array_sum($totals);
         }
 
         $this->chartData = [
@@ -134,7 +191,13 @@ class DashboardIndex extends Component
             $totals['Others'],
         ];
 
-        $this->dispatch('chart-updated', data: $this->chartData);
+        // Dispatch chart update with measurement unit info
+        $this->dispatch('chart-updated', [
+            'data' => $this->chartData,
+            'measurementUnit' => $this->measurementUnit,
+            'isPercentage' => $this->isPercentage
+        ]);
+
         $this->loading = false;
     }
 
