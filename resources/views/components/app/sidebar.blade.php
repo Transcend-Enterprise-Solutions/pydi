@@ -52,6 +52,11 @@
                                         'label' => 'Covered Year (PYDP)',
                                     ],
                                     [
+                                        'route' => 'email-templates',
+                                        'icon' => 'bi bi-envelope-plus',
+                                        'label' => 'Email Templates',
+                                    ],
+                                    [
                                         'route' => 'logs',
                                         'icon' => 'activity',
                                         'label' => Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs',

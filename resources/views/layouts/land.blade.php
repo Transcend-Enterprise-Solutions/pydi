@@ -261,7 +261,7 @@
         <div class="border-t border-gray-800 mt-8 pt-8 pb-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-500 text-sm text-center md:text-left">
-                    &copy; {{ date('Y') }} Philippine Youth Development Index. All rights reserved.
+                    &copy; {{ date('Y') }} Philippine Youth Development Index. All rights reserved. Developed By: <a href="https://transcend-enterprise.com/" target="_blank" class="hover:underline">Transcend Enterprise Solutions</a>.
                 </p>
                 <div class="mt-4 md:mt-0 flex space-x-6">
                     <a href="#" class="text-gray-500 hover:text-gray-400 text-sm">Privacy Policy</a>

@@ -2,10 +2,13 @@
 
 namespace App\Livewire\User;
 
+use App\Mail\UserDatasetSubmissionNotif;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDataset, PydpType, UserLog, PydpLevel};
+use App\Models\{PydpDataset, PydpType, UserLog, PydpLevel, User};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
 #[Title('PYDP Datasets')]
@@ -160,6 +163,20 @@ class PydpDatasetIndex extends Component
             $dataset->status = 'pending';
             $dataset->submitted_at = now();
             $dataset->save();
+
+            $userInfo = User::where('users.id', $dataset->user_id)
+                            ->join('user_data', 'user_data.user_id', 'users.id')
+                            ->first();
+
+            $details = null;
+            if($userInfo){
+                $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+                'Representative: ' . $userInfo->name . '<br>' .
+                'PYDP Dataset: ' . $dataset->name . '<br>' .
+                'Description: ' . $dataset->description;
+            }
+
+            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserDatasetSubmissionNotif( Auth::user()->email, 'pydp_dataset_submission', $details));
 
             $this->logs("Submitted dataset: {$dataset->name}");
 

@@ -18,35 +18,37 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2 border">#</th>
-                            <th class="px-4 py-2 border">Account Name</th>
-                            <th class="px-4 py-2 border">Action</th>
-                            <th class="px-4 py-2 border">Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($tableDatas as $index => $row)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border">{{ $tableDatas->firstItem() + $index }}</td>
-                                <td class="px-4 py-2 border">{{ $row->user->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->action }}</td>
-                                <td class="px-4 py-2 border">
-                                    {{ $row->created_at->format('M d, Y h:i A') }}
-                                </td>
-                            </tr>
-                        @empty
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="w-full text-xs overflow-auto">
+                    <table class="table-auto w-full text-left">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-gray-500">
-                                    No records found.
-                                </td>
+                                <th class="px-4 py-2">#</th>
+                                <th class="px-4 py-2">Account Name</th>
+                                <th class="px-4 py-2">Action</th>
+                                <th class="px-4 py-2">Created At</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @forelse ($tableDatas as $index => $row)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
+                                    <td class="px-4 py-2">{{ $row->user->name }}</td>
+                                    <td class="px-4 py-2">{{ $row->action }}</td>
+                                    <td class="px-4 py-2">
+                                        {{ $row->created_at->format('M d, Y h:i A') }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-gray-500">
+                                        No records found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="mt-4">

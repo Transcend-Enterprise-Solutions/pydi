@@ -2,7 +2,7 @@
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">PYDP Datasets</h2>
+                <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">PYDP Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
                         class="w-52 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
@@ -22,174 +22,176 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2 border">#</th>
-                            <th class="px-4 py-2 border">Title</th>
-                            <th class="px-4 py-2 border">Level</th>
-                            <th class="px-4 py-2 border">Year Covered</th>
-                            <th class="px-4 py-2 border">Status</th>
-                            <th class="px-4 py-2 border">Date</th>
-                            <th class="px-4 py-2 border text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($tableDatas as $index => $row)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border">{{ $tableDatas->firstItem() + $index }}</td>
-                                <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->level->title }}</td>
-                                <td class="px-4 py-2 border">
-                                    {{ $row->type->year_start . ' - ' . $row->type->year_end }}
-                                </td>
-                                <td class="px-4 py-2 border w-auto">
-                                    <div class="flex justify-start items-center">
-                                        @if ($row->status === 'approved')
-                                            <span
-                                                class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
-                                        @elseif ($row->status === 'rejected')
-                                            <span
-                                                class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
-                                        @elseif ($row->status === 'needs_revision')
-                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
-                                                Revision</span>
-                                        @else
-                                            <span
-                                                class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
-                                        @endif
-
-                                        @if ($row->finalized_at && $row->feedback)
-                                            <!-- Message Button with Tooltip -->
-                                            <div class="relative group inline-flex">
-                                                <span wire:click="message({{ $row->id }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                    <i class="bi bi-chat-left-text"></i>
-                                                </span>
-                                                <div
-                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-                                                    <div
-                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                        View feedback
-                                                        <div
-                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-
-                                        @if ($row->is_submitted && $row->status === 'pending')
-                                            <!-- Send Check Button with Tooltip -->
-                                            <div class="relative group inline-flex">
+            <div class="rounded-lg border border-gray-200 dark:border-gray-700">
+                <div class="w-full text-xs">
+                    <table class="table-auto w-full text-left">
+                        <thead class="bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
+                            <tr>
+                                <th class="px-4 py-2">#</th>
+                                <th class="px-4 py-2">Title</th>
+                                <th class="px-4 py-2">Level</th>
+                                <th class="px-4 py-2">Year Covered</th>
+                                <th class="px-4 py-2">Status</th>
+                                <th class="px-4 py-2 text-center">Date</th>
+                                <th class="px-4 py-2 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($tableDatas as $index => $row)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
+                                    <td class="px-4 py-2">{{ $row->name }}</td>
+                                    <td class="px-4 py-2">{{ $row->level->title }}</td>
+                                    <td class="px-4 py-2">
+                                        {{ $row->type->year_start . ' - ' . $row->type->year_end }}
+                                    </td>
+                                    <td class="px-4 py-2 w-auto">
+                                        <div class="flex justify-start items-center">
+                                            @if ($row->status === 'approved')
                                                 <span
-                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md hover:bg-blue-200 transition">
-                                                    <i class="bi bi-send-check"></i>
-                                                </span>
-                                                <div
-                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                    class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
+                                            @elseif ($row->status === 'rejected')
+                                                <span
+                                                    class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
+                                            @elseif ($row->status === 'needs_revision')
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
+                                                    Revision</span>
+                                            @else
+                                                <span
+                                                    class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
+                                            @endif
+
+                                            @if ($row->finalized_at && $row->feedback)
+                                                <!-- Message Button with Tooltip -->
+                                                <div class="relative group inline-flex">
+                                                    <span wire:click="message({{ $row->id }})"
+                                                        class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                                        <i class="bi bi-chat-left-text"></i>
+                                                    </span>
                                                     <div
-                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                        Submitted
+                                                        class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
                                                         <div
-                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                            View feedback
+                                                            <div
+                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
+                                            @endif
+
+                                            @if ($row->is_submitted && $row->status === 'pending')
+                                                <!-- Send Check Button with Tooltip -->
+                                                <div class="relative group inline-flex">
+                                                    <span
+                                                        class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md hover:bg-blue-200 transition">
+                                                        <i class="bi bi-send-check"></i>
+                                                    </span>
+                                                    <div
+                                                        class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                        <div
+                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                            Submitted
+                                                            <div
+                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @include('livewire.user.request-statuses')
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        <div>
+                                            <span class="font-semibold text-gray-800">Created:</span>
+                                            {{ $row->created_at->format('M d, Y') }}
+                                        </div>
+                                        @if ($row->finalized_at)
+                                            <div>
+                                                <span class="font-semibold text-gray-800">Finalized:</span>
+                                                {{ \Carbon\Carbon::parse($row->finalized_at)->format('M d, Y') }}
                                             </div>
                                         @endif
+                                    </td>
 
-                                        @include('livewire.user.request-statuses')
-                                    </div>
-                                </td>
-                                <td class="px-4 py-2 border text-sm text-gray-600 text-xs">
-                                    <div>
-                                        <span class="font-semibold text-gray-800">Created:</span>
-                                        {{ $row->created_at->format('M d, Y') }}
-                                    </div>
-                                    @if ($row->finalized_at)
-                                        <div>
-                                            <span class="font-semibold text-gray-800">Finalized:</span>
-                                            {{ \Carbon\Carbon::parse($row->finalized_at)->format('M d, Y') }}
-                                        </div>
-                                    @endif
-                                </td>
+                                    <!-- Action Buttons as Dropdown -->
+                                    <td class="px-4 py-2 text-center">
+                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                            <!-- Dropdown Trigger -->
+                                            <button @click="open = !open"
+                                                class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                                aria-label="Toggle actions menu" title="More actions">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
 
-                                <!-- Action Buttons as Dropdown -->
-                                <td class="px-4 py-2 border text-center">
-                                    <div x-data="{ open: false }" class="relative inline-block text-left">
-                                        <!-- Dropdown Trigger -->
-                                        <button @click="open = !open"
-                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
-                                            aria-label="Toggle actions menu" title="More actions">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+                                            <!-- Dropdown Menu -->
+                                            <div x-show="open" @click.away="open = false" x-transition
+                                                class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
+                                                <ul
+                                                    class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
 
-                                        <!-- Dropdown Menu -->
-                                        <div x-show="open" @click.away="open = false" x-transition
-                                            class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
-                                            <ul
-                                                class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
+                                                    @if ($row->status !== 'approved' && $row->status !== 'rejected')
+                                                        @if (!$row->is_submitted)
+                                                            <li>
+                                                                <button wire:click="confirmSend({{ $row->id }})"
+                                                                    class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                                    <i class="bi bi-send-arrow-up"></i> Submit for Review
+                                                                </button>
+                                                            </li>
+                                                        @endif
 
-                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                                    @if (!$row->is_submitted)
                                                         <li>
-                                                            <button wire:click="confirmSend({{ $row->id }})"
+                                                            <button wire:click="edit({{ $row->id }})"
                                                                 class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                                <i class="bi bi-send-arrow-up"></i> Submit for Review
+                                                                <i class="bi bi-pencil-fill"></i> Edit Details
+                                                            </button>
+                                                        </li>
+                                                    @endif
+
+                                                    @if ($row->status === 'approved' && !$row->is_request_edit)
+                                                        <li>
+                                                            <button wire:click="requestEdit({{ $row->id }})"
+                                                                class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                                <i class="bi bi-file-text-fill"></i> Request Edit
                                                             </button>
                                                         </li>
                                                     @endif
 
                                                     <li>
-                                                        <button wire:click="edit({{ $row->id }})"
+                                                        <a href="{{ route('pydp-dataset-details', $row->id) }}"
                                                             class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                            <i class="bi bi-pencil-fill"></i> Edit Details
-                                                        </button>
+                                                            <i class="bi bi-file-earmark-bar-graph-fill"></i> Manage
+                                                            Datasets
+                                                        </a>
                                                     </li>
-                                                @endif
 
-                                                @if ($row->status === 'approved' && !$row->is_request_edit)
-                                                    <li>
-                                                        <button wire:click="requestEdit({{ $row->id }})"
-                                                            class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                            <i class="bi bi-file-text-fill"></i> Request Edit
-                                                        </button>
-                                                    </li>
-                                                @endif
-
-                                                <li>
-                                                    <a href="{{ route('pydp-dataset-details', $row->id) }}"
-                                                        class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                        <i class="bi bi-file-earmark-bar-graph-fill"></i> Manage
-                                                        Datasets
-                                                    </a>
-                                                </li>
-
-                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                                    <li>
-                                                        <button wire:click="confirmDelete({{ $row->id }})"
-                                                            class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
-                                                            <i class="bi bi-trash-fill"></i> Delete Dataset
-                                                        </button>
-                                                    </li>
-                                                @endif
-                                            </ul>
+                                                    @if ($row->status !== 'approved' && $row->status !== 'rejected')
+                                                        <li>
+                                                            <button wire:click="confirmDelete({{ $row->id }})"
+                                                                class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
+                                                                <i class="bi bi-trash-fill"></i> Delete Dataset
+                                                            </button>
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-gray-500">
-                                    No records found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-gray-500">
+                                        No records found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="mt-4">
@@ -201,14 +203,14 @@
     <!-- Modal (Used for Create & Edit) -->
     @if ($showModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-700 dark:text-gray-200">
                     {{ $editMode ? 'Edit Dataset' : 'Create New Dataset' }}
                 </h3>
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Title</label>
-                    <input type="text" wire:model="title" class="border rounded w-full px-3 py-2"
+                    <input type="text" wire:model="title" class="border rounded w-full px-3 py-2 dark:bg-slate-700"
                         placeholder="Enter Title">
                     @error('title')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -217,7 +219,7 @@
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Description</label>
-                    <textarea wire:model="description" class="border rounded w-full px-3 py-2" placeholder="Enter Description"></textarea>
+                    <textarea wire:model="description" class="border rounded w-full px-3 py-2 dark:bg-slate-700" placeholder="Enter Description"></textarea>
                     @error('description')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -226,7 +228,7 @@
                 <!-- level -->
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Level</label>
-                    <select wire:model="level" class="border rounded w-full px-3 py-2">
+                    <select wire:model="level" class="border rounded w-full px-3 py-2 dark:bg-slate-700">
                         <option value="">Please Select</option>
                         @foreach ($levels as $row)
                             <option value="{{ $row->id }}">
@@ -241,7 +243,7 @@
                 <!-- Type -->
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Year Covered</label>
-                    <select wire:model="type" class="border rounded w-full px-3 py-2">
+                    <select wire:model="type" class="border rounded w-full px-3 py-2 dark:bg-slate-700">
                         <option value="">Please Select</option>
                         @foreach ($types as $row)
                             <option value="{{ $row->id }}">
@@ -270,7 +272,7 @@
     <!-- Delete Confirmation Modal -->
     @if ($showDeleteModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
                 <h3 class="text-lg font-bold mb-2">Delete Dataset</h3>
                 <p class="text-gray-600 mb-4">Are you sure you want to delete this dataset? This action cannot be
                     undone.</p>
@@ -314,13 +316,13 @@
     <!-- Confirm Submit Modal -->
     @if ($showConfirmSend)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
-                <h3 class="text-xl font-semibold text-gray-800 mb-3">Confirm Send</h3>
-                <p class="text-gray-600 mb-5">Are you sure you want to send this dataset?</p>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Confirm Send</h3>
+                <p class="mb-5">Are you sure you want to send this dataset?</p>
 
                 {{-- Optional file attachment --}}
                 <div class="mb-5 text-left">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Optional Attachment</label>
+                    <label class="block text-sm font-medium mb-1">Optional Attachment</label>
                     <input type="file" wire:model="file" class="border rounded w-full px-3 py-2">
                     @error('file')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -329,7 +331,7 @@
 
                 <div class="flex justify-center gap-3">
                     <button wire:click="$set('showConfirmSend', false)"
-                        class="px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-100 transition">
+                        class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition">
                         Cancel
                     </button>
                     <button wire:click="sendConfirmed" wire:loading.attr="disabled"
