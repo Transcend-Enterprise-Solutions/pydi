@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Mail\AdminActionNotif;
+use App\Models\EmailTemplate;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
@@ -76,11 +77,16 @@ class ManagePydpIndex extends Component
                 $details .= 'Feedback: ' . $this->action_feedback;
             }
         }
-
+        
+        $emailTemplate = EmailTemplate::where('name', 'pydp_admin_action_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydp_admin_action_notif', $details));
+        }else{
+            session()->flash('error', 'Email not sent. Email template is not active.');
+        }
+        
         session()->flash('success', 'Dataset status updated successfully!');
         $this->showActionModal = false;
-
-        Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydp_admin_action_notif', $details));
     }
 
     public function message($id)
@@ -116,7 +122,12 @@ class ManagePydpIndex extends Component
                 $details .= 'Feedback: ' . $this->action_feedback;
             }
 
-            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
+            $emailTemplate = EmailTemplate::where('name', 'edit_request_admin_action_notif')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
+            }else{
+                session()->flash('error', 'Email not sent. Email template is not active.');
+            }
 
             session()->flash('success', 'Edit request has been processed successfully!');
         } else {

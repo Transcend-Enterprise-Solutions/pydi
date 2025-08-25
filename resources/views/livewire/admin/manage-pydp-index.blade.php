@@ -351,10 +351,18 @@
                 <div class="flex justify-between gap-3">
                     <button wire:click="processEditRequest('reject')" title="Reject the edit request"
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none transition">
+                        <div wire:loading wire:target="processEditRequest('reject')" style="margin-right: 5px">
+                            <div class="spinner-border small text-primary" role="status">
+                            </div>
+                        </div>
                         <i class="bi bi-x-circle mr-1"></i> Reject
                     </button>
                     <button wire:click="processEditRequest('approve')" title="Approve the edit request"
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none transition">
+                        <div wire:loading wire:target="processEditRequest('approve')" style="margin-right: 5px">
+                            <div class="spinner-border small text-primary" role="status">
+                            </div>
+                        </div>
                         <i class="bi bi-check-circle mr-1"></i> Approve
                     </button>
                 </div>

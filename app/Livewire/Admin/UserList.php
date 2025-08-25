@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Jobs\SendBulkEmailJob;
 use App\Mail\SubmissionReminderNotif;
+use App\Models\EmailTemplate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
@@ -193,12 +194,7 @@ class UserList extends Component
             $user = User::findOrFail($this->userId);
             $user->userData()->delete();
             $user->delete();
-
-            $this->dispatch('swal', [
-                'title' => 'Rejected!',
-                'text' => 'User has been rejected and removed from the system.',
-                'icon' => 'success'
-            ]);
+            session()->flash('success', 'User has been rejected and removed from the system.');
         } else {
             // Handle other status changes
             $status = match($this->actionType) {
@@ -210,12 +206,7 @@ class UserList extends Component
             if ($status !== null) {
                 $user = User::findOrFail($this->userId);
                 $user->update(['active_status' => $status]);
-
-                $this->dispatch('swal', [
-                    'title' => $this->getSuccessTitle(),
-                    'text' => $this->getSuccessMessage($status),
-                    'icon' => 'success'
-                ]);
+                session()->flash('success', $this->getSuccessMessage($status));
             }
         }
 
@@ -267,25 +258,13 @@ class UserList extends Component
             }
 
             if ($errorCount === 0) {
-                $this->dispatch('swal', [
-                    'title' => 'Success!',
-                    'text' => $this->getBulkSuccessMessage($this->bulkActionType, $successCount),
-                    'icon' => 'success'
-                ]);
+                session()->flash('success', $this->getBulkSuccessMessage($this->bulkActionType, $successCount));
             } else {
-                $this->dispatch('swal', [
-                    'title' => 'Partially Completed',
-                    'text' => "Successfully processed {$successCount} users. {$errorCount} failed.",
-                    'icon' => 'warning'
-                ]);
+                session()->flash('warning', "Successfully processed {$successCount} users. {$errorCount} failed.");
             }
-
+            
         } catch (Exception $e) {
-            $this->dispatch('swal', [
-                'title' => 'Error!',
-                'text' => 'There was an error processing the bulk action. Please try again.',
-                'icon' => 'error'
-            ]);
+            session()->flash('error', 'There was an error processing the bulk action. Please try again.');
             Log::error("Bulk action failed: " . $e->getMessage());
         }
         $this->resetBulkAction();
@@ -347,15 +326,20 @@ class UserList extends Component
         try{
             $userInfo = User::where('id', $this->userId)->first();
     
-            if($this->email_subject == 'agency_submission_reminder_notif'){
-                Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new SubmissionReminderNotif( Auth::user()->email, $this->email_subject));
+            $emailTemplate = EmailTemplate::where('name', $this->email_subject)->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                switch($this->email_subject){
+                    case 'agency_submission_reminder_notif':
+                        Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new SubmissionReminderNotif( Auth::user()->email, $this->email_subject));
+                        break;
+                }
+            }else{
+                session()->flash('error', 'Email template is not active.');
+                $this->openEmailModal = false;
+                return;
             }
-        
-            $this->dispatch('swal', [
-                'title' => 'Email Sent!',
-                'text' => 'Email has been successfully sent to the agency representative.',
-                'icon' => 'success'
-            ]);
+
+            session()->flash('success', 'Email has been successfully sent to the agency representative.');
             $this->resetAction();
         }catch(Exception $e){
             throw $e;
@@ -373,13 +357,20 @@ class UserList extends Component
             $emailSubject = $this->email_subject;
             $senderEmail = Auth::user()->email;
 
-            SendBulkEmailJob::dispatch(
-                $selectedUserIds, 
-                $emailSubject, 
-                $senderEmail
-            );
-
+            $emailTemplate = EmailTemplate::where('name', $emailSubject)->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                SendBulkEmailJob::dispatch(
+                    $selectedUserIds, 
+                    $emailSubject, 
+                    $senderEmail
+                );
+            }else{
+                session()->flash('error', 'Email template is not active.');
+                $this->openBulkEmailModal = false;
+                return;
+            }
             session()->flash('success', 'Email has been successfully sent to the agency representative.');
+
 
             $this->resetAction();
             $this->clearBulkSelection();

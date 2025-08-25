@@ -214,6 +214,10 @@
                     @click="confirmingAction = false"
                     class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500
                     dark:bg-blue-700 dark:hover:bg-blue-600">
+                    <div wire:loading wire:target="updateStatus" style="margin-right: 5px">
+                        <div class="spinner-border small text-primary" role="status">
+                        </div>
+                    </div>
                     Confirm
                 </button>
             </div>
@@ -282,6 +286,10 @@
                     @click="confirmingBulkAction = false"
                     class="px-4 py-2 rounded-md text-white focus:outline-none focus:ring-2 transition-colors"
                     :class="bulkActionType === 'reject' ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'">
+                    <div wire:loading wire:target="executeBulkAction" style="margin-right: 5px">
+                        <div class="spinner-border small text-primary" role="status">
+                        </div>
+                    </div>
                     <span x-text="
                         bulkActionType === 'approve' ? 'Approve All' :
                         bulkActionType === 'reject' ? 'Delete All' :
@@ -292,7 +300,7 @@
         </div>
     </div>
 
-    <!-- Action Confirmation Modal -->
+    <!-- Action Email Modal -->
     <div x-show="openEmailModal"
         class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-40 flex items-center justify-center">
         <div x-show="openEmailModal"
@@ -331,6 +339,10 @@
                 <button wire:click="sendEmail"
                     class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500
                     dark:bg-blue-700 dark:hover:bg-blue-600">
+                    <div wire:loading wire:target="sendEmail" style="margin-right: 5px">
+                        <div class="spinner-border small text-primary" role="status">
+                        </div>
+                    </div>
                     Send Email
                 </button>
             </div>
@@ -379,6 +391,10 @@
                 <button wire:click="sendBulkEmail"
                     class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500
                     dark:bg-green-700 dark:hover:bg-green-600">
+                    <div wire:loading wire:target="sendBulkEmail" style="margin-right: 5px">
+                        <div class="spinner-border small text-primary" role="status">
+                        </div>
+                    </div>
                     Send Email
                 </button>
             </div>

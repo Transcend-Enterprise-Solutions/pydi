@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Mail\AdminActionNotif;
+use App\Models\EmailTemplate;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\WithPagination;
@@ -79,8 +80,13 @@ class ManagePydiIndex extends Component
             }
         }
 
-        Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydi_admin_action_notif', $details));
-
+        $emailTemplate = EmailTemplate::where('name', 'pydi_admin_action_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydi_admin_action_notif', $details));
+        }else{
+            session()->flash('error', 'Email not sent. Email template is not active.');
+        }
+        
         session()->flash('success', 'Dataset status updated successfully!');
         $this->showActionModal = false;
     }
@@ -111,8 +117,7 @@ class ManagePydiIndex extends Component
             $entry->update([
                 'is_request_edit' => $action
             ]);
-            session()->flash('success', 'Edit request has been processed successfully!');
-
+            
             $userInfo = User::where('users.id', $entry->user_id)->first();
 
 
@@ -121,7 +126,14 @@ class ManagePydiIndex extends Component
                 $details .= 'Feedback: ' . $this->action_feedback;
             }
 
-            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
+            $emailTemplate = EmailTemplate::where('name', 'edit_request_admin_action_notif')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
+            }else{
+                session()->flash('error', 'Email not sent. Email template is not active.');
+            }
+            
+            session()->flash('success', 'Edit request has been processed successfully!');
         } else {
             session()->flash('error', 'Dataset not found.');
         }

@@ -6,7 +6,7 @@ use App\Mail\UserActionNotif;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDataset, PydpType, UserLog, PydpLevel, User};
+use App\Models\{EmailTemplate, PydpDataset, PydpType, UserLog, PydpLevel, User};
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -176,7 +176,11 @@ class PydpDatasetIndex extends Component
                 'Description: ' . $dataset->description;
             }
 
-            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_dataset_submission', 'PYDP',  $details));
+            $emailTemplate = EmailTemplate::where('name', 'user_dataset_submission')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_dataset_submission', 'PYDP',  $details));
+            }
+
             
             $this->logs("Submitted dataset: {$dataset->name}");
             session()->flash('success', 'Dataset has been sent successfully!');
@@ -212,7 +216,10 @@ class PydpDatasetIndex extends Component
             'Description: ' . $entry->description;
         }
 
-        Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_request_edit_notif', 'PYDP',  $details));
+        $emailTemplate = EmailTemplate::where('name', 'user_request_edit_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_request_edit_notif', 'PYDP',  $details));
+        }
 
         $this->logs("Requested edit for dataset: {$entry->name}");
 
