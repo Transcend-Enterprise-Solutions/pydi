@@ -28,7 +28,6 @@
                         <tr>
                             <th class="px-4 py-2 border">#</th>
                             <th class="px-4 py-2 border">Title</th>
-                            <th class="px-4 py-2 border">Level</th>
                             <th class="px-4 py-2 border">Year Covered</th>
                             <th class="px-4 py-2 border">Status</th>
                             <th class="px-4 py-2 border">Date</th>
@@ -40,7 +39,6 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 border">{{ $tableDatas->firstItem() + $index }}</td>
                                 <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->level->title }}</td>
                                 <td class="px-4 py-2 border">
                                     {{ $row->type->year_start . ' - ' . $row->type->year_end }}
                                 </td>
@@ -219,21 +217,6 @@
                     <label class="block text-sm font-medium">Description</label>
                     <textarea wire:model="description" class="border rounded w-full px-3 py-2" placeholder="Enter Description"></textarea>
                     @error('description')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- level -->
-                <div class="mb-3">
-                    <label class="block text-sm font-medium">Level</label>
-                    <select wire:model="level" class="border rounded w-full px-3 py-2">
-                        <option value="">Please Select</option>
-                        @foreach ($levels as $row)
-                            <option value="{{ $row->id }}">
-                                {{ $row->title }}</option>
-                        @endforeach
-                    </select>
-                    @error('level')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>

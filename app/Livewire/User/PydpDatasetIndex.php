@@ -5,7 +5,7 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDataset, PydpType, UserLog, PydpLevel};
+use App\Models\{PydpDataset, PydpType, UserLog};
 
 #[Layout('layouts.app')]
 #[Title('PYDP Datasets')]
@@ -15,7 +15,7 @@ class PydpDatasetIndex extends Component
 
     public $showEntries = 10;
     public $search = '';
-    public $types = [], $levels = [];
+    public $types = [];
 
     public $showModal = false;
     public $editMode = false;
@@ -32,7 +32,7 @@ class PydpDatasetIndex extends Component
     public $selectedId = null;
     public $file;
 
-    public $valueId, $title, $description, $type, $level;
+    public $valueId, $title, $description, $type;
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -43,7 +43,6 @@ class PydpDatasetIndex extends Component
     public function mount()
     {
         $this->types = PydpType::all();
-        $this->levels = PydpLevel::where('user_id', auth()->id())->get();
     }
 
     public function updatingSearch()
@@ -79,7 +78,6 @@ class PydpDatasetIndex extends Component
             $dataset = PydpDataset::findOrFail($this->valueId);
             $dataset->update([
                 'pydp_type_id' => $this->type,
-                'pydp_level_id' => $this->level,
                 'name' => $this->title,
                 'description' => $this->description
             ]);
@@ -90,7 +88,6 @@ class PydpDatasetIndex extends Component
             $dataset = PydpDataset::create([
                 'user_id' => auth()->id(),
                 'pydp_type_id' => $this->type,
-                'pydp_level_id' => $this->level,
                 'name' => $this->title,
                 'description' => $this->description
             ]);
@@ -193,7 +190,7 @@ class PydpDatasetIndex extends Component
     {
         UserLog::create([
             'user_id' => auth()->id(),
-            'action'  => $action,
+            'action'  => $action . ' at ' . now()->format('Y-m-d H:i:s'),
         ]);
     }
 
