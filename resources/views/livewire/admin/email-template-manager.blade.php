@@ -3,7 +3,7 @@
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-3 sm:p-6">
             <div class="w-full mb-6">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Email Templates Manager</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Email Templates Manager</h2>
                     {{-- <button 
                         wire:click="createTemplate" 
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -20,27 +20,27 @@
             </div>
 
             <!-- Templates List -->
-            <div class="rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="border border-gray-200 dark:border-gray-700">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <tr class="text-xs uppercase">
+                                <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Subject</th>
+                                <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-center font-medium text-gray-500 tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300">
                             @forelse($templates as $template)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <tr class="text-xs">
+                                    <td class="px-6 py-2 whitespace-nowrap font-medium">
                                         {{ $template->name }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-6 py-2 whitespace-nowrap">
                                         {{ $template->subject }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-2 whitespace-nowrap">
                                         <button 
                                             wire:click="toggleStatus({{ $template->id }})"
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $template->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}"
@@ -48,12 +48,12 @@
                                             {{ $template->is_active ? 'Active' : 'Inactive' }}
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4 text-center whitespace-nowrap text-sm font-medium space-x-2">
+                                    <td class="px-6 py-2 text-center whitespace-nowrap font-medium space-x-2">
                                         <button 
                                             wire:click="editTemplate({{ $template->id }})"
-                                            class="text-indigo-600 hover:text-indigo-900"
+                                            class="text-blue-500 hover:text-blue-600"
                                         >
-                                            Edit
+                                            <i class="bi bi-pencil"></i> Edit
                                         </button>
                                         {{-- <button 
                                             wire:click="deleteTemplate({{ $template->id }})"

@@ -21,7 +21,7 @@
     <script defer src="build/assets/app-BUdMCiQf.js"></script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="build/assets/app-BswuWUK1.css">
+    <link rel="stylesheet" href="build/assets/app-m1OUMg2T.css">
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

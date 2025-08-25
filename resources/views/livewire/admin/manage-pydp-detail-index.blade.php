@@ -30,12 +30,12 @@
 
                         <!-- Dropdown Menu -->
                         <div x-show="open" @click.away="open = false"
-                            class="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                            class="absolute overflow-hidden right-0 mt-2 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                             <ul class="py-2 text-sm">
                                 <!-- Export/Generate Report -->
                                 <li>
                                     <button wire:click="exportDatasetDetails"
-                                        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                        class="flex items-center w-full px-4 py-2 text-gray-700 dark:text-gray-200 bg-gray-100 hover:opacity-70 dark:bg-gray-800 transition">
                                         <i class="bi bi-bar-chart-fill text-purple-500 mr-2"></i>
                                         Generate Report
                                     </button>
@@ -55,53 +55,53 @@
             @include('livewire.user.session-flash')
 
             <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2 border">PYDP Center</th>
-                            <th class="px-4 py-2 border">Indicator</th>
-                            <th class="px-4 py-2 border">Year Data</th>
+                <table class="table-auto w-full text-left border border-gray-200 dark:border-gray-700">
+                    <thead class="bg-gray-100 dark:bg-slate-700">
+                        <tr class="uppercase text-xs">
+                            <th class="px-4 py-2">PYDP Center</th>
+                            <th class="px-4 py-2">Indicator</th>
+                            <th class="px-4 py-2">Year Data</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($tableDatas as $row)
-                            <tr class="hover:bg-gray-50 align-middle">
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200 align-middle">
+                                <td class="px-4 py-2 text-center text-xs align-middle">
                                     {{ $row->dimension->name }}</td>
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
+                                <td class="px-4 py-2 text-center text-xs align-middle">
                                     {{ $row->indicator->title }}</td>
 
-                                <td class="px-4 py-2 border align-middle">
+                                <td class="px-4 py-2 align-middle">
                                     @php
                                         $yearData = $row->years->sortBy('year');
                                     @endphp
 
                                     @if ($yearData->count())
-                                        <table class="w-full text-xs border mx-auto">
+                                        <table class="w-full text-xs mx-auto">
                                             <thead class="bg-gray-50 text-gray-700">
                                                 <tr>
-                                                    <th class="border px-2 py-1 text-center">Year</th>
-                                                    <th class="border px-2 py-1 text-center">Physical Target</th>
-                                                    <th class="border px-2 py-1 text-center">Financial Target</th>
-                                                    <th class="border px-2 py-1 text-center">Physical Actual</th>
-                                                    <th class="border px-2 py-1 text-center">Financial Actual</th>
+                                                    <th class="px-2 py-1 text-center">Year</th>
+                                                    <th class="px-2 py-1 text-center">Physical Target</th>
+                                                    <th class="px-2 py-1 text-center">Financial Target</th>
+                                                    <th class="px-2 py-1 text-center">Physical Actual</th>
+                                                    <th class="px-2 py-1 text-center">Financial Actual</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($yearData as $year)
                                                     <tr>
-                                                        <td class="border px-2 py-1 text-center">{{ $year->year }}
+                                                        <td class="px-2 py-1 text-center">{{ $year->year }}
                                                         </td>
-                                                        <td class="border px-2 py-1 text-center">
+                                                        <td class="px-2 py-1 text-center">
                                                             {{ $year->target_physical !== null ? number_format($year->target_physical, 2) : '-' }}
                                                         </td>
-                                                        <td class="border px-2 py-1 text-center">
+                                                        <td class="px-2 py-1 text-center">
                                                             {{ $year->target_financial !== null ? number_format($year->target_financial, 2) : '-' }}
                                                         </td>
-                                                        <td class="border px-2 py-1 text-center">
+                                                        <td class="px-2 py-1 text-center">
                                                             {{ $year->actual_physical !== null ? number_format($year->actual_physical, 2) : '-' }}
                                                         </td>
-                                                        <td class="border px-2 py-1 text-center">
+                                                        <td class="px-2 py-1 text-center">
                                                             {{ $year->actual_financial !== null ? number_format($year->actual_financial, 2) : '-' }}
                                                         </td>
                                                     </tr>

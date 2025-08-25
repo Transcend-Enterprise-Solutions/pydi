@@ -5,16 +5,16 @@
                 <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">PYDI Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
-                        class="w-52 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-52 py-2 px-3 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
-                        class="w-16 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-16 py-2 px-3 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                     </select>
                     <button wire:click="create()"
-                        class="bg-blue-500 text-white py-2 px-3 rounded hover:bg-blue-600 transition">
+                        class="bg-blue-500 text-sm text-white py-2 px-3 rounded hover:bg-blue-600 transition">
                         <i class="bi bi-plus-lg"></i> Add Dataset
                     </button>
                 </div>
@@ -22,10 +22,10 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="border border-gray-200 dark:border-gray-700 ">
                 <div class="w-full text-xs">
-                    <table class="table-auto w-full text-left text-xs">
-                        <thead class="bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
+                    <table class="table-auto w-full text-left text-xs rounded-lg">
+                        <thead class="rounded-t-lg bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
                             <tr>
                                 <th class="px-4 py-2">#</th>
                                 <th class="px-4 py-2">Title</th>
@@ -227,9 +227,9 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium text-gray-700">Year</label>
+                    <label class="block text-sm font-medium">Year</label>
                     <select wire:model="year"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-slate-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border px-3 dark:bg-slate-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                         @php
                             $currentYear = date('Y');
                             $startYear = $currentYear - 4;
@@ -248,7 +248,7 @@
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded">Cancel</button>
+                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded dark:border-gray-700">Cancel</button>
                     <button wire:click="save" wire:loading.attr="disabled"
                         class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2">
                         <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
@@ -265,7 +265,7 @@
     @if ($showDeleteModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-sm p-6 text-center">
-                <h3 class="text-lg font-bold mb-2">Delete Dataset</h3>
+                <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">Delete Dataset</h3>
                 <p class="text-gray-600 mb-4">Are you sure you want to delete this dataset? This action cannot be
                     undone.</p>
 
@@ -288,10 +288,10 @@
     <!-- Message Modal -->
     @if ($showMessageModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">Feedback</h3>
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-200">Feedback</h3>
 
-                <div class="mb-4 text-gray-700">
+                <div class="mb-4 text-gray-700 dark:text-gray-300">
                     {!! nl2br(e($feedbackMessage)) !!}
                 </div>
 
@@ -308,13 +308,13 @@
     <!-- Confirm Submit Modal -->
     @if ($showConfirmSend)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
-                <h3 class="text-xl font-semibold text-gray-800 mb-3">Confirm Send</h3>
-                <p class="text-gray-600 mb-5">Are you sure you want to send this dataset?</p>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Confirm Send</h3>
+                <p class="text-gray-600 dark:text-gray-300 mb-5">Are you sure you want to send this dataset?</p>
 
                 {{-- Optional file attachment --}}
                 <div class="mb-5 text-left">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Optional Attachment</label>
+                    <label class="block text-sm font-medium mb-1">Optional Attachment</label>
                     <input type="file" wire:model="file" class="border rounded w-full px-3 py-2">
                     @error('file')
                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -323,7 +323,7 @@
 
                 <div class="flex justify-center gap-3">
                     <button wire:click="$set('showConfirmSend', false)"
-                        class="px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-100 transition">
+                        class="px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-100 transition dark:border-gray-700">
                         Cancel
                     </button>
                     <button wire:click="sendConfirmed" wire:loading.attr="disabled"

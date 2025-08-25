@@ -2,12 +2,12 @@
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">{{ Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs' }}</h2>
+                <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">{{ Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs' }}</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
-                        class="w-52 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-52 py-2 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
-                        class="w-16 py-2 px-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-16 py-2 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -18,10 +18,10 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="overflow-hidden border border-gray-200 dark:border-gray-700">
                 <div class="w-full text-xs overflow-auto">
                     <table class="table-auto w-full text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700 uppercase">
                             <tr>
                                 <th class="px-4 py-2">#</th>
                                 <th class="px-4 py-2">Account Name</th>
@@ -31,7 +31,7 @@
                         </thead>
                         <tbody>
                             @forelse ($tableDatas as $index => $row)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200">
                                     <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
                                     <td class="px-4 py-2">{{ $row->user->name }}</td>
                                     <td class="px-4 py-2">{{ $row->action }}</td>

@@ -2,12 +2,12 @@
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold">Manage PYDI Datasets</h2>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Manage PYDI Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
-                        class="w-52 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-52 py-1 px-2 border text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
-                        class="w-16 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                        class="w-16 py-1 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -97,27 +97,27 @@
             @include('livewire.user.session-flash')
 
             <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2 border">Account Name</th>
-                            <th class="px-4 py-2 border">Title</th>
-                            <th class="px-4 py-2 border">Description</th>
-                            <th class="px-4 py-2 border">Year</th>
-                            <th class="px-4 py-2 border">Status</th>
-                            <th class="px-4 py-2 border">Date</th>
-                            <th class="px-4 py-2 border text-center">Actions</th>
+                <table class="table-auto w-full text-left border border-gray-200 dark:border-gray-700">
+                    <thead class="bg-gray-100 dark:bg-slate-700">
+                        <tr class="uppercase text-xs">
+                            <th class="px-4 py-2">Account Name</th>
+                            <th class="px-4 py-2">Title</th>
+                            <th class="px-4 py-2">Description</th>
+                            <th class="px-4 py-2">Year</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Date</th>
+                            <th class="px-4 py-2 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($tableDatas as $index => $row)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border">{{ $row->user->name }}</td>
-                                <td class="px-4 py-2 border">{{ $row->name }}</td>
-                                <td class="px-4 py-2 border">{{ Str::limit($row->description, 50) }}</td>
-                                <td class="px-4 py-2 border">{{ $row->year }}</td>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
+                                <td class="px-4 py-2">{{ $row->user->name }}</td>
+                                <td class="px-4 py-2">{{ $row->name }}</td>
+                                <td class="px-4 py-2">{{ Str::limit($row->description, 50) }}</td>
+                                <td class="px-4 py-2">{{ $row->year }}</td>
 
-                                <td class="px-4 py-2 border">
+                                <td class="px-4 py-2">
                                     <div class="flex justify-start items-center gap-1">
                                         @if ($row->status === 'approved')
                                             <span
@@ -195,21 +195,21 @@
                                     </div>
                                 </td>
 
-                                <td class="px-4 py-2 border text-sm text-gray-600">
-                                    <div>
-                                        <span class="font-semibold text-gray-800">Created:</span>
+                                <td class="px-4 py-2 text-sm text-gray-600">
+                                    <div class="text-gray-800 dark:text-gray-200 text-xs">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">Created:</span>
                                         {{ $row->created_at->format('M d, Y') }}
                                     </div>
                                     @if ($row->finalized_at)
-                                        <div>
-                                            <span class="font-semibold text-gray-800">Finalized:</span>
+                                        <div class="text-gray-800 dark:text-gray-200 text-xs">
+                                            <span class="font-semibold text-gray-700 dark:text-gray-300">Finalized:</span>
                                             {{ \Carbon\Carbon::parse($row->finalized_at)->format('M d, Y') }}
                                         </div>
                                     @endif
                                 </td>
 
                                 <!-- Action Buttons -->
-                                <td class="px-4 py-2 border text-center">
+                                <td class="px-4 py-2 text-center">
                                     <div x-data="{ open: false }" class="relative inline-block text-left">
                                         <!-- Trigger -->
                                         <button @click="open = !open"
@@ -310,10 +310,10 @@
     <!-- Message Modal -->
     @if ($showMessageModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
                 <h3 class="text-lg font-bold mb-4">Feedback</h3>
 
-                <div class="mb-4 text-gray-700">
+                <div class="mb-4 text-gray-700 dark:text-gray-300">
                     {!! nl2br(e($feedbackMessage)) !!}
                 </div>
 
@@ -330,9 +330,9 @@
     <!-- Edit Request Approval Modal -->
     @if ($showEditRequestModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
+            <div class="w-full max-w-md p-6 mx-4 bg-white dark:bg-slate-800 rounded-lg shadow-lg">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Process Edit Request</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Process Edit Request</h3>
                     <button wire:click="$set('showEditRequestModal', false)" title="Close"
                         class="text-gray-400 hover:text-gray-600 transition">
                         <i class="bi bi-x-lg"></i>
@@ -340,7 +340,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
                         This entry has requested edits. Please review and choose to approve or reject the request.
                     </p>
                 </div>

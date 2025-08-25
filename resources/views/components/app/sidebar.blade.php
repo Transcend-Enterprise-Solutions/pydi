@@ -8,7 +8,7 @@
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-64'" @click.outside="sidebarOpen = false"
         @keydown.escape.window="sidebarOpen = false">
 
-        <div class="flex items-center ml-3 my-5" style="height: 40px;">
+        <div class="flex items-center my-5" style="height: 40px;">
             <!-- Logo -->
             <a href="{{ url('/') }}" class="flex items-center space-x-2  group">
                 <img src="/images/nyc_logo.png" alt="NYC Logo" title="Go to Dashboard"
@@ -79,7 +79,7 @@
 
                         @foreach ($adminSections as $section => $items)
                             <li
-                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-slate-400">
+                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase dark:text-slate-400 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 transition-opacity duration-300">
                                 {{ $section }}
                             </li>
 
@@ -147,7 +147,7 @@
 
                         @foreach ($userSections as $section => $items)
                             <li
-                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-slate-400">
+                                class="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-slate-400 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 transition-opacity duration-300">
                                 {{ $section }}
                             </li>
 
