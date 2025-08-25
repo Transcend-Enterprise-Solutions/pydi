@@ -32,15 +32,17 @@ class SendBulkEmailJob implements ShouldQueue
      * @var int
      */
     public $timeout = 300;
+    protected $isAccountAction;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(array $userIds, string $emailSubject, string $senderEmail)
+    public function __construct(array $userIds, string $emailSubject, string $senderEmail, $isAccountAction = false)
     {
         $this->userIds = $userIds;
         $this->emailSubject = $emailSubject;
         $this->senderEmail = $senderEmail;
+        $this->isAccountAction = $isAccountAction;
     }
 
     /**
@@ -78,18 +80,12 @@ class SendBulkEmailJob implements ShouldQueue
     private function sendEmailToUser(User $user, $senderEmail, $index): void
     {
         $recipientEmail = $user->email ?? 'test@gmail.com';
-        
-        switch ($this->emailSubject) {
-            case 'agency_submission_reminder_notif':
-                SendSingleEmailJob::dispatch(
-                    $recipientEmail, 
-                    $senderEmail,
-                    $this->emailSubject,
-                    )->delay(now()->addSeconds($index * 2));
-                break;
-            default:
-                throw new Exception("Unknown email subject: {$this->emailSubject}");
-        }
+        SendSingleEmailJob::dispatch(
+            $recipientEmail, 
+            $senderEmail,
+            $this->emailSubject,
+            $this->isAccountAction
+            )->delay(now()->addSeconds($index * 2));
     }
 
     /**

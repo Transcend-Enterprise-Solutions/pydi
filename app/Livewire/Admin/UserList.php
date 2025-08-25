@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Jobs\SendBulkEmailJob;
 use App\Mail\SubmissionReminderNotif;
+use App\Mail\UserRegistrationNotif;
 use App\Models\EmailTemplate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -194,6 +195,14 @@ class UserList extends Component
             $user = User::findOrFail($this->userId);
             $user->userData()->delete();
             $user->delete();
+
+            $emailTemplate = EmailTemplate::where('name', 'user_rejected_notif')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_rejected_notif'));
+            }else{
+                session()->flash('error', 'Email not sent. Email template is not active.');
+            }
+
             session()->flash('success', 'User has been rejected and removed from the system.');
         } else {
             // Handle other status changes
@@ -206,7 +215,29 @@ class UserList extends Component
             if ($status !== null) {
                 $user = User::findOrFail($this->userId);
                 $user->update(['active_status' => $status]);
+
                 session()->flash('success', $this->getSuccessMessage($status));
+
+                switch($status){
+                    case 1:
+                        $emailTemplate = EmailTemplate::where('name', 'user_approved_notif')->first();
+                        if($emailTemplate && $emailTemplate->is_active){
+                            Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_approved_notif'));
+                        }else{
+                            session()->flash('error', 'Email not sent. Email template is not active.');
+                        }
+                        break;
+                    case 3:
+                        $emailTemplate = EmailTemplate::where('name', 'user_deactivated_notif')->first();
+                        if($emailTemplate && $emailTemplate->is_active){
+                            Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_deactivated_notif'));
+                        }else{
+                            session()->flash('error', 'Email not sent. Email template is not active.');
+                        }
+                        break;
+                    default:
+                        break;  
+                }
             }
         }
 
@@ -255,6 +286,31 @@ class UserList extends Component
                     $errorCount++;
                     Log::error("Failed to {$this->bulkActionType} user ID {$userId}: " . $e->getMessage());
                 }
+            }
+
+            $templateName = '';
+            switch ($this->bulkActionType) {
+                case 'reject':
+                    $templateName = 'user_rejected_notif';
+                    break;
+                case 'approve':
+                    $templateName = 'user_approved_notif';
+                case 'deactivate':
+                    $templateName = 'user_deactivated_notif';
+                    break;
+            }
+
+            $senderEmail = Auth::user()->email;
+            $emailTemplate = EmailTemplate::where('name', $templateName)->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                SendBulkEmailJob::dispatch(
+                    $this->selectedUsers, 
+                    $templateName, 
+                    $senderEmail,
+                    true
+                );
+            }else{
+                session()->flash('error', 'Email not sent. Email template is not active.');
             }
 
             if ($errorCount === 0) {
@@ -334,7 +390,7 @@ class UserList extends Component
                         break;
                 }
             }else{
-                session()->flash('error', 'Email template is not active.');
+                session()->flash('error', 'Email not sent. Email template is not active.');
                 $this->openEmailModal = false;
                 return;
             }
@@ -365,7 +421,7 @@ class UserList extends Component
                     $senderEmail
                 );
             }else{
-                session()->flash('error', 'Email template is not active.');
+                session()->flash('error', 'Email not sent. Email template is not active.');
                 $this->openBulkEmailModal = false;
                 return;
             }

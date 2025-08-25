@@ -2,11 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Mail\UserRegistrationNotif;
+use App\Models\EmailTemplate;
 use App\Models\Notification;
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\UserData;
+use Illuminate\Support\Facades\Mail;
 
 class Registration extends Component
 {
@@ -106,6 +109,11 @@ class Registration extends Component
             'notif' => 'register',
             'read' => 0,
         ]);
+
+        $emailTemplate = EmailTemplate::where('name', 'registration_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserRegistrationNotif( $this->email, 'registration_notif'));
+        }
 
         $this->submitCount++;
         $this->resetVariables();
