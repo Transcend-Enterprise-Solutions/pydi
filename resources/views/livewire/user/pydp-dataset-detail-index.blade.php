@@ -73,10 +73,7 @@
                             <th class="px-4 py-2 border">PYDP Center</th>
                             <th class="px-4 py-2 border">Level</th>
                             <th class="px-4 py-2 border">Indicator</th>
-                            <th class="px-4 py-2 border">Baseline</th>
                             <th class="px-4 py-2 border">Year Data</th>
-                            <th class="px-4 py-2 border">Total</th>
-                            <th class="px-4 py-2 border">Remarks</th>
 
                             @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
                                 <th class="px-4 py-2 border text-center">Actions</th>
@@ -94,9 +91,6 @@
                                 </td>
                                 <td class="px-4 py-2 border text-center text-xs align-middle">
                                     {{ $row->indicator->title }}</td>
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ number_format($row->baseline, 2) }}
-                                </td>
 
                                 <td class="px-4 py-2 border align-middle">
                                     @php
@@ -108,16 +102,21 @@
                                             <thead class="bg-gray-50 text-gray-700">
                                                 <tr>
                                                     <th class="border px-2 py-1 text-center">Year</th>
+                                                    <th class="border px-2 py-1 text-center">Baseline</th>
                                                     <th class="border px-2 py-1 text-center">Physical Target</th>
                                                     <th class="border px-2 py-1 text-center">Financial Target</th>
                                                     <th class="border px-2 py-1 text-center">Physical Actual</th>
                                                     <th class="border px-2 py-1 text-center">Financial Actual</th>
+                                                    <th class="border px-2 py-1 text-center">Total</th>
+                                                    <th class="border px-2 py-1 text-center">Remarks</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($yearData as $year)
                                                     <tr>
-                                                        <td class="border px-2 py-1 text-center">{{ $year->year }}
+                                                        <td class="border px-2 py-1 text-center">{{ $year->year }}</td>
+                                                        <td class="border px-2 py-1 text-center">
+                                                            {{ $year->baseline !== null ? number_format($year->baseline, 2) : '-' }}
                                                         </td>
                                                         <td class="border px-2 py-1 text-center">
                                                             {{ $year->target_physical !== null ? number_format($year->target_physical, 2) : '-' }}
@@ -131,6 +130,16 @@
                                                         <td class="border px-2 py-1 text-center">
                                                             {{ $year->actual_financial !== null ? number_format($year->actual_financial, 2) : '-' }}
                                                         </td>
+                                                        <td class="border px-2 py-1 text-center">
+                                                            {{ $year->total !== null ? number_format($year->total, 2) : '-' }}
+                                                        </td>
+                                                        <td class="border px-2 py-1 text-center text-xs" style="max-width: 150px;">
+                                                            @if($year->remarks)
+                                                                <div class="truncate" title="{{ $year->remarks }}">{{ $year->remarks }}</div>
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -139,11 +148,6 @@
                                         <span class="text-gray-400 italic block text-center">No data</span>
                                     @endif
                                 </td>
-
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ number_format($row->total, 2) }}</td>
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ $row->remarks ?? '-' }}</td>
 
                                 @if (($datasetInfo->status !== 'approved' && $datasetInfo->status !== 'rejected') || $datasetInfo->is_request_edit === 2)
                                     <td class="px-4 py-2 border text-center align-middle">
@@ -177,7 +181,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-gray-500">
+                                <td colspan="5" class="text-center py-4 text-gray-500">
                                     No records found.
                                 </td>
                             </tr>
@@ -195,104 +199,102 @@
     <!-- Modal (Used for Create & Edit) -->
     @if ($showModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-5xl mx-4 my-5 p-8">
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-6xl mx-4 my-5 p-8">
                 <h3 class="text-xl font-bold mb-6">
                     {{ $editMode ? 'Edit Dataset Details' : 'Create New Dataset Details' }}
                 </h3>
 
-                {{-- Scrollable Section for Year Inputs --}}
-                <div class="max-h-[70vh] overflow-y-auto mt-6 pr-2">
-
-                    {{-- Form Section --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {{-- Dimension (now first column) --}}
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Dimension</label>
-                            <select wire:model="dimension" class="border rounded w-full px-3 py-2">
-                                <option value="">Please Select</option>
-                                @foreach ($dimensions as $row)
-                                    <option value="{{ $row->id }}">{{ $row->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('dimension')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Level and Indicator on the same row --}}
-                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {{-- Level --}}
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Level</label>
-                                <select wire:model.live="level_id" class="border rounded w-full px-3 py-2">
-                                    <option value="">Please Select</option>
-                                    @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}">{{ $level->title }}</option>
-                                    @endforeach
-                                </select>
-                                @error('level_id')
-                                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            {{-- Indicator --}}
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Indicator</label>
-                                <select wire:model="indicator_id" class="border rounded w-full px-3 py-2"
-                                    {{ !$level_id ? 'disabled' : '' }}>
-                                    <option value="">Please Select</option>
-                                    @if ($level_id)
-                                        @foreach ($this->indicators as $row)
-                                            <option value="{{ $row->id }}">{{ $row->title }}</option>
-                                        @endforeach
-                                    @else
-                                        <option value="">Please select a level first</option>
-                                    @endif
-                                </select>
-                                @error('indicator_id')
-                                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        {{-- Baseline --}}
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Baseline</label>
-                            <input type="number" wire:model="baseline" class="border rounded w-full px-3 py-2"
-                                placeholder="Enter baseline value">
-                            @error('baseline')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Total --}}
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Actual Total</label>
-                            <input type="number" wire:model="total" class="border rounded w-full px-3 py-2"
-                                placeholder="Enter total value">
-                            @error('total')
-                                <span class="text-red-500 text-sm">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    {{-- Remarks --}}
-                    <div class="my-6">
-                        <label class="block text-sm font-medium mb-1">Remarks</label>
-                        <textarea wire:model="remarks" rows="2" class="border rounded w-full px-3 py-2"
-                            placeholder="Enter remarks here"></textarea>
-                        @error('remarks')
+                {{-- Form Section for Basic Info --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    {{-- Dimension (now first column) --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Dimension</label>
+                        <select wire:model="dimension" class="border rounded w-full px-3 py-2">
+                            <option value="">Please Select</option>
+                            @foreach ($dimensions as $row)
+                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('dimension')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
+                    {{-- Level --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Level</label>
+                        <select wire:model.live="level_id" class="border rounded w-full px-3 py-2">
+                            <option value="">Please Select</option>
+                            @foreach ($levels as $level)
+                                <option value="{{ $level->id }}">{{ $level->title }}</option>
+                            @endforeach
+                        </select>
+                        @error('level_id')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- Indicator --}}
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Indicator</label>
+                        <select wire:model="indicator_id" class="border rounded w-full px-3 py-2"
+                            {{ !$level_id ? 'disabled' : '' }}>
+                            <option value="">Please Select</option>
+                            @if ($level_id)
+                                @foreach ($this->indicators as $row)
+                                    <option value="{{ $row->id }}">{{ $row->title }}</option>
+                                @endforeach
+                            @else
+                                <option value="">Please select a level first</option>
+                            @endif
+                        </select>
+                        @error('indicator_id')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Scrollable Section for Year Inputs --}}
+                <div class="max-h-[60vh] overflow-y-auto mt-6 pr-2">
                     @foreach ($yearRange as $year)
                         <div class="border rounded p-4 mb-4 bg-gray-50">
                             <h4 class="text-lg font-semibold mb-3">Year {{ $year }}</h4>
 
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                                <!-- First Row: Baseline, Total, Remarks -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Baseline</label>
+                                    <input type="number" wire:model="yearData.{{ $year }}.baseline"
+                                        class="border rounded w-full px-3 py-2"
+                                        placeholder="Baseline for {{ $year }}">
+                                    @error("yearData.$year.baseline")
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Total</label>
+                                    <input type="number" wire:model="yearData.{{ $year }}.total"
+                                        class="border rounded w-full px-3 py-2"
+                                        placeholder="Total for {{ $year }}">
+                                    @error("yearData.$year.total")
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Remarks</label>
+                                    <textarea wire:model="yearData.{{ $year }}.remarks" rows="1"
+                                        class="border rounded w-full px-3 py-2"
+                                        placeholder="Remarks for {{ $year }}"></textarea>
+                                    @error("yearData.$year.remarks")
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <!-- Second Row: Physical and Financial targets/actuals -->
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Physical Target</label>
                                     <input type="number" wire:model="yearData.{{ $year }}.physical_target"
