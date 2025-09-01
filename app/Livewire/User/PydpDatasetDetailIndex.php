@@ -25,9 +25,6 @@ class PydpDatasetDetailIndex extends Component
     public $dimension, $indicator_id, $level_id, $type_id;
     public $yearData = [];
     public $valueId;
-    public $remarks;
-    public $total;
-    public $baseline;
 
     public $showDeleteModal = false;
     public $showModal = false;
@@ -38,10 +35,17 @@ class PydpDatasetDetailIndex extends Component
         $dataset = PydpDataset::with(['type'])->findOrFail($id);
         $this->datasetInfo = $dataset;
 
-        // Get all levels, types, and indicators
-        $this->levels = PydpLevel::all();
+        // Get only levels that belong to the current user
+        $this->levels = PydpLevel::where('user_id', auth()->id())
+                                ->where('is_active', 1)
+                                ->get();
+
         $this->types = PydpType::all();
-        $this->allIndicators = PydpIndicator::all();
+
+        // Get only indicators that belong to levels owned by the current user
+        $userLevelIds = collect($this->levels)->pluck('id');
+        $this->allIndicators = PydpIndicator::whereIn('pydp_level_id', $userLevelIds)->get();
+
         $this->dimensions = Dimension::all();
 
         $years = range((int)$dataset->type->year_start, (int)$dataset->type->year_end);
@@ -52,14 +56,14 @@ class PydpDatasetDetailIndex extends Component
         'level_id' => 'required|exists:pydp_levels,id',
         'dimension' => 'required|exists:dimensions,id',
         'indicator_id' => 'required|exists:pydp_indicators,id',
-        'baseline' => 'required|numeric|min:0',
-        'total' => 'required|numeric|min:0',
-        'remarks' => 'nullable|string|max:1000',
         'yearData' => 'nullable|array',
         'yearData.*.physical_target' => 'nullable|numeric',
         'yearData.*.financial_target' => 'nullable|numeric',
         'yearData.*.physical_actual' => 'nullable|numeric',
         'yearData.*.financial_actual' => 'nullable|numeric',
+        'yearData.*.baseline' => 'nullable|numeric|min:0',
+        'yearData.*.total' => 'nullable|numeric|min:0',
+        'yearData.*.remarks' => 'nullable|string|max:1000',
     ];
 
     // Computed property to get filtered indicators based on selected level
@@ -79,15 +83,22 @@ class PydpDatasetDetailIndex extends Component
         $this->indicator_id = null;
 
         if ($value) {
-            $this->indicators = PydpIndicator::where('pydp_level_id', $value)->get();
+            // Get indicators for the selected level that belongs to the current user
+            $this->indicators = PydpIndicator::where('pydp_level_id', $value)
+                                            ->whereHas('level', function($query) {
+                                                $query->where('user_id', auth()->id());
+                                            })
+                                            ->get();
         } else {
-            $this->indicators = $this->allIndicators;
+            // Show all indicators for user's levels
+            $userLevelIds = collect($this->levels)->pluck('id');
+            $this->indicators = PydpIndicator::whereIn('pydp_level_id', $userLevelIds)->get();
         }
     }
 
     public function create()
     {
-        $this->reset(['level_id', 'type_id', 'dimension', 'indicator_id', 'yearData', 'remarks', 'valueId']);
+        $this->reset(['level_id', 'type_id', 'dimension', 'indicator_id', 'yearData', 'valueId']);
         $this->editMode = false;
         $this->showModal = true;
     }
@@ -101,11 +112,8 @@ class PydpDatasetDetailIndex extends Component
         $this->type_id = $data->indicator->pydp_type_id ?? null;
         $this->dimension = $data->dimension_id;
         $this->indicator_id = $data->pydp_indicator_id;
-        $this->baseline = $data->baseline;
-        $this->total = $data->total;
-        $this->remarks = $data->remarks;
 
-        // Populate year data
+        // Populate year data with new fields
         $this->yearData = [];
         foreach ($data->years as $year) {
             $this->yearData[$year->year] = [
@@ -113,6 +121,9 @@ class PydpDatasetDetailIndex extends Component
                 'financial_target' => $year->target_financial,
                 'physical_actual' => $year->actual_physical,
                 'financial_actual' => $year->actual_financial,
+                'baseline' => $year->baseline,
+                'total' => $year->total,
+                'remarks' => $year->remarks,
             ];
         }
 
@@ -122,13 +133,10 @@ class PydpDatasetDetailIndex extends Component
 
     public function save()
     {
-
         Log::info('Save method called', [
             'level_id' => $this->level_id,
             'dimension' => $this->dimension,
             'indicator_id' => $this->indicator_id,
-            'baseline' => $this->baseline,
-            'total' => $this->total,
             'yearData' => $this->yearData
         ]);
 
@@ -138,14 +146,11 @@ class PydpDatasetDetailIndex extends Component
 
         try {
             if ($this->editMode) {
-                // Update dataset detail
+                // Update dataset detail (only basic info now)
                 PydpDatasetDetail::where('id', $this->valueId)->update([
                     'pydp_dataset_id' => $this->datasetInfo['id'],
                     'dimension_id' => $this->dimension,
                     'pydp_indicator_id' => $this->indicator_id,
-                    'baseline' => $this->baseline,
-                    'total' => $this->total ?? 0,
-                    'remarks' => $this->remarks,
                 ]);
 
                 // Delete old years and reinsert
@@ -161,6 +166,9 @@ class PydpDatasetDetailIndex extends Component
                             'target_financial' => $values['financial_target'] ?? null,
                             'actual_physical' => $values['physical_actual'] ?? null,
                             'actual_financial' => $values['financial_actual'] ?? null,
+                            'baseline' => $values['baseline'] ?? null,
+                            'total' => $values['total'] ?? null,
+                            'remarks' => $values['remarks'] ?? null,
                         ]);
                     }
                 }
@@ -172,9 +180,6 @@ class PydpDatasetDetailIndex extends Component
                     'pydp_dataset_id' => $this->datasetInfo['id'],
                     'dimension_id' => $this->dimension,
                     'pydp_indicator_id' => $this->indicator_id,
-                    'baseline' => $this->baseline,
-                    'total' => $this->total ?? 0,
-                    'remarks' => $this->remarks,
                 ]);
 
                 // Only create year records if yearData exists
@@ -187,6 +192,9 @@ class PydpDatasetDetailIndex extends Component
                             'target_financial' => $values['financial_target'] ?? null,
                             'actual_physical' => $values['physical_actual'] ?? null,
                             'actual_financial' => $values['financial_actual'] ?? null,
+                            'baseline' => $values['baseline'] ?? null,
+                            'total' => $values['total'] ?? null,
+                            'remarks' => $values['remarks'] ?? null,
                         ]);
                     }
                 }
@@ -198,7 +206,7 @@ class PydpDatasetDetailIndex extends Component
 
             session()->flash('success', $this->editMode ? 'Dataset detail updated successfully.' : 'Dataset created successfully.');
             $this->showModal = false;
-            $this->reset(['level_id', 'type_id', 'dimension', 'indicator_id', 'yearData', 'remarks', 'valueId', 'editMode', 'baseline', 'total']);
+            $this->reset(['level_id', 'type_id', 'dimension', 'indicator_id', 'yearData', 'valueId', 'editMode']);
             $this->dispatch('refreshTable');
         } catch (\Exception $e) {
             DB::rollBack();
