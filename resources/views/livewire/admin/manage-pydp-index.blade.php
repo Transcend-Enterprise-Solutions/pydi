@@ -100,7 +100,7 @@
                 <table class="table-auto w-full text-left border border-gray-200 dark:border-gray-700">
                     <thead class="bg-gray-100 dark:bg-slate-700">
                         <tr class="uppercase text-xs">
-                            <th class="px-4 py-2">Account Name</th>
+                            <th class="px-4 py-2 whitespace-nowrap">Account Name</th>
                             <th class="px-4 py-2">Title</th>
                             <th class="px-4 py-2">Level</th>
                             <th class="px-4 py-2">Year Covered</th>
@@ -112,7 +112,7 @@
                     <tbody>
                         @forelse ($tableDatas as $index => $row)
                             <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
-                                <td class="px-4 py-2">{{ $row->user->name }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $row->user->name }}</td>
                                 <td class="px-4 py-2">{{ $row->name }}</td>
                                 <td class="px-4 py-2">
                                     @php
@@ -121,7 +121,7 @@
 
                                     @if($levels->count() > 0)
                                         @foreach($levels as $index => $level)
-                                            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded mr-1 mb-1">
+                                            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-white text-xs rounded mr-1 mb-1">
                                                 {{ $level }}
                                             </span>
                                         @endforeach
