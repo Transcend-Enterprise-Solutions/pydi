@@ -94,7 +94,7 @@ class DatasetDetailExport implements FromArray, WithEvents
 
                 // Set column widths
                 $sheet->getColumnDimension('A')->setWidth(25); // Dimension
-                $sheet->getColumnDimension('B')->setWidth(15); // Level
+                $sheet->getColumnDimension('B')->setWidth(45); // Level
                 $sheet->getColumnDimension('C')->setWidth(45); // Indicator
 
                 // Set year column widths

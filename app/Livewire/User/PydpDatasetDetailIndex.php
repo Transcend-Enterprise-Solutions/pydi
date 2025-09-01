@@ -35,10 +35,17 @@ class PydpDatasetDetailIndex extends Component
         $dataset = PydpDataset::with(['type'])->findOrFail($id);
         $this->datasetInfo = $dataset;
 
-        // Get all levels, types, and indicators
-        $this->levels = PydpLevel::all();
+        // Get only levels that belong to the current user
+        $this->levels = PydpLevel::where('user_id', auth()->id())
+                                ->where('is_active', 1)
+                                ->get();
+
         $this->types = PydpType::all();
-        $this->allIndicators = PydpIndicator::all();
+
+        // Get only indicators that belong to levels owned by the current user
+        $userLevelIds = collect($this->levels)->pluck('id');
+        $this->allIndicators = PydpIndicator::whereIn('pydp_level_id', $userLevelIds)->get();
+
         $this->dimensions = Dimension::all();
 
         $years = range((int)$dataset->type->year_start, (int)$dataset->type->year_end);
@@ -76,9 +83,16 @@ class PydpDatasetDetailIndex extends Component
         $this->indicator_id = null;
 
         if ($value) {
-            $this->indicators = PydpIndicator::where('pydp_level_id', $value)->get();
+            // Get indicators for the selected level that belongs to the current user
+            $this->indicators = PydpIndicator::where('pydp_level_id', $value)
+                                            ->whereHas('level', function($query) {
+                                                $query->where('user_id', auth()->id());
+                                            })
+                                            ->get();
         } else {
-            $this->indicators = $this->allIndicators;
+            // Show all indicators for user's levels
+            $userLevelIds = collect($this->levels)->pluck('id');
+            $this->indicators = PydpIndicator::whereIn('pydp_level_id', $userLevelIds)->get();
         }
     }
 

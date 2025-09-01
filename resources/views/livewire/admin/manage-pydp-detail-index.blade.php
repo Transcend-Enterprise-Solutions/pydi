@@ -48,66 +48,101 @@
                         class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">
                         <i class="bi bi-skip-backward"></i>
                     </a>
-
                 </div>
             </div>
 
             @include('livewire.user.session-flash')
 
-            <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200">
+            <div class="w-full overflow-x-auto">
+                <table class="table-auto w-full text-left border border-gray-200 min-w-max">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2 border">PYDP Center</th>
-                            <th class="px-4 py-2 border">Indicator</th>
-                            <th class="px-4 py-2 border">Year Data</th>
+                            <th class="px-4 py-2 border w-40">PYDP Center</th>
+                            <th class="px-4 py-2 border w-80">Level</th>
+                            <th class="px-4 py-2 border w-80">Indicator</th>
+                            <th class="px-4 py-2 border text-center">Year Data</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($tableDatas as $row)
-                            <tr class="hover:bg-gray-50 align-middle">
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ $row->dimension->name }}</td>
-                                <td class="px-4 py-2 border text-center text-xs align-middle">
-                                    {{ $row->indicator->title }}</td>
-
+                            <tr class="hover:bg-gray-50 align-top">
+                                <td class="px-4 py-2 border text-left text-xs align-top w-48">
+                                    <div class="break-words leading-tight">
+                                        {{ $row->dimension->name }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2 border text-center text-xs align-top w-40">
+                                    <span class="inline-block px-2 py-1 bg-purple-50 text-purple-800 rounded text-xs font-medium">
+                                        {{ $row->indicator->level->title ?? 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 border text-left text-xs align-top w-80">
+                                    <div class="break-words leading-tight whitespace-normal">
+                                        {{ $row->indicator->title }}
+                                    </div>
+                                </td>
                                 <td class="px-4 py-2 border align-middle">
                                     @php
                                         $yearData = $row->years->sortBy('year');
                                     @endphp
 
                                     @if ($yearData->count())
-                                        <table class="w-full text-xs border mx-auto">
-                                            <thead class="bg-gray-50 text-gray-700">
-                                                <tr>
-                                                    <th class="border px-2 py-1 text-center">Year</th>
-                                                    <th class="border px-2 py-1 text-center">Physical Target</th>
-                                                    <th class="border px-2 py-1 text-center">Financial Target</th>
-                                                    <th class="border px-2 py-1 text-center">Physical Actual</th>
-                                                    <th class="border px-2 py-1 text-center">Financial Actual</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($yearData as $year)
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-xs border mx-auto min-w-max">
+                                                <thead class="bg-gray-50 text-gray-700">
                                                     <tr>
-                                                        <td class="border px-2 py-1 text-center">{{ $year->year }}
-                                                        </td>
-                                                        <td class="border px-2 py-1 text-center">
-                                                            {{ $year->target_physical !== null ? number_format($year->target_physical, 2) : '-' }}
-                                                        </td>
-                                                        <td class="border px-2 py-1 text-center">
-                                                            {{ $year->target_financial !== null ? number_format($year->target_financial, 2) : '-' }}
-                                                        </td>
-                                                        <td class="border px-2 py-1 text-center">
-                                                            {{ $year->actual_physical !== null ? number_format($year->actual_physical, 2) : '-' }}
-                                                        </td>
-                                                        <td class="border px-2 py-1 text-center">
-                                                            {{ $year->actual_financial !== null ? number_format($year->actual_financial, 2) : '-' }}
-                                                        </td>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Year</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Baseline</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Physical Target</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Financial Target</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Physical Actual</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Financial Actual</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Total</th>
+                                                        <th class="border px-2 py-1 text-center whitespace-nowrap">Remarks</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($yearData as $year)
+                                                        <tr class="hover:bg-gray-25">
+                                                            <td class="border px-2 py-1 text-center font-medium">
+                                                                {{ $year->year }}
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                <span class="inline-block px-2 py-1 bg-blue-50 text-blue-800 rounded text-xs font-medium">
+                                                                    {{ $year->baseline !== null ? number_format($year->baseline, 2) : '-' }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                {{ $year->target_physical !== null ? number_format($year->target_physical, 2) : '-' }}
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                {{ $year->target_financial !== null ? number_format($year->target_financial, 2) : '-' }}
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                {{ $year->actual_physical !== null ? number_format($year->actual_physical, 2) : '-' }}
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                {{ $year->actual_financial !== null ? number_format($year->actual_financial, 2) : '-' }}
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-center">
+                                                                <span class="inline-block px-2 py-1 bg-green-50 text-green-800 rounded text-xs font-medium">
+                                                                    {{ $year->total !== null ? number_format($year->total, 2) : '-' }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="border px-2 py-1 text-left max-w-[150px]">
+                                                                @if($year->remarks)
+                                                                    <div class="truncate text-xs text-gray-700" title="{{ $year->remarks }}">
+                                                                        {{ $year->remarks }}
+                                                                    </div>
+                                                                @else
+                                                                    <span class="text-gray-400">-</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     @else
                                         <span class="text-gray-400 italic block text-center">No data</span>
                                     @endif
@@ -124,11 +159,9 @@
                 </table>
             </div>
 
-
             <div class="mt-4">
                 {{ $tableDatas->links() }}
             </div>
         </div>
     </div>
-
 </div>
