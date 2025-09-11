@@ -33,7 +33,32 @@ class DashboardIndex extends Component
     public function mount()
     {
         $this->dimensions = Dimension::orderBy('name')->get();
-        $this->selectedDimension = "";
+
+        // Select the first dimension by default if available
+        if ($this->dimensions instanceof \Illuminate\Support\Collection && $this->dimensions->isNotEmpty()) {
+            $this->selectedDimension = $this->dimensions->first()->id;
+
+            // Load indicators for the first dimension
+            $this->advocacyInfo = Dimension::with('indicators')->findOrFail($this->selectedDimension);
+            $this->indicators = $this->advocacyInfo->indicators;
+
+            // Select the first indicator if available
+            if (is_array($this->indicators)) {
+                if (!empty($this->indicators)) {
+                    $firstIndicator = reset($this->indicators);
+                    $this->selectedIndicator = $firstIndicator['id'] ?? '';
+                    $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
+                    $this->isPercentage = $this->measurementUnit === 'percentage';
+                }
+            } elseif ($this->indicators instanceof \Illuminate\Support\Collection && $this->indicators->isNotEmpty()) {
+                $this->selectedIndicator = $this->indicators->first()->id;
+                $this->measurementUnit = $this->indicators->first()->measurement_unit ?? 'frequency';
+                $this->isPercentage = $this->measurementUnit === 'percentage';
+            }
+        } else {
+            $this->selectedDimension = "";
+            $this->indicators = [];
+        }
 
         $this->yearOptions = PydiDataset::select('year')
             ->distinct()
@@ -65,6 +90,7 @@ class DashboardIndex extends Component
             $this->indicators = [];
             $this->measurementUnit = 'frequency'; // Reset to default
             $this->isPercentage = false;
+            $this->selectedIndicator = ""; // Reset indicator selection
         } else {
             $this->advocacyInfo = Dimension::with('indicators')->findOrFail($value);
             $this->indicators = $this->advocacyInfo->indicators;
@@ -73,10 +99,16 @@ class DashboardIndex extends Component
                 $firstIndicator = is_array($this->indicators) ? reset($this->indicators) : $this->indicators->first();
                 $this->measurementUnit = $firstIndicator->measurement_unit ?? 'frequency';
                 $this->isPercentage = $this->measurementUnit === 'percentage';
+
+                // Auto-select the first indicator
+                $this->selectedIndicator = is_array($this->indicators) ? $firstIndicator['id'] : $firstIndicator->id;
+            } else {
+                $this->selectedIndicator = ""; // No indicators available
+                $this->measurementUnit = 'frequency';
+                $this->isPercentage = false;
             }
         }
 
-        $this->selectedIndicator = ""; // Reset indicator selection
         $this->updateChartData();
         $this->loading = false;
     }
