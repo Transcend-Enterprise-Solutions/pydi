@@ -25,8 +25,8 @@
                     <label for="dimension-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium bg-white dark:bg-slate-800">Dimension</label>
                     <select id="dimension-select" wire:model.live="selectedDimension"
-                        class="px-4 py-2 text-sm border dark:bg-slate-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-48">
-                        <option value="">All Dimensions</option>
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-48">
+                        {{-- <option value="">All Dimensions</option> --}}
                         @foreach ($dimensions as $dimension)
                             <option value="{{ $dimension->id }}">{{ $dimension->name }}</option>
                         @endforeach
@@ -37,8 +37,8 @@
                     <label for="indicator-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Indicator</label>
                     <select id="indicator-select" wire:model.live="selectedIndicator"
-                        class="px-4 py-2 text-sm border dark:bg-slate-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-72">
-                        <option value="">All Indicators</option>
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-72">
+                        {{-- <option value="">All Indicators</option> --}}
                         @foreach ($indicators as $indicator)
                             <option value="{{ $indicator->id }}">
                                 {{ $indicator->name }}
