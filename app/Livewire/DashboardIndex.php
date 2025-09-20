@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
-use App\Models\{Dimension, PydiDataset, Indicator};
+use App\Models\{Dimension, PydiDataset, Indicator, PhilippineRegion, PhilippineRegions};
 
 #[Layout('layouts.app')]
 #[Title('Dashboard')]
@@ -14,8 +14,18 @@ class DashboardIndex extends Component
     public $yearOptions = [];
     public $indicators = [];
     public $dimensions = [];
+    public $regions = [];
     public $ageOptions = ['15-17', '18-24', '25-30 ', 'All Ages'];
+    public $sexOptions = ['Male', 'Female', 'Others', 'All Sexes'];
+
+    // Type annotations for better IDE support
+    /** @var \Illuminate\Database\Eloquent\Collection $dimensions */
+    /** @var \Illuminate\Database\Eloquent\Collection $regions */
+    /** @var \Illuminate\Database\Eloquent\Collection $indicators */
+
     public $selectedAge = 'All Ages';
+    public $selectedSex = 'All Sexes';
+    public $selectedRegion = '';
     public $selectedYear = '';
     public $selectedDimension = ""; // can be empty = all
     public $selectedIndicator = "";
@@ -32,27 +42,22 @@ class DashboardIndex extends Component
 
     public function mount()
     {
-        $this->dimensions = Dimension::orderBy('name')->get();
+        $this->dimensions = Dimension::orderBy('name')->get()->toArray();
+        $this->regions = PhilippineRegions::orderBy('region_description')->get()->toArray();
 
         // Select the first dimension by default if available
-        if ($this->dimensions instanceof \Illuminate\Support\Collection && $this->dimensions->isNotEmpty()) {
-            $this->selectedDimension = $this->dimensions->first()->id;
+        if (!empty($this->dimensions)) {
+            $this->selectedDimension = $this->dimensions[0]['id'];
 
             // Load indicators for the first dimension
             $this->advocacyInfo = Dimension::with('indicators')->findOrFail($this->selectedDimension);
-            $this->indicators = $this->advocacyInfo->indicators;
+            $this->indicators = $this->advocacyInfo->indicators->toArray();
 
             // Select the first indicator if available
-            if (is_array($this->indicators)) {
-                if (!empty($this->indicators)) {
-                    $firstIndicator = reset($this->indicators);
-                    $this->selectedIndicator = $firstIndicator['id'] ?? '';
-                    $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
-                    $this->isPercentage = $this->measurementUnit === 'percentage';
-                }
-            } elseif ($this->indicators instanceof \Illuminate\Support\Collection && $this->indicators->isNotEmpty()) {
-                $this->selectedIndicator = $this->indicators->first()->id;
-                $this->measurementUnit = $this->indicators->first()->measurement_unit ?? 'frequency';
+            if (!empty($this->indicators)) {
+                $firstIndicator = $this->indicators[0];
+                $this->selectedIndicator = $firstIndicator['id'] ?? '';
+                $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
                 $this->isPercentage = $this->measurementUnit === 'percentage';
             }
         } else {
@@ -68,6 +73,9 @@ class DashboardIndex extends Component
 
         $this->selectedYear = in_array(date('Y'), $this->yearOptions) ? date('Y') : ($this->yearOptions[0] ?? null);
 
+        // Set default region to "All Regions" (empty value)
+        $this->selectedRegion = '';
+
         $this->updateChartData();
     }
 
@@ -77,6 +85,16 @@ class DashboardIndex extends Component
     }
 
     public function updatedSelectedAge()
+    {
+        $this->updateChartData();
+    }
+
+    public function updatedSelectedSex()
+    {
+        $this->updateChartData();
+    }
+
+    public function updatedSelectedRegion()
     {
         $this->updateChartData();
     }
@@ -93,15 +111,16 @@ class DashboardIndex extends Component
             $this->selectedIndicator = ""; // Reset indicator selection
         } else {
             $this->advocacyInfo = Dimension::with('indicators')->findOrFail($value);
-            $this->indicators = $this->advocacyInfo->indicators;
+            $this->indicators = $this->advocacyInfo->indicators->toArray();
+
             // Set measurement unit based on first indicator if available
             if (!empty($this->indicators)) {
-                $firstIndicator = is_array($this->indicators) ? reset($this->indicators) : $this->indicators->first();
-                $this->measurementUnit = $firstIndicator->measurement_unit ?? 'frequency';
+                $firstIndicator = $this->indicators[0];
+                $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
                 $this->isPercentage = $this->measurementUnit === 'percentage';
 
                 // Auto-select the first indicator
-                $this->selectedIndicator = is_array($this->indicators) ? $firstIndicator['id'] : $firstIndicator->id;
+                $this->selectedIndicator = $firstIndicator['id'];
             } else {
                 $this->selectedIndicator = ""; // No indicators available
                 $this->measurementUnit = 'frequency';
@@ -127,8 +146,8 @@ class DashboardIndex extends Component
         } else {
             // If no specific indicator selected, use dimension's first indicator or default
             if (!empty($this->selectedDimension) && !empty($this->indicators)) {
-                $firstIndicator = is_array($this->indicators) ? reset($this->indicators) : $this->indicators->first();
-                $this->measurementUnit = $firstIndicator->measurement_unit ?? 'frequency';
+                $firstIndicator = $this->indicators[0];
+                $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
                 $this->isPercentage = $this->measurementUnit === 'percentage';
             } else {
                 $this->measurementUnit = 'frequency';
@@ -146,6 +165,7 @@ class DashboardIndex extends Component
 
         // Base query: fetch all or selected dimensions
         $dimensionsQuery = Dimension::with(['pydiDatasetDetails' => function ($query) {
+            // Age filter
             if ($this->selectedAge !== 'All Ages') {
                 if (str_contains($this->selectedAge, '+')) {
                     $ageMin = rtrim($this->selectedAge, '+');
@@ -156,16 +176,29 @@ class DashboardIndex extends Component
                 }
             }
 
+            // Sex filter
+            if ($this->selectedSex !== 'All Sexes') {
+                $query->where('sex', strtolower($this->selectedSex));
+            }
+
+            // Region filter
+            if (!empty($this->selectedRegion)) {
+                $query->where('philippine_region_id', $this->selectedRegion);
+            }
+
+            // Indicator filter
             if (!empty($this->selectedIndicator)) {
                 $query->where('indicator_id', $this->selectedIndicator);
             }
 
+            // User role filter
             if (auth()->user()->user_role === 'user') {
                 $query->whereHas('pydiDataset', function ($subQuery) {
                     $subQuery->where('user_id', auth()->id());
                 });
             }
 
+            // Year and status filter
             $query->whereHas('pydiDataset', function ($subQuery) {
                 $subQuery->where('year', $this->selectedYear)
                     ->where('status', 'approved');
@@ -238,6 +271,8 @@ class DashboardIndex extends Component
         $this->advocacyInfo = Dimension::with(['indicators', 'pydiDatasetDetails'])->findOrFail($value);
         $this->selectedYear = $this->yearOptions[0] ?? '';
         $this->selectedAge = 'All Ages';
+        $this->selectedSex = 'All Sexes';
+        $this->selectedRegion = '';
         $this->updateChartData();
     }
 
