@@ -159,6 +159,24 @@ class DashboardIndex extends Component
         $this->loading = false;
     }
 
+    public function getDimensionNameById($id){
+        $dimension = Dimension::find($id);
+        if($dimension){
+            return $dimension->name;
+        }
+
+        return '';
+    }
+
+    public function getIndicatorNameById($id){
+        $indicator = Indicator::find($id);
+        if($indicator){
+            return $indicator->name;
+        }
+
+        return '';
+    }
+
     protected function updateChartData()
     {
         $this->loading = true;

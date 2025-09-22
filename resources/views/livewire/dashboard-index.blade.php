@@ -2,7 +2,7 @@
     <x-dashboard.welcome-banner />
 
     <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <div class="flex flex-col items-start mb-6 gap-4 w-full">
             <div class="space-y-1">
                 <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">PYDI Support Levels</h2>
                 <p class="text-sm">
@@ -20,13 +20,13 @@
             </div>
 
             <!-- Filters -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 w-full sm:w-auto">
+            <div class="grid grid-cols-3 gap-4 w-full mt-5">
                 <!-- Dimension Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="dimension-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium bg-white dark:bg-slate-800">Dimension</label>
                     <select id="dimension-select" wire:model.live="selectedDimension"
-                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-48">
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-48 dark:bg-gray-800 dark:border-gray-700">
                         @foreach ($dimensions as $dimension)
                             <option value="{{ $dimension['id'] }}">{{ $dimension['name'] }}</option>
                         @endforeach
@@ -34,11 +34,11 @@
                 </div>
 
                 <!-- Indicator Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="indicator-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Indicator</label>
                     <select id="indicator-select" wire:model.live="selectedIndicator"
-                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-72">
+                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-72 dark:bg-gray-800 dark:border-gray-700">
                         @foreach ($indicators as $indicator)
                             <option value="{{ $indicator['id'] }}">
                                 {{ $indicator['name'] }}
@@ -49,11 +49,11 @@
                 </div>
 
                 <!-- Year Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="year-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Year</label>
                     <select id="year-select" wire:model.live="selectedYear"
-                        class="px-4 py-2 text-sm border dark:bg-slate-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-24">
+                        class="w-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         @foreach ($yearOptions as $year)
                             <option value="{{ $year }}">{{ $year }}</option>
                         @endforeach
@@ -61,11 +61,11 @@
                 </div>
 
                 <!-- Age Group Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="age-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Age Group</label>
                     <select id="age-select" wire:model.live="selectedAge"
-                        class="px-4 py-2 text-sm border dark:bg-slate-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-28">
+                        class="w-full px-4 py-2 text-sm border dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         @foreach ($ageOptions as $age)
                             <option value="{{ $age }}">{{ $age }}</option>
                         @endforeach
@@ -73,11 +73,11 @@
                 </div>
 
                 <!-- Sex Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="sex-select"
-                        class="absolute -top-2 left-2 px-1 text-xs font-medium text-gray-500 bg-white">Sex</label>
+                        class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Sex</label>
                     <select id="sex-select" wire:model.live="selectedSex"
-                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-32">
+                        class="px-4 py-2 text-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-32">
                         @foreach ($sexOptions as $sex)
                             <option value="{{ $sex }}">{{ $sex }}</option>
                         @endforeach
@@ -85,16 +85,56 @@
                 </div>
 
                 <!-- Region Filter -->
-                <div class="relative">
+                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
                     <label for="region-select"
-                        class="absolute -top-2 left-2 px-1 text-xs font-medium text-gray-500 bg-white">Region</label>
+                        class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Region</label>
                     <select id="region-select" wire:model.live="selectedRegion"
-                        class="px-4 py-2 text-sm border border-gray-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-48">
+                        class="px-4 py-2 text-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full min-w-48">
                         <option value="">All Regions</option>
                         @foreach ($regions as $region)
                             <option value="{{ $region['id'] }}">{{ $region['region_description'] }}</option>
                         @endforeach
                     </select>
+                </div>
+            </div>
+
+            <!-- Filter Summary -->
+            <div class="p-2 rounded-lg w-full">
+                <h3 class="text-sm font-medium mb-2">Active Filters:</h3>
+                <div class="flex flex-wrap gap-2">
+                    @if($selectedDimension)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            Dimension: {{ $this->getDimensionNameById($selectedDimension) }}
+                        </span>
+                    @endif
+                    @if($selectedIndicator)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            Indicator: {{ $this->getIndicatorNameById($selectedIndicator) }}
+                        </span>
+                    @endif
+                    @if($selectedAge !== 'All Ages')
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            Age: {{ $selectedAge }}
+                        </span>
+                    @endif
+                    @if($selectedSex !== 'All Sexes')
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Sex: {{ $selectedSex }}
+                        </span>
+                    @endif
+                    @if($selectedRegion && collect($regions)->where('id', $selectedRegion)->first())
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                            Region: {{ collect($regions)->where('id', $selectedRegion)->first()['region_description'] ?? 'Unknown' }}
+                        </span>
+                    @endif
+                    @if($selectedYear)
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Year: {{ $selectedYear }}
+                        </span>
+                    @endif
+                    @if(!$selectedAge === 'All Ages' && !$selectedSex === 'All Sexes' && !$selectedRegion && !$selectedYear)
+                        <span class="text-xs text-gray-500">No filters applied</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -175,36 +215,6 @@
                         @endif
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Filter Summary -->
-        <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <h3 class="text-sm font-medium text-gray-700 mb-2">Active Filters:</h3>
-            <div class="flex flex-wrap gap-2">
-                @if($selectedAge !== 'All Ages')
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Age: {{ $selectedAge }}
-                    </span>
-                @endif
-                @if($selectedSex !== 'All Sexes')
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Sex: {{ $selectedSex }}
-                    </span>
-                @endif
-                @if($selectedRegion && collect($regions)->where('id', $selectedRegion)->first())
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        Region: {{ collect($regions)->where('id', $selectedRegion)->first()['region_description'] ?? 'Unknown' }}
-                    </span>
-                @endif
-                @if($selectedYear)
-                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        Year: {{ $selectedYear }}
-                    </span>
-                @endif
-                @if(!$selectedAge === 'All Ages' && !$selectedSex === 'All Sexes' && !$selectedRegion && !$selectedYear)
-                    <span class="text-xs text-gray-500">No filters applied</span>
-                @endif
             </div>
         </div>
     </div>

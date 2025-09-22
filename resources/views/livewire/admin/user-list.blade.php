@@ -78,8 +78,8 @@
         </div>
 
         <!-- Table -->
-        <div class="mt-4 overflow-x-auto text-sm">
-            <table class="min-w-full bg-white dark:bg-gray-800 overflow-hidden">
+        <div class="overflow-x-auto text-sm">
+            <table class="w-full min-w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700 rounded-xl">
                     <tr class="whitespace-nowrap">
                         @if($bulkSelectMode)
@@ -93,12 +93,12 @@
                         <th class="px-4 py-2 uppercase font-medium text-left">Contact</th>
                         <th class="px-4 py-2 uppercase font-medium text-left">Agency</th>
                         <th class="px-4 py-2 uppercase font-medium text-center">Status</th>
-                        <th class="px-4 py-2 uppercase font-medium text-center">Actions</th>
+                        <th class="px-4 py-2 uppercase font-medium text-center sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
-                    <tr class="border-b border-gray-200 dark:border-gray-700 whitespace-nowrap hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr class="border-b border-gray-200 dark:border-gray-700 whitespace-nowrap">
                         @if($bulkSelectMode)
                             <td class="px-4 py-2">
                                 <input type="checkbox" wire:model.live="selectedUsers" value="{{ $user->id }}"
@@ -124,7 +124,7 @@
                                     @break
                             @endswitch
                         </td>
-                        <td class="px-4 py-2 text-center">
+                        <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
                             <div class="flex justify-center space-x-3">
                                 @if($user->active_status == 0) {{-- Pending --}}
                                     <button wire:click="confirmAction({{ $user->id }}, 'approve')"
