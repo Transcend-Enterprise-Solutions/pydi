@@ -1,4 +1,4 @@
-<div x-data="{
+<div class="w-full mt-6" x-data="{
     isModalOpen: false,
     isEditMode: false,
     confirmingAction: @entangle('confirmingAction'),

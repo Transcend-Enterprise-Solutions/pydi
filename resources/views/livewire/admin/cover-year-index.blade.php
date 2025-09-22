@@ -1,9 +1,9 @@
-<div class="w-full">
+<div class="w-full mt-6">
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex flex-col justify-start items-start mb-4">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Covered Year (PYDP)</h2>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center flex-wrap gap-2 mt-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
                         class="w-52 py-2 px-3 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <select wire:model.live="showEntries"
@@ -22,70 +22,72 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="w-full">
-                <table class="table-auto w-full text-left border border-gray-200 dark:border-gray-700">
-                    <thead class="bg-gray-100 dark:bg-slate-700">
-                        <tr class="uppercase text-xs">
-                            <th class="px-4 py-2">#</th>
-                            <th class="px-4 py-2">Title</th>
-                            <th class="px-4 py-2">Description</th>
-                            <th class="px-4 py-2">Covered Year</th>
-                            <th class="px-4 py-2">Created At</th>
-                            <th class="px-4 py-2 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($tableDatas as $index => $row)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
-                                <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
-                                <td class="px-4 py-2">{{ $row->title }}</td>
-                                <td class="px-4 py-2">{{ $row->content }}</td>
-                                <td class="px-4 py-2">{{ $row->year_start . '  - ' . $row->year_end }}</td>
-                                <td class="px-4 py-2">{{ $row->created_at->format('M d, Y') }}</td>
+            <div class="border border-gray-200 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-100 dark:bg-slate-700">
+                            <tr class="uppercase text-xs">
+                                <th class="px-4 py-2">#</th>
+                                <th class="px-4 py-2">Title</th>
+                                <th class="px-4 py-2">Description</th>
+                                <th class="px-4 py-2">Covered Year</th>
+                                <th class="px-4 py-2">Created At</th>
+                                <th class="px-4 py-2 text-center sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($tableDatas as $index => $row)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
+                                    <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
+                                    <td class="px-4 py-2">{{ $row->title }}</td>
+                                    <td class="px-4 py-2">{{ $row->content }}</td>
+                                    <td class="px-4 py-2">{{ $row->year_start . '  - ' . $row->year_end }}</td>
+                                    <td class="px-4 py-2">{{ $row->created_at->format('M d, Y') }}</td>
 
-                                <!-- Action Buttons as Dropdown -->
-                                <td class="px-4 py-2 text-center">
-                                    <div x-data="{ open: false }" class="relative inline-block text-left">
-                                        <!-- Dropdown Trigger -->
-                                        <button @click="open = !open"
-                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
-                                            aria-label="Toggle actions menu" title="More actions">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+                                    <!-- Action Buttons as Dropdown -->
+                                    <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
+                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                            <!-- Dropdown Trigger -->
+                                            <button @click="open = !open"
+                                                class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                                aria-label="Toggle actions menu" title="More actions">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
 
-                                        <!-- Dropdown Menu -->
-                                        <div x-show="open" @click.away="open = false" x-transition
-                                            class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
-                                            <ul
-                                                class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
-                                                <li>
-                                                    <button wire:click="edit({{ $row->id }})"
-                                                        class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                        <i class="bi bi-pencil-fill"></i> Edit Details
-                                                    </button>
-                                                </li>
+                                            <!-- Dropdown Menu -->
+                                            <div x-show="open" @click.away="open = false" x-transition
+                                                class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
+                                                <ul
+                                                    class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
+                                                    <li>
+                                                        <button wire:click="edit({{ $row->id }})"
+                                                            class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                            <i class="bi bi-pencil-fill"></i> Edit Details
+                                                        </button>
+                                                    </li>
 
-                                                <li>
-                                                    <button wire:click="confirmDelete({{ $row->id }})"
-                                                        class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
-                                                        <i class="bi bi-trash-fill"></i> Delete Year Covered
-                                                    </button>
-                                                </li>
-                                            </ul>
+                                                    <li>
+                                                        <button wire:click="confirmDelete({{ $row->id }})"
+                                                            class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
+                                                            <i class="bi bi-trash-fill"></i> Delete Year Covered
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-gray-500">
-                                    No records found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-gray-500">
+                                        No records found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="mt-4">

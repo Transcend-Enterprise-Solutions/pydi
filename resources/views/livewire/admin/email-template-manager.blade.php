@@ -1,6 +1,6 @@
-<div class="p-6">
+<div class="w-full mt-8">
     <div class="max-w-7xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-3 sm:p-6">
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg p-3 sm:p-6">
             <div class="w-full mb-6">
                 <div class="flex justify-between items-center">
                     <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Email Template Manager</h2>
@@ -28,7 +28,7 @@
                                 <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Name</th>
                                 <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Subject</th>
                                 <th class="px-6 py-3 text-left font-medium text-gray-500 tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-center font-medium text-gray-500 tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-center font-medium tracking-wider sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300">
@@ -48,7 +48,7 @@
                                             {{ $template->is_active ? 'Active' : 'Inactive' }}
                                         </button>
                                     </td>
-                                    <td class="px-6 py-2 text-center whitespace-nowrap font-medium space-x-2">
+                                    <td class="px-6 py-2 text-center whitespace-nowrap font-medium space-x-2 sticky right-0 z-10 bg-white dark:bg-gray-800">
                                         <button 
                                             wire:click="editTemplate({{ $template->id }})"
                                             class="text-blue-500 hover:text-blue-600"

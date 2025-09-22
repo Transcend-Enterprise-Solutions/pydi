@@ -1,9 +1,9 @@
-<div class="w-full">
+<div class="w-full mt-6">
     <h2 class="text-xl font-bold mb-3 pt-0">PYDI ({{ $datasetInfo->name }})</h2>
 
     <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
-        <div class="flex justify-between items-center mb-4">
-            <div class="flex gap-2 items-center">
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+            <div class="flex gap-2 items-center flex-wrap">
                 <input type="text" wire:model.live="search" placeholder="Search..."
                     class="w-52 py-1 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                 <select wire:model.live="showEntries"
@@ -15,8 +15,6 @@
                 </select>
             </div>
             <div class="flex gap-2 items-center">
-
-
                 <button wire:click="$set('showExportModal', true)"
                     class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">
                     <i class="bi bi-bar-chart-fill mr-2"></i>Generate Report
