@@ -9,7 +9,7 @@ use App\Models\EmailTemplate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
-use App\Models\UserData;
+use App\Services\EmailService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -41,6 +41,13 @@ class UserList extends Component
     public $selectAll = false;
     public $bulkActionType;
     public $confirmingBulkAction;
+
+    protected EmailService $emailService;
+
+    public function __construct()
+    {
+        $this->emailService = app(EmailService::class);
+    }
 
     public function render()
     {
@@ -158,6 +165,7 @@ class UserList extends Component
         switch($action){
             case 'email':
                 $this->openBulkEmailModal = true;
+                $this->bulkActionType = 'email';
                 break;
             case 'reject':
                 $this->bulkActionType = 'reject';
@@ -191,19 +199,23 @@ class UserList extends Component
     public function updateStatus()
     {
         if ($this->actionType === 'reject') {
-            // Delete the user and their data when rejected
             $user = User::findOrFail($this->userId);
             $user->userData()->delete();
             $user->delete();
 
-            $emailTemplate = EmailTemplate::where('name', 'user_rejected_notif')->first();
-            if($emailTemplate && $emailTemplate->is_active){
-                Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_rejected_notif'));
-            }else{
-                session()->flash('error', 'Email not sent. Email template is not active.');
-            }
+            // Send rejection email with error handling
+            $result = $this->emailService->sendEmail(
+                $user->email,
+                'registration_rejection_notif',
+                new UserRegistrationNotif(Auth::user()->email, 'registration_rejection_notif')
+            );
 
-            session()->flash('success', 'User has been rejected and removed from the system.');
+            if ($result['success']) {
+                session()->flash('success', 'User has been rejected and removed from the system.');
+            } else {
+                session()->flash('success', 'User has been rejected and removed from the system.');
+                session()->flash('error', $result['message']);
+            }
         } else {
             // Handle other status changes
             $status = match($this->actionType) {
@@ -216,27 +228,29 @@ class UserList extends Component
                 $user = User::findOrFail($this->userId);
                 $user->update(['active_status' => $status]);
 
-                session()->flash('success', $this->getSuccessMessage($status));
+                $successMessage = $this->getSuccessMessage($status);
 
-                switch($status){
-                    case 1:
-                        $emailTemplate = EmailTemplate::where('name', 'user_approved_notif')->first();
-                        if($emailTemplate && $emailTemplate->is_active){
-                            Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_approved_notif'));
-                        }else{
-                            session()->flash('error', 'Email not sent. Email template is not active.');
-                        }
-                        break;
-                    case 3:
-                        $emailTemplate = EmailTemplate::where('name', 'user_deactivated_notif')->first();
-                        if($emailTemplate && $emailTemplate->is_active){
-                            Mail::to( $user->email)->send(new UserRegistrationNotif( Auth::user()->email,'user_deactivated_notif'));
-                        }else{
-                            session()->flash('error', 'Email not sent. Email template is not active.');
-                        }
-                        break;
-                    default:
-                        break;  
+                $templateName = match($status) {
+                    1 => 'registration_approval_notif',
+                    3 => 'account_deactivation_notif',
+                    default => null
+                };
+
+                if ($templateName) {
+                    $result = $this->emailService->sendEmail(
+                        $user->email,
+                        $templateName,
+                        new UserRegistrationNotif(Auth::user()->email, $templateName)
+                    );
+
+                    if ($result['success']) {
+                        session()->flash('success', $successMessage);
+                    } else {
+                        session()->flash('success', $successMessage);
+                        session()->flash('error', $result['message']);
+                    }
+                } else {
+                    session()->flash('success', $successMessage);
                 }
             }
         }
@@ -258,6 +272,7 @@ class UserList extends Component
         $selectedCount = count($this->selectedUsers);
         $successCount = 0;
         $errorCount = 0;
+        $processedUsers = [];
 
         try {
             foreach ($this->selectedUsers as $userId) {
@@ -266,20 +281,22 @@ class UserList extends Component
                     
                     switch ($this->bulkActionType) {
                         case 'reject':
-                            // Delete the user and their data when rejected
                             $user->userData()->delete();
                             $user->delete();
                             $successCount++;
+                            $processedUsers[] = $user;
                             break;
                             
                         case 'approve':
                             $user->update(['active_status' => 1]);
                             $successCount++;
+                            $processedUsers[] = $user;
                             break;
                             
                         case 'deactivate':
                             $user->update(['active_status' => 3]);
                             $successCount++;
+                            $processedUsers[] = $user;
                             break;
                     }
                 } catch (Exception $e) {
@@ -288,29 +305,8 @@ class UserList extends Component
                 }
             }
 
-            $templateName = '';
-            switch ($this->bulkActionType) {
-                case 'reject':
-                    $templateName = 'user_rejected_notif';
-                    break;
-                case 'approve':
-                    $templateName = 'user_approved_notif';
-                case 'deactivate':
-                    $templateName = 'user_deactivated_notif';
-                    break;
-            }
-
-            $senderEmail = Auth::user()->email;
-            $emailTemplate = EmailTemplate::where('name', $templateName)->first();
-            if($emailTemplate && $emailTemplate->is_active){
-                SendBulkEmailJob::dispatch(
-                    $this->selectedUsers, 
-                    $templateName, 
-                    $senderEmail,
-                    true
-                );
-            }else{
-                session()->flash('error', 'Email not sent. Email template is not active.');
+            if (!empty($processedUsers)) {
+                $this->handleBulkEmails($processedUsers);
             }
 
             if ($errorCount === 0) {
@@ -323,7 +319,80 @@ class UserList extends Component
             session()->flash('error', 'There was an error processing the bulk action. Please try again.');
             Log::error("Bulk action failed: " . $e->getMessage());
         }
+        
         $this->resetBulkAction();
+    }
+
+    private function handleBulkEmails(array $users)
+    {
+        $templateName = $this->getBulkEmailTemplate();
+        
+        if (!$templateName) {
+            return;
+        }
+
+        $recipients = array_map(function($user) {
+            return [
+                'email' => $user->email,
+                'user' => $user
+            ];
+        }, $users);
+
+        // Determine if we should use queue (for more than 10 users)
+        $useQueue = count($users) > 1;
+
+        // Send bulk emails using EmailService
+        $result = $this->emailService->sendBulkEmails(
+            $recipients,
+            $templateName,
+            function($recipient) use ($templateName) {
+                return new UserRegistrationNotif(Auth::user()->email, $templateName);
+            },
+            $useQueue
+        );
+
+        if (isset($result['queued']) && $result['queued']) {
+            $this->addEmailQueuedMessage(count($users));
+        } elseif ($result['failed'] > 0) {
+            $this->addEmailErrorMessage($result);
+        }
+    }
+
+    private function addEmailQueuedMessage(int $userCount)
+    {
+        $currentMessage = session()->get('success', '');
+        $emailMessage = " Notification emails for {$userCount} users have been queued for background processing.";
+        session()->flash('success', $currentMessage . $emailMessage);
+    }
+
+    private function addEmailErrorMessage(array $result)
+    {
+        $errorMessage = "Actions completed successfully, but {$result['failed']} email(s) failed to send.";
+        
+        if (!empty($result['errors'])) {
+            foreach ($result['errors'] as $error) {
+                Log::warning("Bulk email failed", $error);
+            }
+            
+            $errorMessages = array_column($result['errors'], 'error');
+            $uniqueErrors = array_unique($errorMessages);
+            
+            if (count($uniqueErrors) === 1) {
+                $errorMessage .= " Error: " . $uniqueErrors[0];
+            }
+        }
+        
+        session()->flash('warning', $errorMessage);
+    }
+
+    private function getBulkEmailTemplate(): ?string
+    {
+        return match($this->bulkActionType) {
+            'reject' => 'registration_rejection_notif',
+            'approve' => 'registration_approval_notif',
+            'deactivate' => 'account_deactivation_notif',
+            default => null
+        };
     }
 
     private function getBulkSuccessMessage($actionType, $count)
@@ -375,30 +444,53 @@ class UserList extends Component
         };
     }
 
-    public function sendEmail(){
+    public function sendEmail()
+    {
         $this->validate([
             'email_subject' => 'required'
         ]);
-        try{
+
+        try {
             $userInfo = User::where('id', $this->userId)->first();
-    
-            $emailTemplate = EmailTemplate::where('name', $this->email_subject)->first();
-            if($emailTemplate && $emailTemplate->is_active){
-                switch($this->email_subject){
-                    case 'agency_submission_reminder_notif':
-                        Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new SubmissionReminderNotif( Auth::user()->email, $this->email_subject));
-                        break;
-                }
-            }else{
-                session()->flash('error', 'Email not sent. Email template is not active.');
+
+            if (!$userInfo) {
+                session()->flash('error', 'User not found.');
                 $this->openEmailModal = false;
                 return;
             }
 
-            session()->flash('success', 'Email has been successfully sent to the agency representative.');
-            $this->resetAction();
-        }catch(Exception $e){
-            throw $e;
+            $mailable = $this->createSingleEmailMailable($userInfo);
+            
+            if (!$mailable) {
+                session()->flash('error', 'Unsupported email template.');
+                $this->openEmailModal = false;
+                return;
+            }
+
+            // Use EmailService for sending with proper error handling
+            $result = $this->emailService->sendEmail(
+                $userInfo->email,
+                $this->email_subject,
+                $mailable
+            );
+
+            if ($result['success']) {
+                session()->flash('success', 'Email has been successfully sent to the agency representative.');
+                $this->resetAction();
+            } else {
+                session()->flash('error', $result['message']);
+                $this->openEmailModal = false;
+            }
+
+        } catch (Exception $e) {
+            Log::error("Single email send failed", [
+                'user_id' => $this->userId,
+                'email_subject' => $this->email_subject,
+                'error' => $e->getMessage()
+            ]);
+            
+            session()->flash('error', 'An unexpected error occurred while sending the email.');
+            $this->openEmailModal = false;
         }
     }
 
@@ -408,37 +500,107 @@ class UserList extends Component
             'email_subject' => 'required'
         ]);
 
-        try {
-            $selectedUserIds = $this->selectedUsers;
-            $emailSubject = $this->email_subject;
-            $senderEmail = Auth::user()->email;
+        if (empty($this->selectedUsers)) {
+            $this->dispatch('swal', [
+                'title' => 'No Selection',
+                'text' => 'Please select at least one user.',
+                'icon' => 'warning'
+            ]);
+            return;
+        }
 
-            $emailTemplate = EmailTemplate::where('name', $emailSubject)->first();
-            if($emailTemplate && $emailTemplate->is_active){
-                SendBulkEmailJob::dispatch(
-                    $selectedUserIds, 
-                    $emailSubject, 
-                    $senderEmail
-                );
-            }else{
-                session()->flash('error', 'Email not sent. Email template is not active.');
+        try {
+            $users = User::whereIn('id', $this->selectedUsers)->get();
+            
+            if ($users->isEmpty()) {
+                session()->flash('error', 'Selected users not found.');
                 $this->openBulkEmailModal = false;
                 return;
             }
-            session()->flash('success', 'Email has been successfully sent to the agency representative.');
 
+            $recipients = $users->map(function($user) {
+                return [
+                    'email' => $user->email,
+                    'user' => $user
+                ];
+            })->toArray();
 
+            $useQueue = count($users) > 1;
+
+            $result = $this->emailService->sendBulkEmails(
+                $recipients,
+                $this->email_subject,
+                function($recipient) {
+                    return $this->createBulkEmailMailable($recipient['user']);
+                },
+                $useQueue
+            );
+
+            $this->handleBulkEmailResult($result, count($users));
+            
             $this->resetAction();
             $this->clearBulkSelection();
             $this->bulkSelectMode = false;
 
         } catch (Exception $e) {
+            Log::error("Bulk email send failed", [
+                'selected_users' => $this->selectedUsers,
+                'email_subject' => $this->email_subject,
+                'error' => $e->getMessage()
+            ]);
+
             $this->dispatch('swal', [
                 'title' => 'Error!',
-                'text' => 'There was an error queuing the emails. Please try again.',
+                'text' => 'There was an error processing the bulk email request. Please try again.',
                 'icon' => 'error'
             ]);
-            throw $e;
+            
+            $this->openBulkEmailModal = false;
         }
+    }
+
+    /**
+     * Create mailable for single email sending
+     */
+    private function createSingleEmailMailable(User $user)
+    {
+        return match($this->email_subject) {
+            'agency_submission_reminder_notif' => new SubmissionReminderNotif(Auth::user()->email, $this->email_subject),
+            default => null
+        };
+    }
+
+    /**
+     * Create mailable for bulk email sending
+     */
+    private function createBulkEmailMailable(User $user)
+    {
+        return match($this->email_subject) {
+            'agency_submission_reminder_notif' => new SubmissionReminderNotif(Auth::user()->email, $this->email_subject),
+            // Add more email types as needed
+            default => new SubmissionReminderNotif(Auth::user()->email, $this->email_subject)
+        };
+    }
+
+    /**
+     * Handle bulk email sending results
+     */
+    private function handleBulkEmailResult(array $result, int $totalUsers)
+    {
+        if (isset($result['queued']) && $result['queued']) {
+            session()->flash('success', "Emails for {$totalUsers} users have been queued for background processing. You will receive notifications once they are sent.");
+        } elseif ($result['failed'] === 0) {
+            session()->flash('success', "Emails have been successfully sent to {$result['sent']} agency representatives.");
+        } elseif ($result['sent'] > 0) {
+            session()->flash('warning', "Emails sent to {$result['sent']} users successfully, but {$result['failed']} failed to send. Please check the logs for details.");
+        } else {
+            if (!empty($result['errors']) && count($result['errors']) === 1) {
+                session()->flash('error', $result['errors'][0]['error']);
+            } else {
+                session()->flash('error', 'All emails failed to send. Please check your email configuration and try again.');
+            }
+        }
+
+        $this->openBulkEmailModal = false;
     }
 }

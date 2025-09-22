@@ -3,7 +3,7 @@
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-3 sm:p-6">
             <div class="w-full mb-6">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Email Templates Manager</h2>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Email Template Manager</h2>
                     {{-- <button 
                         wire:click="createTemplate" 
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -99,7 +99,7 @@
                                                 type="text" 
                                                 wire:model="name" 
                                                 class="mt-1 block dark:bg-slate-700 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="e.g., training_invitation"
+                                                placeholder="e.g., approval_notif"
                                             > --}}
                                             @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                         </div>
