@@ -22,7 +22,7 @@
             <!-- Filters -->
             <div class="grid grid-cols-3 gap-4 w-full mt-5">
                 <!-- Dimension Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="dimension-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium bg-white dark:bg-slate-800">Dimension</label>
                     <select id="dimension-select" wire:model.live="selectedDimension"
@@ -34,7 +34,7 @@
                 </div>
 
                 <!-- Indicator Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="indicator-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Indicator</label>
                     <select id="indicator-select" wire:model.live="selectedIndicator"
@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- Year Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="year-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Year</label>
                     <select id="year-select" wire:model.live="selectedYear"
@@ -61,7 +61,7 @@
                 </div>
 
                 <!-- Age Group Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="age-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Age Group</label>
                     <select id="age-select" wire:model.live="selectedAge"
@@ -73,7 +73,7 @@
                 </div>
 
                 <!-- Sex Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="sex-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Sex</label>
                     <select id="sex-select" wire:model.live="selectedSex"
@@ -85,7 +85,7 @@
                 </div>
 
                 <!-- Region Filter -->
-                <div class="relative sm:col-span-full md:col-span-1 lg:col-span-1">
+                <div class="relative col-span-full md:col-span-1 lg:col-span-1">
                     <label for="region-select"
                         class="absolute -top-2 left-2 px-1 text-xs font-medium dark:bg-slate-800 bg-white">Region</label>
                     <select id="region-select" wire:model.live="selectedRegion"
