@@ -32,7 +32,15 @@ class PydpDatasetDetailIndex extends Component
 
     public function mount($id)
     {
+        // Ensure the dataset belongs to the current user or is accessible to them
         $dataset = PydpDataset::with(['type'])->findOrFail($id);
+
+        // Add additional check if datasets have user ownership
+        // Uncomment if datasets should be user-specific:
+        // if ($dataset->user_id !== auth()->id()) {
+        //     abort(403, 'Access denied to this dataset.');
+        // }
+
         $this->datasetInfo = $dataset;
 
         // Get only levels that belong to the current user
@@ -70,7 +78,12 @@ class PydpDatasetDetailIndex extends Component
     public function getIndicatorsProperty()
     {
         if ($this->level_id) {
-            return PydpIndicator::where('pydp_level_id', $this->level_id)->get();
+            // Only get indicators for levels owned by the current user
+            return PydpIndicator::where('pydp_level_id', $this->level_id)
+                               ->whereHas('level', function($query) {
+                                   $query->where('user_id', auth()->id());
+                               })
+                               ->get();
         }
 
         return $this->allIndicators;
@@ -83,6 +96,16 @@ class PydpDatasetDetailIndex extends Component
         $this->indicator_id = null;
 
         if ($value) {
+            // Verify the selected level belongs to the current user
+            $levelBelongsToUser = PydpLevel::where('id', $value)
+                                          ->where('user_id', auth()->id())
+                                          ->exists();
+
+            if (!$levelBelongsToUser) {
+                $this->addError('level_id', 'Selected level is not accessible.');
+                return;
+            }
+
             // Get indicators for the selected level that belongs to the current user
             $this->indicators = PydpIndicator::where('pydp_level_id', $value)
                                             ->whereHas('level', function($query) {
@@ -105,10 +128,21 @@ class PydpDatasetDetailIndex extends Component
 
     public function edit($id)
     {
-        $data = PydpDatasetDetail::with(['years', 'indicator.level'])->findOrFail($id);
+        // Ensure the dataset detail is accessible (through indicator ownership)
+        $data = PydpDatasetDetail::with(['years', 'indicator.level'])
+                                 ->whereHas('indicator.level', function($query) {
+                                     $query->where('user_id', auth()->id());
+                                 })
+                                 ->where('id', $id)
+                                 ->first();
+
+        if (!$data) {
+            session()->flash('error', 'Dataset detail not found or access denied.');
+            return;
+        }
 
         $this->valueId = $data->id;
-        $this->level_id = $data->indicator->pydp_level_id ?? null; // Get level from indicator
+        $this->level_id = $data->indicator->pydp_level_id ?? null;
         $this->type_id = $data->indicator->pydp_type_id ?? null;
         $this->dimension = $data->dimension_id;
         $this->indicator_id = $data->pydp_indicator_id;
@@ -140,12 +174,47 @@ class PydpDatasetDetailIndex extends Component
             'yearData' => $this->yearData
         ]);
 
+        // Additional validation to ensure selected level belongs to current user
+        if ($this->level_id) {
+            $levelExists = PydpLevel::where('id', $this->level_id)
+                                   ->where('user_id', auth()->id())
+                                   ->exists();
+            if (!$levelExists) {
+                $this->addError('level_id', 'Selected level is not accessible.');
+                return;
+            }
+        }
+
+        // Additional validation to ensure selected indicator belongs to user's level
+        if ($this->indicator_id) {
+            $indicatorExists = PydpIndicator::where('id', $this->indicator_id)
+                                           ->whereHas('level', function($query) {
+                                               $query->where('user_id', auth()->id());
+                                           })
+                                           ->exists();
+            if (!$indicatorExists) {
+                $this->addError('indicator_id', 'Selected indicator is not accessible.');
+                return;
+            }
+        }
+
         $this->validate();
 
         DB::beginTransaction();
 
         try {
             if ($this->editMode) {
+                // Verify ownership before updating
+                $existingDetail = PydpDatasetDetail::whereHas('indicator.level', function($query) {
+                    $query->where('user_id', auth()->id());
+                })->where('id', $this->valueId)->first();
+
+                if (!$existingDetail) {
+                    DB::rollBack();
+                    $this->addError('save', 'Access denied to update this dataset detail.');
+                    return;
+                }
+
                 // Update dataset detail (only basic info now)
                 PydpDatasetDetail::where('id', $this->valueId)->update([
                     'pydp_dataset_id' => $this->datasetInfo['id'],
@@ -218,6 +287,16 @@ class PydpDatasetDetailIndex extends Component
     // Delete Dataset
     public function confirmDelete($id)
     {
+        // Verify the dataset detail is accessible before allowing delete
+        $detailExists = PydpDatasetDetail::whereHas('indicator.level', function($query) {
+            $query->where('user_id', auth()->id());
+        })->where('id', $id)->exists();
+
+        if (!$detailExists) {
+            session()->flash('error', 'Dataset detail not found or access denied.');
+            return;
+        }
+
         $this->valueId = $id;
         $this->showDeleteModal = true;
     }
@@ -225,11 +304,19 @@ class PydpDatasetDetailIndex extends Component
     public function delete()
     {
         if ($this->valueId) {
-            $dataset = PydpDatasetDetail::findOrFail($this->valueId);
+            // Ensure the dataset detail belongs to user's indicators
+            $dataset = PydpDatasetDetail::whereHas('indicator.level', function($query) {
+                $query->where('user_id', auth()->id());
+            })->where('id', $this->valueId)->first();
+
+            if (!$dataset) {
+                session()->flash('error', 'Dataset detail not found or access denied.');
+                $this->reset(['showDeleteModal', 'valueId']);
+                return;
+            }
+
             $dataset->delete();
-
             $this->logs("Deleted dataset detail: {$this->valueId}");
-
             session()->flash('success', 'Dataset detail deleted successfully!');
         }
 
@@ -243,7 +330,7 @@ class PydpDatasetDetailIndex extends Component
 
         $yearRange = range($yearStart, $yearEnd);
 
-        return Excel::download(new DatasetDetailExport($yearRange, $this->datasetInfo['id']), 'dataset_details.xlsx');
+        return Excel::download(new DatasetDetailExport($yearRange, $this->datasetInfo['id'], auth()->id()), 'dataset_details.xlsx');
     }
 
     public function logs($action)
@@ -258,6 +345,9 @@ class PydpDatasetDetailIndex extends Component
     {
         $query = PydpDatasetDetail::with(['indicator.level', 'pydpDataset', 'dimension'])
             ->where('pydp_dataset_id', $this->datasetInfo['id'])
+            ->whereHas('indicator.level', function($query) {
+                $query->where('user_id', auth()->id());
+            })
             ->when($this->search, function ($q) {
                 $q->whereHas('indicator', function ($q2) {
                     $q2->where('title', 'like', '%' . $this->search . '%');
