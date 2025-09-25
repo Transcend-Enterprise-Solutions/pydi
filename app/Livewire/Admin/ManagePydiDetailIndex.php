@@ -12,13 +12,14 @@ use App\Exports\{PydiDatasetDetailsExport};
 
 #[Layout('layouts.app')]
 #[Title('PYDI Dataset Details')]
+
 class ManagePydiDetailIndex extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination;
 
-    public $datasetInfo = [];
-    public $showEntries = 10;
+    public $datasetInfo;
     public $search = '';
+    public $showEntries = 10;
     public $showExportModal = false;
 
     public function mount($id)
@@ -39,9 +40,15 @@ class ManagePydiDetailIndex extends Component
         $query = PydiDatasetDetail::with(['region', 'dimension', 'indicator'])
             ->where('pydi_dataset_id', $this->datasetInfo['id'])
             ->when($this->search, function ($q) {
-                $q->where('sex', 'like', "%{$this->search}%")
-                    ->orWhere('age', 'like', "%{$this->search}%")
-                    ->orWhereHas('region', fn($ds) => $ds->where('region_description', 'like', "%{$this->search}%"));
+                $q->where(function ($query) {
+                    $query->where('sex', 'like', "%{$this->search}%")
+                        ->orWhere('age', 'like', "%{$this->search}%")
+                        ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
+                        ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
+                        ->orWhereHas('region', fn($ds) => $ds->where('region_description', 'like', "%{$this->search}%"))
+                        ->orWhereHas('dimension', fn($ds) => $ds->where('name', 'like', "%{$this->search}%"))
+                        ->orWhereHas('indicator', fn($ds) => $ds->where('name', 'like', "%{$this->search}%"));
+                });
             });
 
         $details = $query->paginate($this->showEntries);

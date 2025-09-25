@@ -47,8 +47,20 @@
                 <tbody>
                     @forelse ($details as $detail)
                         <tr class="text-xs">
-                            <td class="px-4 py-2 border">{{ $detail->dimension->name ?? '-' }}</td>
-                            <td class="px-4 py-2 border">{{ $detail->indicator->name ?? '-' }}</td>
+                            <td class="px-4 py-2 border">
+                                @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->dimension_others_text)
+                                    {{ $detail->dimension_others_text }}
+                                @else
+                                    {{ $detail->dimension->name ?? '-' }}
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 border">
+                                @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->indicator_others_text)
+                                    {{ $detail->indicator_others_text }}
+                                @else
+                                    {{ $detail->indicator->name ?? '-' }}
+                                @endif
+                            </td>
                             <td class="px-4 py-2 border">{{ $detail->region->region_description }}</td>
                             <td class="px-4 py-2 border">{{ $detail->sex }}</td>
                             <td class="px-4 py-2 border">{{ $detail->age }}</td>

@@ -42,7 +42,9 @@
                         @foreach ($indicators as $indicator)
                             <option value="{{ $indicator['id'] }}">
                                 {{ $indicator['name'] }}
-                                <small class="text-gray-500">({{ ucfirst($indicator['measurement_unit']) }})</small>
+                                @if(isset($indicator['measurement_unit']) && $indicator['measurement_unit'] === 'percentage')
+                                    <small class="text-gray-500">(Percentage)</small>
+                                @endif
                             </option>
                         @endforeach
                     </select>
@@ -139,10 +141,10 @@
                         @if ($index === 0) text-blue-600
                         @elseif($index === 1) text-green-600
                         @else text-red-600 @endif">
-                            @if($isPercentage)
-                                {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
+                            @if($totalSum > 0)
+                                {{ round(($chartData[$index] / $totalSum) * 100, 1) }}%
                             @else
-                                {{ $totalSum > 0 ? round(($chartData[$index] / $totalSum) * 100, 1) : 0 }}%
+                                0%
                             @endif
                         </div>
                     </div>
@@ -197,7 +199,12 @@
                         Year: {{ $selectedYear }}
                     </span>
                 @endif
-                @if(!$selectedAge === 'All Ages' && !$selectedSex === 'All Sexes' && !$selectedRegion && !$selectedYear)
+                @if($selectedDimension && collect($dimensions)->where('id', $selectedDimension)->first())
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        Dimension: {{ collect($dimensions)->where('id', $selectedDimension)->first()['name'] ?? 'Unknown' }}
+                    </span>
+                @endif
+                @if(!$selectedAge === 'All Ages' && !$selectedSex === 'All Sexes' && !$selectedRegion && !$selectedYear && !$selectedDimension)
                     <span class="text-xs text-gray-500">No filters applied</span>
                 @endif
             </div>
@@ -242,7 +249,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: isPercentage ? 'Percentage' : 'Participants',
+                            label: isPercentage ? 'Percentage' : 'Count',
                             data: data,
                             backgroundColor: gradientColors,
                             borderColor: colors.map(c => c.replace('0.9', '1')),
@@ -286,8 +293,7 @@
                                         }
                                     },
                                     title: (context) => {
-                                        const suffix = isPercentage ? 'Percentage' : 'Participants';
-                                        return `${context[0].label} ${suffix}`;
+                                        return context[0].label;
                                     }
                                 }
                             }
@@ -295,7 +301,7 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                max: isPercentage ? 100 : undefined, // Set max to 100 for percentage
+                                max: isPercentage ? 100 : undefined,
                                 grid: {
                                     drawBorder: false,
                                     color: 'rgba(0,0,0,0.05)'
@@ -344,7 +350,7 @@
                     } else {
                         // Just update data
                         chart.data.datasets[0].data = data;
-                        chart.data.datasets[0].label = isPercentage ? 'Percentage' : 'Participants';
+                        chart.data.datasets[0].label = isPercentage ? 'Percentage' : 'Count';
                         chart.update();
                     }
                 }
