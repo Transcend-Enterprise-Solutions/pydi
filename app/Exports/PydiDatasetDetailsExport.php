@@ -26,9 +26,21 @@ class PydiDatasetDetailsExport implements FromCollection, WithHeadings, WithEven
             ->where('pydi_dataset_id', $this->datasetId)
             ->get()
             ->map(function ($detail) {
+                // Determine dimension name - use dimension_others_text if dimension is "others"
+                $dimensionName = $detail->dimension->name ?? '';
+                if (isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->dimension_others_text) {
+                    $dimensionName = $detail->dimension_others_text;
+                }
+
+                // Determine indicator name - use indicator_others_text if dimension is "others"
+                $indicatorName = $detail->indicator->name ?? '';
+                if (isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->indicator_others_text) {
+                    $indicatorName = $detail->indicator_others_text;
+                }
+
                 return [
-                    'Dimension'         => $detail->dimension->name ?? '',
-                    'Indicator'         => $detail->indicator->name ?? '',
+                    'Dimension'         => $dimensionName,
+                    'Indicator'         => $indicatorName,
                     'Philippine Region' => $detail->region->region_description ?? '',
                     'Sex'               => $detail->sex ?? '',
                     'Age'               => $detail->age ?? '',

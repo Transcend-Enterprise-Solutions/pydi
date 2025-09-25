@@ -35,13 +35,30 @@ class PydpLevelController extends Component
 
     public function loadDimensions()
     {
-        $this->dimensions = PydpLevel::with('indicators')->orderBy('title')->get();
+        // Only load dimensions belonging to the authenticated user
+        $this->dimensions = PydpLevel::where('user_id', auth()->id())
+            ->with('indicators')
+            ->orderBy('title')
+            ->get();
     }
 
     public function openDimensionModal($dimensionId = null)
     {
         if ($dimensionId) {
-            $dimension = PydpLevel::find($dimensionId);
+            // Ensure the dimension belongs to the authenticated user
+            $dimension = PydpLevel::where('user_id', auth()->id())
+                ->where('id', $dimensionId)
+                ->first();
+
+            if (!$dimension) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Level not found or access denied.',
+                    'icon' => 'error'
+                ]);
+                return;
+            }
+
             $this->editingDimensionId = $dimensionId;
             $this->dimensionName = $dimension->title;
             $this->dimensionDescription = $dimension->content;
@@ -53,15 +70,40 @@ class PydpLevelController extends Component
 
     public function openIndicatorModal($dimensionId, $indicatorId = null)
     {
+        // Verify the dimension belongs to the authenticated user
+        $dimension = PydpLevel::where('user_id', auth()->id())
+            ->where('id', $dimensionId)
+            ->first();
+
+        if (!$dimension) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Level not found or access denied.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
         $this->selectedDimensionId = $dimensionId;
 
         if ($indicatorId) {
-            $indicator = PydpIndicator::find($indicatorId);
-            if ($indicator) {
-                $this->editingIndicatorId = $indicatorId;
-                $this->indicatorName = $indicator->title;
-                $this->indicatorDescription = $indicator->content;
+            // Ensure the indicator belongs to a level owned by the authenticated user
+            $indicator = PydpIndicator::whereHas('level', function ($query) {
+                $query->where('user_id', auth()->id());
+            })->where('id', $indicatorId)->first();
+
+            if (!$indicator) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Indicator not found or access denied.',
+                    'icon' => 'error'
+                ]);
+                return;
             }
+
+            $this->editingIndicatorId = $indicatorId;
+            $this->indicatorName = $indicator->title;
+            $this->indicatorDescription = $indicator->content;
         } else {
             $this->resetIndicatorForm();
             $this->selectedDimensionId = $dimensionId;
@@ -91,8 +133,22 @@ class PydpLevelController extends Component
     public function confirmDelete()
     {
         if ($this->type == 'level') {
-            $level = PydpLevel::findOrFail($this->valueId);
-            $name  = $level->title;
+            // Ensure the level belongs to the authenticated user
+            $level = PydpLevel::where('user_id', auth()->id())
+                ->where('id', $this->valueId)
+                ->first();
+
+            if (!$level) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Level not found or access denied.',
+                    'icon' => 'error'
+                ]);
+                $this->showDeleteModal = false;
+                return;
+            }
+
+            $name = $level->title;
             $level->delete();
 
             $this->logs("Deleted level: {$name}");
@@ -104,8 +160,22 @@ class PydpLevelController extends Component
                 'icon' => 'success'
             ]);
         } elseif ($this->type == 'indicator') {
-            $indicator = PydpIndicator::findOrFail($this->valueId);
-            $name      = $indicator->title;
+            // Ensure the indicator belongs to a level owned by the authenticated user
+            $indicator = PydpIndicator::whereHas('level', function ($query) {
+                $query->where('user_id', auth()->id());
+            })->where('id', $this->valueId)->first();
+
+            if (!$indicator) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Indicator not found or access denied.',
+                    'icon' => 'error'
+                ]);
+                $this->showDeleteModal = false;
+                return;
+            }
+
+            $name = $indicator->title;
             $indicator->delete();
 
             $this->logs("Deleted indicator: {$name}");
@@ -129,13 +199,26 @@ class PydpLevelController extends Component
         ]);
 
         if ($this->editingDimensionId) {
-            $dimension = PydpLevel::find($this->editingDimensionId);
+            // Ensure the dimension belongs to the authenticated user
+            $dimension = PydpLevel::where('user_id', auth()->id())
+                ->where('id', $this->editingDimensionId)
+                ->first();
+
+            if (!$dimension) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Level not found or access denied.',
+                    'icon' => 'error'
+                ]);
+                return;
+            }
+
             $dimension->update([
                 'title' => $this->dimensionName,
                 'content' => $this->dimensionDescription
             ]);
             $message = 'Level updated successfully';
-            $action  = "Updated level: {$this->dimensionName}";
+            $action = "Updated level: {$this->dimensionName}";
         } else {
             PydpLevel::create([
                 'user_id' => auth()->id(),
@@ -143,7 +226,7 @@ class PydpLevelController extends Component
                 'content' => $this->dimensionDescription
             ]);
             $message = 'Level created successfully';
-            $action  = "Created level: {$this->dimensionName}";
+            $action = "Created level: {$this->dimensionName}";
         }
 
         // save log
@@ -163,18 +246,45 @@ class PydpLevelController extends Component
         $this->validate([
             'indicatorName' => 'required|min:3',
             'indicatorDescription' => 'nullable',
-            'selectedDimensionId' => 'required|exists:dimensions,id'
+            'selectedDimensionId' => 'required|exists:pydp_levels,id'
         ]);
+
+        // Verify the selected dimension belongs to the authenticated user
+        $dimension = PydpLevel::where('user_id', auth()->id())
+            ->where('id', $this->selectedDimensionId)
+            ->first();
+
+        if (!$dimension) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Selected level not found or access denied.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
 
         try {
             if ($this->editingIndicatorId) {
-                $indicator = PydpIndicator::find($this->editingIndicatorId);
+                // Ensure the indicator belongs to a level owned by the authenticated user
+                $indicator = PydpIndicator::whereHas('level', function ($query) {
+                    $query->where('user_id', auth()->id());
+                })->where('id', $this->editingIndicatorId)->first();
+
+                if (!$indicator) {
+                    $this->dispatch('swal', [
+                        'title' => 'Error!',
+                        'text' => 'Indicator not found or access denied.',
+                        'icon' => 'error'
+                    ]);
+                    return;
+                }
+
                 $indicator->update([
                     'title' => $this->indicatorName,
                     'content' => $this->indicatorDescription,
                 ]);
                 $message = 'Indicator updated successfully';
-                $action  = "Updated indicator: {$this->indicatorName}";
+                $action = "Updated indicator: {$this->indicatorName}";
             } else {
                 PydpIndicator::create([
                     'pydp_level_id' => $this->selectedDimensionId,
@@ -182,7 +292,7 @@ class PydpLevelController extends Component
                     'content' => $this->indicatorDescription,
                 ]);
                 $message = 'Indicator created successfully';
-                $action  = "Created indicator: {$this->indicatorName}";
+                $action = "Created indicator: {$this->indicatorName}";
             }
 
             // save log
@@ -208,11 +318,9 @@ class PydpLevelController extends Component
     {
         UserLog::create([
             'user_id' => auth()->id(),
-            'action'  => $action,
+            'action' => $action,
         ]);
     }
-
-
 
     public function resetDimensionForm()
     {
@@ -240,7 +348,7 @@ class PydpLevelController extends Component
     {
         return view('livewire.user.pydp-level-controller', [
             'selectedDimensionName' => $this->selectedDimensionId
-                ? $this->dimensions->find($this->selectedDimensionId)?->name
+                ? $this->dimensions->find($this->selectedDimensionId)?->title
                 : null
         ]);
     }

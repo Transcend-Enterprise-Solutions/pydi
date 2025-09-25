@@ -1,13 +1,13 @@
-<div class="w-full mt-6">
+<div class="w-full">
     <h2 class="text-xl font-bold mb-3 pt-0">PYDI ({{ $datasetInfo->name }})</h2>
 
     <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
-            <div class="flex gap-2 items-center flex-wrap">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex gap-2 items-center">
                 <input type="text" wire:model.live="search" placeholder="Search..."
-                    class="w-52 py-1 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                    class="w-52 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                 <select wire:model.live="showEntries"
-                    class="w-16 py-1 px-2 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                    class="w-16 py-1 px-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                     <option value="5">5</option>
                     <option value="10">10</option>
                     <option value="25">25</option>
@@ -15,6 +15,8 @@
                 </select>
             </div>
             <div class="flex gap-2 items-center">
+
+
                 <button wire:click="$set('showExportModal', true)"
                     class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition">
                     <i class="bi bi-bar-chart-fill mr-2"></i>Generate Report
@@ -31,26 +33,38 @@
 
         <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="table-auto w-full text-left border border-gray-200 dark:border-gray-700">
-                <thead class="bg-gray-100 dark:bg-slate-700">
-                    <tr class="uppercase text-xs">
-                        <th class="px-4 py-2">Dimension</th>
-                        <th class="px-4 py-2">Indicator</th>
-                        <th class="px-4 py-2">Region</th>
-                        <th class="px-4 py-2">Sex</th>
-                        <th class="px-4 py-2">Age</th>
-                        <th class="px-4 py-2">Value</th>
+            <table class="table-auto w-full text-left border border-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 border">Dimension</th>
+                        <th class="px-4 py-2 border">Indicator</th>
+                        <th class="px-4 py-2 border">Region</th>
+                        <th class="px-4 py-2 border">Sex</th>
+                        <th class="px-4 py-2 border">Age</th>
+                        <th class="px-4 py-2 border">Value</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($details as $detail)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
-                            <td class="px-4 py-2">{{ $detail->dimension->name ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $detail->indicator->name ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $detail->region->region_description }}</td>
-                            <td class="px-4 py-2">{{ $detail->sex }}</td>
-                            <td class="px-4 py-2">{{ $detail->age }}</td>
-                            <td class="px-4 py-2">{{ $detail->value }}</td>
+                        <tr class="text-xs">
+                            <td class="px-4 py-2 border">
+                                @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->dimension_others_text)
+                                    {{ $detail->dimension_others_text }}
+                                @else
+                                    {{ $detail->dimension->name ?? '-' }}
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 border">
+                                @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->indicator_others_text)
+                                    {{ $detail->indicator_others_text }}
+                                @else
+                                    {{ $detail->indicator->name ?? '-' }}
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 border">{{ $detail->region->region_description }}</td>
+                            <td class="px-4 py-2 border">{{ $detail->sex }}</td>
+                            <td class="px-4 py-2 border">{{ $detail->age }}</td>
+                            <td class="px-4 py-2 border">{{ $detail->value }}</td>
                         </tr>
                     @empty
 
@@ -70,8 +84,8 @@
     <!-- Export Modal -->
     @if ($showExportModal ?? false)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h3 class="text-lg font-bold mb-4 text-gray-700 dark:text-gray-200">Export Dataset Details</h3>
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h3 class="text-lg font-bold mb-4">Export Dataset Details</h3>
 
                 <div class="flex flex-col gap-4">
                     <p>Select a format to export your dataset:</p>
@@ -84,7 +98,7 @@
                 </div>
 
                 <div class="flex justify-end mt-6">
-                    <button wire:click="$set('showExportModal', false)" class="px-4 py-2 border rounded dark:border-gray-700">Close</button>
+                    <button wire:click="$set('showExportModal', false)" class="px-4 py-2 border rounded">Close</button>
                 </div>
             </div>
         </div>

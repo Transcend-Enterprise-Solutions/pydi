@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
-use App\Models\{Dimension, PydiDataset, Indicator, PhilippineRegion, PhilippineRegions};
+use App\Models\{Dimension, PydiDataset, Indicator, PhilippineRegion, PhilippineRegions, PydiDatasetDetail};
 
 #[Layout('layouts.app')]
 #[Title('Dashboard')]
@@ -50,8 +50,7 @@ class DashboardIndex extends Component
             $this->selectedDimension = $this->dimensions[0]['id'];
 
             // Load indicators for the first dimension
-            $this->advocacyInfo = Dimension::with('indicators')->findOrFail($this->selectedDimension);
-            $this->indicators = $this->advocacyInfo->indicators->toArray();
+            $this->loadIndicatorsForDimension($this->selectedDimension);
 
             // Select the first indicator if available
             if (!empty($this->indicators)) {
@@ -110,22 +109,7 @@ class DashboardIndex extends Component
             $this->isPercentage = false;
             $this->selectedIndicator = ""; // Reset indicator selection
         } else {
-            $this->advocacyInfo = Dimension::with('indicators')->findOrFail($value);
-            $this->indicators = $this->advocacyInfo->indicators->toArray();
-
-            // Set measurement unit based on first indicator if available
-            if (!empty($this->indicators)) {
-                $firstIndicator = $this->indicators[0];
-                $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
-                $this->isPercentage = $this->measurementUnit === 'percentage';
-
-                // Auto-select the first indicator
-                $this->selectedIndicator = $firstIndicator['id'];
-            } else {
-                $this->selectedIndicator = ""; // No indicators available
-                $this->measurementUnit = 'frequency';
-                $this->isPercentage = false;
-            }
+            $this->loadIndicatorsForDimension($value);
         }
 
         $this->updateChartData();
@@ -159,104 +143,153 @@ class DashboardIndex extends Component
         $this->loading = false;
     }
 
-    public function getDimensionNameById($id){
-        $dimension = Dimension::find($id);
-        if($dimension){
-            return $dimension->name;
+    protected function loadIndicatorsForDimension($dimensionId)
+    {
+        $this->advocacyInfo = Dimension::with('indicators')->findOrFail($dimensionId);
+
+        // Check if this dimension is "others"
+        $dimension = Dimension::find($dimensionId);
+        $isOthersDimension = $dimension && strtolower($dimension->name) === 'others';
+
+        if ($isOthersDimension) {
+            // For "others" dimension, get unique indicator_others_text values from existing data
+            $this->indicators = $this->getCustomIndicatorsForOthersDimension();
+        } else {
+            // For regular dimensions, use the predefined indicators
+            $this->indicators = $this->advocacyInfo->indicators->toArray();
         }
 
-        return '';
+        // Set measurement unit based on first indicator if available
+        if (!empty($this->indicators)) {
+            $firstIndicator = $this->indicators[0];
+            $this->measurementUnit = $firstIndicator['measurement_unit'] ?? 'frequency';
+            $this->isPercentage = $this->measurementUnit === 'percentage';
+
+            // Auto-select the first indicator
+            $this->selectedIndicator = $firstIndicator['id'];
+        } else {
+            $this->selectedIndicator = ""; // No indicators available
+            $this->measurementUnit = 'frequency';
+            $this->isPercentage = false;
+        }
     }
 
-    public function getIndicatorNameById($id){
-        $indicator = Indicator::find($id);
-        if($indicator){
-            return $indicator->name;
-        }
+    protected function getCustomIndicatorsForOthersDimension()
+    {
+        // Get unique indicator_others_text values from PydiDatasetDetail for the "others" dimension
+        $customIndicators = PydiDatasetDetail::whereHas('dimension', function($query) {
+                $query->where('name', 'like', '%others%');
+            })
+            ->whereNotNull('indicator_others_text')
+            ->where('indicator_others_text', '!=', '')
+            ->distinct()
+            ->pluck('indicator_others_text')
+            ->map(function($indicatorText, $index) {
+                return [
+                    'id' => 'custom_' . ($index + 1), // Generate unique ID for custom indicators
+                    'name' => $indicatorText,
+                    'measurement_unit' => 'frequency' // Default measurement unit for custom indicators
+                ];
+            })
+            ->toArray();
 
-        return '';
+        return $customIndicators;
     }
 
     protected function updateChartData()
     {
         $this->loading = true;
 
-        // Base query: fetch all or selected dimensions
-        $dimensionsQuery = Dimension::with(['pydiDatasetDetails' => function ($query) {
-            // Age filter
-            if ($this->selectedAge !== 'All Ages') {
-                if (str_contains($this->selectedAge, '+')) {
-                    $ageMin = rtrim($this->selectedAge, '+');
-                    $query->where('age', '>=', $ageMin);
-                } else {
-                    [$min, $max] = explode('-', $this->selectedAge);
-                    $query->whereBetween('age', [(int)$min, (int)$max]);
-                }
-            }
-
-            // Sex filter
-            if ($this->selectedSex !== 'All Sexes') {
-                $query->where('sex', strtolower($this->selectedSex));
-            }
-
-            // Region filter
-            if (!empty($this->selectedRegion)) {
-                $query->where('philippine_region_id', $this->selectedRegion);
-            }
-
-            // Indicator filter
-            if (!empty($this->selectedIndicator)) {
-                $query->where('indicator_id', $this->selectedIndicator);
-            }
-
-            // User role filter
-            if (auth()->user()->user_role === 'user') {
-                $query->whereHas('pydiDataset', function ($subQuery) {
-                    $subQuery->where('user_id', auth()->id());
-                });
-            }
-
-            // Year and status filter
-            $query->whereHas('pydiDataset', function ($subQuery) {
-                $subQuery->where('year', $this->selectedYear)
-                    ->where('status', 'approved');
-            });
-        }, 'pydiDatasetDetails.pydiDataset']);
+        // Check if we're dealing with "others" dimension and custom indicator
+        $isOthersDimension = false;
+        $customIndicatorText = null;
 
         if (!empty($this->selectedDimension)) {
-            $dimensionsQuery->where('id', $this->selectedDimension);
+            $dimension = Dimension::find($this->selectedDimension);
+            $isOthersDimension = $dimension && strtolower($dimension->name) === 'others';
+
+            // Check if selected indicator is a custom indicator (starts with "custom_")
+            if ($isOthersDimension && !empty($this->selectedIndicator) && strpos($this->selectedIndicator, 'custom_') === 0) {
+                // Find the custom indicator text from the indicators array
+                $selectedIndicatorData = collect($this->indicators)->firstWhere('id', $this->selectedIndicator);
+                $customIndicatorText = $selectedIndicatorData['name'] ?? null;
+            }
         }
 
-        $datasetDetails = $dimensionsQuery->get();
+        // Base query: fetch dataset details directly
+        $query = PydiDatasetDetail::with(['dimension', 'indicator', 'pydiDataset']);
+
+        // Dimension filter
+        if (!empty($this->selectedDimension)) {
+            $query->where('dimension_id', $this->selectedDimension);
+        }
+
+        // For "others" dimension with custom indicator, filter by indicator_others_text
+        if ($isOthersDimension && $customIndicatorText) {
+            $query->where('indicator_others_text', $customIndicatorText);
+        } else if (!empty($this->selectedIndicator)) {
+            // For regular dimensions, use indicator_id
+            $query->where('indicator_id', $this->selectedIndicator);
+        }
+
+        // Age filter
+        if ($this->selectedAge !== 'All Ages') {
+            if (str_contains($this->selectedAge, '+')) {
+                $ageMin = rtrim($this->selectedAge, '+');
+                $query->where('age', '>=', $ageMin);
+            } else {
+                [$min, $max] = explode('-', $this->selectedAge);
+                $query->whereBetween('age', [(int)$min, (int)$max]);
+            }
+        }
+
+        // Sex filter
+        if ($this->selectedSex !== 'All Sexes') {
+            $query->where('sex', strtolower($this->selectedSex));
+        }
+
+        // Region filter
+        if (!empty($this->selectedRegion)) {
+            $query->where('philippine_region_id', $this->selectedRegion);
+        }
+
+        // User role filter
+        if (auth()->user()->user_role === 'user') {
+            $query->whereHas('pydiDataset', function ($subQuery) {
+                $subQuery->where('user_id', auth()->id());
+            });
+        }
+
+        // Year and status filter
+        $query->whereHas('pydiDataset', function ($subQuery) {
+            $subQuery->where('year', $this->selectedYear)
+                    ->where('status', 'approved');
+        });
+
+        $datasetDetails = $query->get();
 
         // Initialize totals
         $totals = ['Male' => 0, 'Female' => 0, 'Others' => 0];
-        $counts = ['Male' => 0, 'Female' => 0, 'Others' => 0]; // For percentage calculation
+        $counts = ['Male' => 0, 'Female' => 0, 'Others' => 0];
         $this->totalSum = 0;
 
-        // Sum values for all selected dimensions
-        foreach ($datasetDetails as $dimension) {
-            foreach ($dimension->pydiDatasetDetails as $detail) {
-                $sex = ucfirst(strtolower($detail->sex ?? 'Others'));
-                if (!isset($totals[$sex])) $sex = 'Others';
+        // Sum values for all selected details
+        foreach ($datasetDetails as $detail) {
+            $sex = ucfirst(strtolower($detail->sex ?? 'Others'));
+            if (!isset($totals[$sex])) $sex = 'Others';
 
-                $value = (float)$detail->value;
+            $value = (float)$detail->value;
 
-                if ($this->isPercentage) {
-                    // For percentage, we might want to average or handle differently
-                    // This depends on your business logic
-                    $totals[$sex] += $value;
-                    $counts[$sex]++;
-                } else {
-                    // For frequency, sum as before
-                    $totals[$sex] += $value;
-                }
+            if ($this->isPercentage) {
+                $totals[$sex] += $value;
+                $counts[$sex]++;
+            } else {
+                $totals[$sex] += $value;
             }
         }
 
         // Calculate final values based on measurement unit
         if ($this->isPercentage) {
-            // For percentage, calculate average if multiple entries
             foreach ($totals as $sex => $total) {
                 if ($counts[$sex] > 0) {
                     $totals[$sex] = $total / $counts[$sex];
@@ -264,7 +297,6 @@ class DashboardIndex extends Component
                 }
             }
         } else {
-            // For frequency, use sum as before
             $this->totalSum = array_sum($totals);
         }
 

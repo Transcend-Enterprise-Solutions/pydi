@@ -5,10 +5,11 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use Livewire\{WithPagination, WithFileUploads};
 use Livewire\Attributes\{Title, Layout};
-use App\Models\{PydiDatasetDetail, PydiDataset, Dimension, Indicator, PhilippineRegions};
+use App\Models\{PydiDatasetDetail, PydiDataset, Dimension, Indicator, PhilippineRegions, UserLog};
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\PydiDatasetDetailsImport;
 use App\Exports\{PydiDatasetDetailsExport, PydiDatasetTemplateExport};
+use Illuminate\Support\Facades\DB;
 
 #[Layout('layouts.app')]
 #[Title('PYDI Dataset Details')]
@@ -24,6 +25,12 @@ class PydiDatasetDetailIndex extends Component
     // Fields
     public $dimension, $indicator, $region, $age, $sex, $value;
     public $gender = ['Male', 'Female', 'Others'];
+
+    // Others fields
+    public $dimensionOthersText = '';
+    public $indicatorText = ''; // For free text input when dimension is "others"
+    public $showDimensionOthers = false;
+    public $showIndicatorAsText = false; // Show indicator as text input
 
     // Delete
     public $showDeleteModal = false;
@@ -46,16 +53,106 @@ class PydiDatasetDetailIndex extends Component
 
     public function mount($id)
     {
-        $this->datasetInfo = PydiDataset::find($id);
-        $this->dimensions = Dimension::get();
-        $this->indicators = Indicator::all();
-        $this->regions = PhilippineRegions::get();
+        $this->datasetInfo = PydiDataset::findOrFail($id);
+
+        // Get all dimensions from admin - ordered with Others at the end
+        $adminDimensions = Dimension::select('id', 'name')->orderBy('name')->get();
+
+        $this->dimensions = collect();
+        $othersDimension = null;
+
+        // Separate regular dimensions from "Others"
+        foreach ($adminDimensions as $dimension) {
+            if (strtolower($dimension->name) === 'others') {
+                $othersDimension = $dimension;
+            } else {
+                $this->dimensions->push((object)[
+                    'id' => $dimension->id,
+                    'name' => $dimension->name
+                ]);
+            }
+        }
+
+        // Add "Others" at the end if it exists
+        if ($othersDimension) {
+            $this->dimensions->push((object)[
+                'id' => $othersDimension->id,
+                'name' => 'Others (Please specify)'
+            ]);
+        }
+
+        $this->regions = PhilippineRegions::select('id', 'region_description')->get();
+    }
+
+    // Watch for dimension changes
+    public function updatedDimension($value)
+    {
+        // Reset indicator related fields
+        $this->indicator = null;
+        $this->indicatorText = '';
+        $this->showDimensionOthers = false;
+        $this->showIndicatorAsText = false;
+
+        if ($value) {
+            // Check if selected dimension is "Others"
+            $selectedDimension = Dimension::find($value);
+
+            if ($selectedDimension && strtolower($selectedDimension->name) === 'others') {
+                // Show dimension others text field and indicator text input
+                $this->showDimensionOthers = true;
+                $this->showIndicatorAsText = true;
+                $this->indicators = collect(); // Clear indicators dropdown
+            } else {
+                // Load indicators for selected dimension
+                $indicatorData = Indicator::where('dimension_id', $value)
+                    ->select('id', 'name')
+                    ->get();
+
+                $this->indicators = collect();
+                foreach ($indicatorData as $indicator) {
+                    $this->indicators->push((object)[
+                        'id' => $indicator->id,
+                        'name' => $indicator->name
+                    ]);
+                }
+
+                $this->showIndicatorAsText = false;
+            }
+        } else {
+            $this->indicators = collect();
+        }
+    }
+
+    // Validation rules
+    protected function rules()
+    {
+        $rules = [
+            'region' => 'required|integer',
+            'age' => 'nullable|string',
+            'sex' => 'nullable|string',
+            'value' => 'nullable|string',
+        ];
+
+        // Check if selected dimension is "Others"
+        $selectedDimension = Dimension::find($this->dimension);
+        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+
+        if ($isOthers) {
+            $rules['dimensionOthersText'] = 'required|string|max:255';
+            $rules['indicatorText'] = 'required|string|max:255';
+            $rules['dimension'] = 'required|integer|exists:dimensions,id';
+        } else {
+            $rules['dimension'] = 'required|integer|exists:dimensions,id';
+            $rules['indicator'] = 'required|integer|exists:indicators,id';
+        }
+
+        return $rules;
     }
 
     // Open for creating new
     public function create()
     {
-        $this->reset(['dimension', 'indicator', 'region', 'age', 'sex', 'value']);
+        $this->reset(['dimension', 'indicator', 'region', 'age', 'sex', 'value', 'dimensionOthersText', 'indicatorText', 'showDimensionOthers', 'showIndicatorAsText']);
         $this->editId = null;
         $this->editMode = false;
         $this->showModal = true;
@@ -67,12 +164,40 @@ class PydiDatasetDetailIndex extends Component
         $detail = PydiDatasetDetail::findOrFail($id);
 
         $this->editId = $detail->id;
-        $this->dimension = $detail->dimension_id;
-        $this->indicator = $detail->indicator_id;
         $this->region = $detail->philippine_region_id;
         $this->age = $detail->age;
         $this->sex = $detail->sex;
         $this->value = $detail->value;
+
+        // Check if this is an "others" dimension
+        if ($detail->dimension_others_text) {
+            $this->dimension = $detail->dimension_id; // Use the actual Others dimension ID
+            $this->dimensionOthersText = $detail->dimension_others_text;
+            $this->indicatorText = $detail->indicator_others_text;
+            $this->showDimensionOthers = true;
+            $this->showIndicatorAsText = true;
+            $this->indicators = collect();
+        } else {
+            $this->dimension = $detail->dimension_id;
+            $this->indicator = $detail->indicator_id;
+            $this->showDimensionOthers = false;
+            $this->showIndicatorAsText = false;
+
+            // Load indicators for the dimension
+            if ($this->dimension) {
+                $indicatorData = Indicator::where('dimension_id', $this->dimension)
+                    ->select('id', 'name')
+                    ->get();
+
+                $this->indicators = collect();
+                foreach ($indicatorData as $indicator) {
+                    $this->indicators->push((object)[
+                        'id' => $indicator->id,
+                        'name' => $indicator->name
+                    ]);
+                }
+            }
+        }
 
         $this->editMode = true;
         $this->showModal = true;
@@ -81,27 +206,43 @@ class PydiDatasetDetailIndex extends Component
     // Save (works for both Create and Update)
     public function save()
     {
-        $this->validate([
-            'dimension' => 'required|integer',
-            'indicator' => 'required|integer',
-            'region' => 'required|integer',
-            'age' => 'nullable|string',
-            'sex' => 'nullable|string',
-            'value' => 'nullable|string',
-        ]);
+        $this->validate();
+
+        // Check if selected dimension is "Others"
+        $selectedDimension = Dimension::find($this->dimension);
+        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+
+        $data = [
+            'pydi_dataset_id' => $this->datasetInfo['id'],
+            'philippine_region_id' => $this->region,
+            'age' => $this->age,
+            'sex' => $this->sex,
+            'value' => $this->value,
+        ];
+
+        if ($isOthers) {
+            // Save with Others dimension ID and custom text
+            $data['dimension_id'] = $this->dimension; // Use the actual "Others" dimension ID
+            $data['indicator_id'] = null; // No indicator for Others
+            $data['dimension_others_text'] = $this->dimensionOthersText;
+            $data['indicator_others_text'] = $this->indicatorText;
+        } else {
+            // Save with regular dimension/indicator IDs
+            $data['dimension_id'] = $this->dimension;
+            $data['indicator_id'] = $this->indicator;
+            $data['dimension_others_text'] = null;
+            $data['indicator_others_text'] = null;
+        }
 
         PydiDatasetDetail::updateOrCreate(
             ['id' => $this->editId],
-            [
-                'pydi_dataset_id' => $this->datasetInfo['id'],
-                'dimension_id' => $this->dimension,
-                'indicator_id' => $this->indicator,
-                'philippine_region_id' => $this->region,
-                'age' => $this->age,
-                'sex' => $this->sex,
-                'value' => $this->value,
-            ]
+            $data
         );
+
+        // Log the action
+        $action = $this->editMode ? 'Updated' : 'Created';
+        $dimensionName = $isOthers ? $this->dimensionOthersText : ($selectedDimension->name ?? 'Unknown');
+        $this->logs("{$action} dataset detail for dimension: {$dimensionName}");
 
         session()->flash('success', $this->editMode ? 'Dataset detail updated!' : 'New dataset added!');
         $this->showModal = false;
@@ -118,7 +259,11 @@ class PydiDatasetDetailIndex extends Component
     public function delete()
     {
         if ($this->editId) {
-            PydiDatasetDetail::findOrFail($this->editId)->delete();
+            $detail = PydiDatasetDetail::findOrFail($this->editId);
+            $dimensionName = $detail->dimension_others_text ?: ($detail->dimension->name ?? 'Unknown');
+
+            $detail->delete();
+            $this->logs("Deleted dataset detail for dimension: {$dimensionName}");
             session()->flash('success', 'Dataset deleted successfully!');
         }
 
@@ -129,10 +274,15 @@ class PydiDatasetDetailIndex extends Component
     public function downloadTemplate()
     {
         $this->validate([
-            'selectedDimension' => 'required|integer|exists:dimensions,id',
+            'selectedDimension' => 'required',
         ]);
 
-        $title = strtolower(Dimension::find($this->selectedDimension)->name ?? 'dataset template');
+        $title = 'dataset_template';
+        $selectedDimension = Dimension::find($this->selectedDimension);
+
+        if ($selectedDimension && strtolower($selectedDimension->name) !== 'others') {
+            $title = strtolower(str_replace(' ', '_', $selectedDimension->name));
+        }
 
         $this->showFormatModal = false;
 
@@ -147,16 +297,17 @@ class PydiDatasetDetailIndex extends Component
     {
         $this->validate([
             'file' => 'required|mimes:xlsx,csv|max:10240',
-            'selectedDimension' => 'required|integer',
+            'selectedDimension' => 'required',
         ]);
 
         $path = $this->file->store('imports');
-        $importer = new PydiDatasetDetailsImport(
-            $this->datasetInfo['id'],
-            $this->selectedDimension
-        );
 
         try {
+            $importer = new PydiDatasetDetailsImport(
+                $this->datasetInfo['id'],
+                $this->selectedDimension
+            );
+
             Excel::import($importer, $path);
 
             if (!empty($importer->errors)) {
@@ -164,19 +315,14 @@ class PydiDatasetDetailIndex extends Component
                 $message = "Row Error: {$firstError['message']} | Row Data: " . json_encode($firstError['row']);
                 session()->flash('error', $message);
             } else {
+                $this->logs("Imported dataset details from file");
                 session()->flash('success', 'Dataset details imported successfully!');
             }
 
-            $this->reset('file', 'showImportModal');
+            $this->reset(['file', 'showImportModal', 'selectedDimension']);
         } catch (\Exception $e) {
             session()->flash('error', 'Error importing file: ' . $e->getMessage());
         }
-    }
-
-    public function updatedDimension($value)
-    {
-        $this->indicators = [];
-        $this->indicators = Indicator::where('dimension_id', $value)->get();
     }
 
     // generate export of dataset details
@@ -185,7 +331,60 @@ class PydiDatasetDetailIndex extends Component
         $filename = 'pydi_dataset_details_' . now()->format('Ymd_His') . '.' . $type;
 
         $this->showExportModal = false;
-        return Excel::download(new PydiDatasetDetailsExport($this->datasetInfo['id']), $filename);
+
+        $this->logs("Exported dataset details as {$type}");
+
+        return Excel::download(
+            new PydiDatasetDetailsExport($this->datasetInfo['id']),
+            $filename
+        );
+    }
+
+    public function logs($action)
+    {
+        UserLog::create([
+            'user_id' => auth()->id(),
+            'action' => $action,
+        ]);
+    }
+
+    // Safe method to handle bulk operations without queueing mixed models
+    public function processBulkData($data)
+    {
+        try {
+            DB::beginTransaction();
+
+            foreach ($data as $item) {
+                $this->processIndividualItem($item);
+            }
+
+            DB::commit();
+            return ['success' => true, 'message' => 'Bulk operation completed successfully'];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ['success' => false, 'message' => 'Error in bulk operation: ' . $e->getMessage()];
+        }
+    }
+
+    private function processIndividualItem($item)
+    {
+        if (is_array($item)) {
+            return $this->processArrayItem($item);
+        } elseif ($item instanceof \Illuminate\Database\Eloquent\Model) {
+            return $this->processModelItem($item->toArray());
+        }
+
+        return false;
+    }
+
+    private function processArrayItem($data)
+    {
+        return PydiDatasetDetail::create($data);
+    }
+
+    private function processModelItem($data)
+    {
+        return PydiDatasetDetail::create($data);
     }
 
     public function render()
@@ -195,9 +394,10 @@ class PydiDatasetDetailIndex extends Component
             ->when($this->search, function ($q) {
                 $q->where('sex', 'like', "%{$this->search}%")
                     ->orWhere('age', 'like', "%{$this->search}%")
+                    ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
+                    ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
                     ->orWhereHas('region', fn($ds) => $ds->where('region_description', 'like', "%{$this->search}%"));
             });
-
 
         $details = $query->latest()->paginate($this->showEntries);
 
