@@ -31,7 +31,7 @@
     <script defer src="build/assets/app-BUdMCiQf.js"></script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="build/assets/app-CMpfd3EF.css">
+    <link rel="stylesheet" href="build/assets/app-BLXy9E6t.css">
 
     <style>
         [x-cloak] {
