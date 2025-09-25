@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 use App\Livewire\{DashboardIndex, UserLogs};
 use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpDatasetIndex, PydpDatasetDetailIndex, PydpLevelController};
-use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, ManagePydpIndex, ManagePydpDetailIndex};
+use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, EmailTemplateManager, ManagePydpIndex, ManagePydpDetailIndex};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
 Route::redirect('/', '/landing');
@@ -35,6 +35,9 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     // Manage PYDI Datasets
     Route::get('/manage-pydi-datasets', ManagePydiIndex::class)->name('manage-pydi-datasets');
     Route::get('/manage-pydi-datasets/{id}', ManagePydiDetailIndex::class)->name('manage-pydi-dataset-details');
+
+    // Manage Email Templates
+    Route::get('/email-templates', EmailTemplateManager::class)->name('email-templates');
 });
 
 /* Homeowner account role --------------------------------------------------------------------------*/

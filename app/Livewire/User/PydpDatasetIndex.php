@@ -2,10 +2,13 @@
 
 namespace App\Livewire\User;
 
+use App\Mail\UserActionNotif;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
-use App\Models\{PydpDataset, PydpType, UserLog};
+use App\Models\{EmailTemplate, PydpDataset, PydpType, UserLog, PydpLevel, User};
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
 #[Title('PYDP Datasets')]
@@ -158,9 +161,27 @@ class PydpDatasetIndex extends Component
             $dataset->submitted_at = now();
             $dataset->save();
 
-            $this->logs("Submitted dataset: {$dataset->name}");
+            $userInfo = User::where('users.id', $dataset->user_id)
+                            ->join('user_data', 'user_data.user_id', 'users.id')
+                            ->first();
 
+            $details = null;
+            if($userInfo){
+                $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+                'Representative: ' . $userInfo->name . '<br>' .
+                'PYDP Dataset: ' . $dataset->name . '<br>' .
+                'Description: ' . $dataset->description;
+            }
+
+            $emailTemplate = EmailTemplate::where('name', 'user_dataset_submission')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_dataset_submission', 'PYDP',  $details));
+            }
+
+            
+            $this->logs("Submitted dataset: {$dataset->name}");
             session()->flash('success', 'Dataset has been sent successfully!');
+            
         }
 
         $this->reset(['showConfirmSend', 'selectedId', 'file']);
@@ -179,6 +200,23 @@ class PydpDatasetIndex extends Component
         $entry->update([
             'is_request_edit' => true,
         ]);
+
+        $userInfo = User::where('users.id', $entry->user_id)
+                        ->join('user_data', 'user_data.user_id', 'users.id')
+                        ->first();
+
+        $details = null;
+        if($userInfo){
+            $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+            'Representative: ' . $userInfo->name . '<br>' .
+            'PYDP Dataset: ' . $entry->name . '<br>' .
+            'Description: ' . $entry->description;
+        }
+
+        $emailTemplate = EmailTemplate::where('name', 'user_request_edit_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_request_edit_notif', 'PYDP',  $details));
+        }
 
         $this->logs("Requested edit for dataset: {$entry->name}");
 

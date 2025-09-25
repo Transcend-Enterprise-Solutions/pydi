@@ -70,10 +70,6 @@ class User extends Authenticatable
         return $this->hasOne(UserData::class);
     }
 
-    public function monthlyAssociationDues(){
-        return $this->hasMany(MonthlyAssociationDues::class);
-    }
-
     public function scopeSearch($query, $term){
         $term = "%$term%";
         $query->where(function ($query) use ($term) {
