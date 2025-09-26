@@ -39,15 +39,15 @@ class DatasetDetailExport implements FromArray, WithEvents
             // Main header spans 7 columns for each year
             $mainHeaders = array_merge($mainHeaders, [$year, '', '', '', '', '', '']);
 
-            // Sub headers for each year's data
+            // Sub headers for each year's data - NEW ORDER: Baseline, Target Physical, Target Financial, Actual Physical, Actual Financial, Total, Remarks
             $subHeaders = array_merge($subHeaders, [
                 'Baseline',
-                'Total',
-                'Remarks',
                 'Target Physical',
                 'Target Financial',
                 'Actual Physical',
-                'Actual Financial'
+                'Actual Financial',
+                'Total',
+                'Remarks'
             ]);
         }
 
@@ -68,12 +68,12 @@ class DatasetDetailExport implements FromArray, WithEvents
 
                 if ($yearData) {
                     $row[] = $yearData->baseline ?? '';
-                    $row[] = $yearData->total ?? '';
-                    $row[] = $yearData->remarks ?? '';
                     $row[] = $yearData->target_physical ?? '';
                     $row[] = $yearData->target_financial ?? '';
                     $row[] = $yearData->actual_physical ?? '';
                     $row[] = $yearData->actual_financial ?? '';
+                    $row[] = $yearData->total ?? '';
+                    $row[] = $yearData->remarks ?? '';
                 } else {
                     $row = array_merge($row, ['', '', '', '', '', '', '']);
                 }
@@ -97,16 +97,16 @@ class DatasetDetailExport implements FromArray, WithEvents
                 $sheet->getColumnDimension('B')->setWidth(45); // Level
                 $sheet->getColumnDimension('C')->setWidth(45); // Indicator
 
-                // Set year column widths
+                // Set year column widths - UPDATED ORDER
                 $colIndex = 4;
                 foreach ($this->yearRange as $year) {
                     $sheet->getColumnDimensionByColumn($colIndex)->setWidth(12);     // Baseline
-                    $sheet->getColumnDimensionByColumn($colIndex + 1)->setWidth(12); // Total
-                    $sheet->getColumnDimensionByColumn($colIndex + 2)->setWidth(25); // Remarks
-                    $sheet->getColumnDimensionByColumn($colIndex + 3)->setWidth(13); // Target Physical
-                    $sheet->getColumnDimensionByColumn($colIndex + 4)->setWidth(13); // Target Financial
-                    $sheet->getColumnDimensionByColumn($colIndex + 5)->setWidth(13); // Actual Physical
-                    $sheet->getColumnDimensionByColumn($colIndex + 6)->setWidth(13); // Actual Financial
+                    $sheet->getColumnDimensionByColumn($colIndex + 1)->setWidth(13); // Target Physical
+                    $sheet->getColumnDimensionByColumn($colIndex + 2)->setWidth(13); // Target Financial
+                    $sheet->getColumnDimensionByColumn($colIndex + 3)->setWidth(13); // Actual Physical
+                    $sheet->getColumnDimensionByColumn($colIndex + 4)->setWidth(13); // Actual Financial
+                    $sheet->getColumnDimensionByColumn($colIndex + 5)->setWidth(12); // Total
+                    $sheet->getColumnDimensionByColumn($colIndex + 6)->setWidth(25); // Remarks
                     $colIndex += 7;
                 }
 
@@ -202,13 +202,13 @@ class DatasetDetailExport implements FromArray, WithEvents
                         ],
                     ]);
 
-                    // Style year data columns
+                    // Style year data columns - UPDATED ORDER
                     $colIndex = 4;
                     foreach ($this->yearRange as $year) {
-                        // Center align numeric columns
+                        // Center align numeric columns, left align remarks
                         for ($i = 0; $i < 7; $i++) {
                             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + $i);
-                            if ($i == 2) { // Remarks column
+                            if ($i == 6) { // Remarks column (now index 6 instead of 2)
                                 $sheet->getStyle($colLetter . '3:' . $colLetter . $highestRow)->applyFromArray([
                                     'alignment' => [
                                         'horizontal' => Alignment::HORIZONTAL_LEFT,
