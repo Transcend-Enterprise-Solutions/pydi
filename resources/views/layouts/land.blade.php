@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/images/nyc-logo_orig.png" type="image/x-icon">
 
-    <title>{{ $title ?? 'NYC PYDI' }}</title>
+    <title>{{ $title ?? 'Bilang Kabataan' }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,7 +42,7 @@
                 <!-- Logo -->
                 <a href="{{ url('/') }}" class="flex items-center gap-2 flex-shrink-0">
                     <img src="/images/nyc-logo_orig.png" alt="NYC Logo" class="h-8 w-8">
-                    <span class="text-xl font-bold text-blue-600">NYC - PYDI</span>
+                    <span class="text-xl font-bold text-blue-600">Bilang Kabataan</span>
                 </a>
 
                 <!-- Desktop Navigation -->

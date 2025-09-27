@@ -16,7 +16,7 @@
 
                 <span
                     class="text-lg font-semibold text-black dark:text-white lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 transition-opacity duration-300">
-                    NYC - PYDP
+                    Bilang Kabataan
                 </span>
             </a>
         </div>
