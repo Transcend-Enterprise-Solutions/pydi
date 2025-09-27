@@ -29,12 +29,12 @@
 
                     <!-- Dropdown Menu -->
                     <div x-show="open" @click.away="open = false"
-                        class="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        class="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
                         <ul class="py-2 text-sm">
                             <!-- Export/Generate Report -->
                             <li>
                                 <button wire:click="exportDatasetDetails"
-                                    class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                    class="flex items-center w-full dark:text-gray-100 px-4 py-2 transition">
                                     <i class="bi bi-bar-chart-fill text-purple-500 mr-2"></i>
                                     Generate Report
                                 </button>

@@ -11,8 +11,7 @@
     </div>
 
     <!-- Main Table -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -203,7 +202,7 @@
 
     <!-- Dimension Modal -->
     @if ($showDimensionModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="text-sm fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div
                 class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
@@ -225,7 +224,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name
                                 *</label>
                             <input type="text" wire:model.defer="dimensionName"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                                class="text-sm w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                             @error('dimensionName')
                                 <span class="text-red-500 text-sm dark:text-red-400">{{ $message }}</span>
                             @enderror
@@ -235,12 +234,12 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                             <textarea wire:model.defer="dimensionDescription" rows="3"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                class="text-sm w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4">
                             <button type="button" wire:click="closeDimensionModal"
-                                class="px-4 py-2 text-gray-600 dark:text-gray-300">
+                                class="px-4 py-2 text-gray-600 dark:text-gray-300 border dark:border-gray-700 rounded-lg">
                                 Cancel
                             </button>
                             <button type="submit"
@@ -256,7 +255,7 @@
 
     <!-- Indicator Modal -->
     @if ($showIndicatorModal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="text-sm fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
@@ -297,7 +296,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Measurement Unit</label>
                             <select wire:model.defer="indicatorUnit"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    class="text-sm w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Select Measurement Unit</option>
                                 <option value="frequency">Frequency or Count</option>
                                 <option value="percentage">Percentage or Rate</option>
@@ -309,7 +308,7 @@
 
                         <div class="flex justify-end gap-3 pt-4">
                             <button type="button" wire:click="closeIndicatorModal"
-                                    class="px-4 py-2 text-gray-600 dark:text-gray-300">
+                                    class="px-4 py-2 text-gray-600 dark:text-gray-300 border dark:border-gray-700 rounded-lg">
                                 Cancel
                             </button>
                             <button type="submit"

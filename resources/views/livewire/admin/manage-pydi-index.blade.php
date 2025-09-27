@@ -265,13 +265,13 @@
     <!-- Action Confirmation Modal -->
     @if ($showActionModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">Take Action on Dataset</h3>
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 dark:bg-gray-800">
+                <h3 class="text-lg font-bold mb-4 dark:text-gray-100">Take Action on Dataset</h3>
 
                 <!-- Status Dropdown -->
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Status</label>
-                    <select wire:model="action_status" class="border rounded w-full px-3 py-2">
+                    <select wire:model="action_status" class="border rounded w-full px-3 py-2 dark:bg-slate-800 dark:border-gray-700">
                         <option value="">Select Status</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -286,7 +286,7 @@
                 <!-- Feedback -->
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Feedback</label>
-                    <textarea wire:model="action_feedback" class="border rounded w-full px-3 py-2"
+                    <textarea wire:model="action_feedback" class="border rounded w-full px-3 py-2 dark:bg-slate-800 dark:border-gray-700"
                         placeholder="Leave feedback for the user (optional)..."></textarea>
                     @error('action_feedback')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -296,7 +296,7 @@
                 <!-- Buttons -->
                 <div class="flex justify-end gap-2">
                     <button wire:click="$set('showActionModal', false)"
-                        class="px-4 py-2 border rounded">Cancel</button>
+                        class="px-4 py-2 border rounded dark:border-gray-700">Cancel</button>
                     <button wire:click="submitAction" wire:loading.attr="disabled"
                         class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-2">
                         <span wire:loading.remove wire:target="submitAction">Save Action</span>

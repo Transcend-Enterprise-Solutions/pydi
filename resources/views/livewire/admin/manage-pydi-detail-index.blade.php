@@ -34,37 +34,37 @@
         <!-- Table -->
         <div class="overflow-x-auto">
             <table class="table-auto w-full text-left border border-gray-200">
-                <thead class="bg-gray-100">
+                <thead class="bg-gray-100 dark:bg-gray-700 border dark:border-gray-700">
                     <tr>
-                        <th class="px-4 py-2 border">Dimension</th>
-                        <th class="px-4 py-2 border">Indicator</th>
-                        <th class="px-4 py-2 border">Region</th>
-                        <th class="px-4 py-2 border">Sex</th>
-                        <th class="px-4 py-2 border">Age</th>
-                        <th class="px-4 py-2 border">Value</th>
+                        <th class="px-4 py-2">Dimension</th>
+                        <th class="px-4 py-2">Indicator</th>
+                        <th class="px-4 py-2">Region</th>
+                        <th class="px-4 py-2">Sex</th>
+                        <th class="px-4 py-2">Age</th>
+                        <th class="px-4 py-2">Value</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($details as $detail)
-                        <tr class="text-xs">
-                            <td class="px-4 py-2 border">
+                        <tr class="text-xs border dark:border-gray-700">
+                            <td class="px-4 py-2">
                                 @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->dimension_others_text)
                                     {{ $detail->dimension_others_text }}
                                 @else
                                     {{ $detail->dimension->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="px-4 py-2 border">
+                            <td class="px-4 py-2">
                                 @if(isset($detail->dimension->name) && strtolower($detail->dimension->name) === 'others' && $detail->indicator_others_text)
                                     {{ $detail->indicator_others_text }}
                                 @else
                                     {{ $detail->indicator->name ?? '-' }}
                                 @endif
                             </td>
-                            <td class="px-4 py-2 border">{{ $detail->region->region_description }}</td>
-                            <td class="px-4 py-2 border">{{ $detail->sex }}</td>
-                            <td class="px-4 py-2 border">{{ $detail->age }}</td>
-                            <td class="px-4 py-2 border">{{ $detail->value }}</td>
+                            <td class="px-4 py-2">{{ $detail->region->region_description }}</td>
+                            <td class="px-4 py-2">{{ $detail->sex }}</td>
+                            <td class="px-4 py-2">{{ $detail->age }}</td>
+                            <td class="px-4 py-2">{{ $detail->value }}</td>
                         </tr>
                     @empty
 
@@ -84,7 +84,7 @@
     <!-- Export Modal -->
     @if ($showExportModal ?? false)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md dark:bg-gray-800">
                 <h3 class="text-lg font-bold mb-4">Export Dataset Details</h3>
 
                 <div class="flex flex-col gap-4">
@@ -98,7 +98,7 @@
                 </div>
 
                 <div class="flex justify-end mt-6">
-                    <button wire:click="$set('showExportModal', false)" class="px-4 py-2 border rounded">Close</button>
+                    <button wire:click="$set('showExportModal', false)" class="px-4 py-2 border rounded dark:border-gray-700">Close</button>
                 </div>
             </div>
         </div>

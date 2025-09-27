@@ -22,9 +22,9 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="border border-gray-200 dark:border-gray-700">
+           <div class="border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 overflow-x-auto overflow-y-visible">
                         <thead class="bg-gray-100 dark:bg-slate-700">
                             <tr class="uppercase text-xs">
                                 <th class="px-4 py-2">#</th>
@@ -35,7 +35,7 @@
                                 <th class="px-4 py-2 text-center sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="overflow-visible">
                             @forelse ($tableDatas as $index => $row)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
                                     <td class="px-4 py-2">{{ $tableDatas->firstItem() + $index }}</td>
@@ -45,29 +45,47 @@
                                     <td class="px-4 py-2">{{ $row->created_at->format('M d, Y') }}</td>
 
                                     <!-- Action Buttons as Dropdown -->
-                                    <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
-                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                    <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800 overflow-visible">
+                                        <div x-data="{ 
+                                            open: false,
+                                            toggle() {
+                                                this.open = !this.open;
+                                                if (this.open) {
+                                                    this.positionDropdown();
+                                                }
+                                            },
+                                            positionDropdown() {
+                                                this.$nextTick(() => {
+                                                    const button = this.$refs.button;
+                                                    const dropdown = this.$refs.dropdown;
+                                                    const rect = button.getBoundingClientRect();
+                                                    dropdown.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+                                                    dropdown.style.left = (rect.right - dropdown.offsetWidth) + 'px';
+                                                });
+                                            }
+                                        }" class="relative inline-block text-left">
                                             <!-- Dropdown Trigger -->
-                                            <button @click="open = !open"
+                                            <button @click="toggle()" x-ref="button"
                                                 class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
                                                 aria-label="Toggle actions menu" title="More actions">
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
 
                                             <!-- Dropdown Menu -->
-                                            <div x-show="open" @click.away="open = false" x-transition
-                                                class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
+                                            <div x-show="open" @click.away="open = false" x-transition x-ref="dropdown"
+                                                class="fixed z-[9999] w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden"
+                                                style="display: none;">
                                                 <ul
                                                     class="text-sm text-gray-700 dark:text-gray-200 divide-y divide-gray-100 dark:divide-slate-700">
                                                     <li>
-                                                        <button wire:click="edit({{ $row->id }})"
+                                                        <button wire:click="edit({{ $row->id }})" @click="open = false"
                                                             class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
                                                             <i class="bi bi-pencil-fill"></i> Edit Details
                                                         </button>
                                                     </li>
 
                                                     <li>
-                                                        <button wire:click="confirmDelete({{ $row->id }})"
+                                                        <button wire:click="confirmDelete({{ $row->id }})" @click="open = false"
                                                             class="w-full flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-700 dark:hover:text-white transition">
                                                             <i class="bi bi-trash-fill"></i> Delete Year Covered
                                                         </button>
@@ -98,7 +116,7 @@
 
     <!-- Modal (Used for Create & Edit) -->
     @if ($showModal)
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="text-sm fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
                 <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
                     {{ $editMode ? 'Edit Covered Year' : 'Create New Covered Year' }}
@@ -106,7 +124,7 @@
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Title</label>
-                    <input type="text" wire:model="title" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
+                    <input type="text" wire:model="title" class="text-sm border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
                         placeholder="Enter Title">
                     @error('title')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -115,7 +133,7 @@
 
                 <div class="mb-3">
                     <label class="block text-sm font-medium">Description</label>
-                    <textarea wire:model="description" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700" placeholder="Enter Description"></textarea>
+                    <textarea wire:model="description" class="text-sm border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700" placeholder="Enter Description"></textarea>
                     @error('description')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -124,7 +142,7 @@
                 <div class="mb-3 flex gap-4">
                     <div class="flex-1">
                         <label class="block text-sm font-medium">Year Start</label>
-                        <input type="text" wire:model="yearStart" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
+                        <input type="text" wire:model="yearStart" class="text-sm border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
                             placeholder="Enter start year">
                         @error('yearStart')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -133,7 +151,7 @@
 
                     <div class="flex-1">
                         <label class="block text-sm font-medium">Year End</label>
-                        <input type="text" wire:model="yearEnd" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
+                        <input type="text" wire:model="yearEnd" class="text-sm border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-slate-700"
                             placeholder="Enter end year">
                         @error('yearEnd')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
