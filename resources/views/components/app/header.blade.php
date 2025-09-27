@@ -36,7 +36,7 @@
 
                 <!-- Notifications button -->
                 {{-- <x-dropdown-notifications align="right" /> --}}
-                @livewire('notification.notifications-dropdown')
+                {{-- @livewire('notification.notifications-dropdown') --}}
 
                 <!-- Dark mode toggle -->
                 <x-theme-toggle />

@@ -1,6 +1,6 @@
 <div class="w-full flex justify-center mt-6">
     <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between flex-col md:flex-row lg:flex-row items-center mb-4 gap-4">
             <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">{{ Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs' }}</h2>
             <div class="flex items-center gap-2">
                 <input type="text" wire:model.live="search" placeholder="Search..."
