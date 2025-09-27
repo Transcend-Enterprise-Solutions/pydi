@@ -104,6 +104,11 @@
             <div class="mt-2">
                 <h3 class="text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Active Filters:</h3>
                 <div class="flex flex-wrap gap-2">
+                    @if($selectedDimension && collect($dimensions)->where('id', $selectedDimension)->first())
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            Dimension: {{ collect($dimensions)->where('id', $selectedDimension)->first()['name'] ?? 'Unknown' }}
+                        </span>
+                    @endif
                     @if($selectedAge !== 'All Ages')
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             Age: {{ $selectedAge }}
@@ -122,11 +127,6 @@
                     @if($selectedYear)
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                             Year: {{ $selectedYear }}
-                        </span>
-                    @endif
-                    @if($selectedDimension && collect($dimensions)->where('id', $selectedDimension)->first())
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                            Dimension: {{ collect($dimensions)->where('id', $selectedDimension)->first()['name'] ?? 'Unknown' }}
                         </span>
                     @endif
                     @if(!$selectedAge === 'All Ages' && !$selectedSex === 'All Sexes' && !$selectedRegion && !$selectedYear && !$selectedDimension)
