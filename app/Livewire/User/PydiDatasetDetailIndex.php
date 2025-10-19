@@ -53,7 +53,7 @@ class PydiDatasetDetailIndex extends Component
 
     public function mount($id)
     {
-        $this->datasetInfo = PydiDataset::findOrFail($id);
+        $this->datasetInfo = PydiDataset::with('indicator.dimension')->findOrFail($id);
 
         // Get all dimensions from admin - ordered with Others at the end
         $adminDimensions = Dimension::select('id', 'name')->orderBy('name')->get();
@@ -82,6 +82,11 @@ class PydiDatasetDetailIndex extends Component
         }
 
         $this->regions = PhilippineRegions::select('id', 'region_description')->get();
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
     }
 
     // Watch for dimension changes
@@ -133,18 +138,22 @@ class PydiDatasetDetailIndex extends Component
             'value' => 'nullable|string',
         ];
 
-        // Check if selected dimension is "Others"
-        $selectedDimension = Dimension::find($this->dimension);
-        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+        // Check if we're using the parent dataset's indicator or custom dimension
+        if ($this->dimension) {
+            // User manually selected a dimension (for "Others" case)
+            $selectedDimension = Dimension::find($this->dimension);
+            $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
 
-        if ($isOthers) {
-            $rules['dimensionOthersText'] = 'required|string|max:255';
-            $rules['indicatorText'] = 'required|string|max:255';
-            $rules['dimension'] = 'required|integer|exists:dimensions,id';
-        } else {
-            $rules['dimension'] = 'required|integer|exists:dimensions,id';
-            $rules['indicator'] = 'required|integer|exists:indicators,id';
+            if ($isOthers) {
+                $rules['dimensionOthersText'] = 'required|string|max:255';
+                $rules['indicatorText'] = 'required|string|max:255';
+                $rules['dimension'] = 'required|integer|exists:dimensions,id';
+            } else {
+                $rules['dimension'] = 'required|integer|exists:dimensions,id';
+                $rules['indicator'] = 'required|integer|exists:indicators,id';
+            }
         }
+        // If no dimension selected, we'll use the parent dataset's indicator (simplified flow)
 
         return $rules;
     }
@@ -208,10 +217,6 @@ class PydiDatasetDetailIndex extends Component
     {
         $this->validate();
 
-        // Check if selected dimension is "Others"
-        $selectedDimension = Dimension::find($this->dimension);
-        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
-
         $data = [
             'pydi_dataset_id' => $this->datasetInfo['id'],
             'philippine_region_id' => $this->region,
@@ -220,16 +225,28 @@ class PydiDatasetDetailIndex extends Component
             'value' => $this->value,
         ];
 
-        if ($isOthers) {
-            // Save with Others dimension ID and custom text
-            $data['dimension_id'] = $this->dimension; // Use the actual "Others" dimension ID
-            $data['indicator_id'] = null; // No indicator for Others
-            $data['dimension_others_text'] = $this->dimensionOthersText;
-            $data['indicator_others_text'] = $this->indicatorText;
+        // Check if user manually selected a dimension (for "Others" custom entries)
+        if ($this->dimension) {
+            $selectedDimension = Dimension::find($this->dimension);
+            $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+
+            if ($isOthers) {
+                // Save with Others dimension ID and custom text
+                $data['dimension_id'] = $this->dimension;
+                $data['indicator_id'] = null;
+                $data['dimension_others_text'] = $this->dimensionOthersText;
+                $data['indicator_others_text'] = $this->indicatorText;
+            } else {
+                // Save with regular dimension/indicator IDs
+                $data['dimension_id'] = $this->dimension;
+                $data['indicator_id'] = $this->indicator;
+                $data['dimension_others_text'] = null;
+                $data['indicator_others_text'] = null;
+            }
         } else {
-            // Save with regular dimension/indicator IDs
-            $data['dimension_id'] = $this->dimension;
-            $data['indicator_id'] = $this->indicator;
+            // Use parent dataset's indicator (simplified flow from the image)
+            $data['dimension_id'] = $this->datasetInfo->indicator->dimension_id ?? null;
+            $data['indicator_id'] = $this->datasetInfo->indicator_id ?? null;
             $data['dimension_others_text'] = null;
             $data['indicator_others_text'] = null;
         }
@@ -241,7 +258,7 @@ class PydiDatasetDetailIndex extends Component
 
         // Log the action
         $action = $this->editMode ? 'Updated' : 'Created';
-        $dimensionName = $isOthers ? $this->dimensionOthersText : ($selectedDimension->name ?? 'Unknown');
+        $dimensionName = $data['dimension_others_text'] ?? ($selectedDimension->name ?? 'from parent dataset');
         $this->logs("{$action} dataset detail for dimension: {$dimensionName}");
 
         session()->flash('success', $this->editMode ? 'Dataset detail updated!' : 'New dataset added!');
@@ -277,18 +294,25 @@ class PydiDatasetDetailIndex extends Component
             'selectedDimension' => 'required',
         ]);
 
-        $title = 'dataset_template';
         $selectedDimension = Dimension::find($this->selectedDimension);
 
-        if ($selectedDimension && strtolower($selectedDimension->name) !== 'others') {
-            $title = strtolower(str_replace(' ', '_', $selectedDimension->name));
+        // Generate filename based on dimension name
+        if ($selectedDimension) {
+            // Convert dimension name to slug format
+            $dimensionSlug = strtolower($selectedDimension->name);
+            $dimensionSlug = preg_replace('/[^a-z0-9]+/', '_', $dimensionSlug);
+            $dimensionSlug = trim($dimensionSlug, '_');
+            
+            $filename = $dimensionSlug . '_template.xlsx';
+        } else {
+            $filename = 'dataset_template.xlsx';
         }
 
         $this->showFormatModal = false;
 
         return Excel::download(
             new PydiDatasetTemplateExport($this->selectedDimension),
-            $title . '_template.xlsx'
+            $filename
         );
     }
 
@@ -328,23 +352,25 @@ class PydiDatasetDetailIndex extends Component
     // generate export of dataset details
     public function export($type = 'csv')
     {
-        $filename = 'pydi_dataset_details_' . now()->format('Ymd_His') . '.' . $type;
+        // Create export instance
+        $export = new PydiDatasetDetailsExport($this->datasetInfo->id);
+        
+        // Generate dynamic filename based on indicator name
+        $indicatorSlug = $export->getIndicatorSlug();
+        $filename = $indicatorSlug . '.' . $type;
 
         $this->showExportModal = false;
 
         $this->logs("Exported dataset details as {$type}");
 
-        return Excel::download(
-            new PydiDatasetDetailsExport($this->datasetInfo['id']),
-            $filename
-        );
+        return Excel::download($export, $filename);
     }
 
     public function logs($action)
     {
         UserLog::create([
             'user_id' => auth()->id(),
-            'action' => $action,
+            'action' => $action . ' at ' . now()->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -392,11 +418,22 @@ class PydiDatasetDetailIndex extends Component
         $query = PydiDatasetDetail::with(['region', 'dimension', 'indicator'])
             ->where('pydi_dataset_id', $this->datasetInfo['id'])
             ->when($this->search, function ($q) {
-                $q->where('sex', 'like', "%{$this->search}%")
-                    ->orWhere('age', 'like', "%{$this->search}%")
-                    ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
-                    ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
-                    ->orWhereHas('region', fn($ds) => $ds->where('region_description', 'like', "%{$this->search}%"));
+                $q->where(function ($sub) {
+                    $sub->where('sex', 'like', "%{$this->search}%")
+                        ->orWhere('age', 'like', "%{$this->search}%")
+                        ->orWhere('value', 'like', "%{$this->search}%")
+                        ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
+                        ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
+                        ->orWhereHas('region', function($region) {
+                            $region->where('region_description', 'like', "%{$this->search}%");
+                        })
+                        ->orWhereHas('dimension', function($dimension) {
+                            $dimension->where('name', 'like', "%{$this->search}%");
+                        })
+                        ->orWhereHas('indicator', function($indicator) {
+                            $indicator->where('name', 'like', "%{$this->search}%");
+                        });
+                });
             });
 
         $details = $query->latest()->paginate($this->showEntries);

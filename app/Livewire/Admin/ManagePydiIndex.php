@@ -35,7 +35,6 @@ class ManagePydiIndex extends Component
     public $selectedEditRequestId;
     public $approveReason = '';
 
-
     public function updatingSearch()
     {
         $this->resetPage();
@@ -60,7 +59,6 @@ class ManagePydiIndex extends Component
 
         $dataset = PydiDataset::findOrFail($this->selectedDatasetId);
 
-
         $dataset->status = $this->action_status;
         $dataset->feedback = $this->action_feedback ?? null;
         $dataset->is_submitted = $dataset->status !== 'needs_revision';
@@ -69,7 +67,6 @@ class ManagePydiIndex extends Component
         $dataset->save();
 
         $userInfo = User::where('users.id', $dataset->user_id)->first();
-
 
         $details = null;
         if($dataset){
@@ -82,8 +79,8 @@ class ManagePydiIndex extends Component
 
         $emailTemplate = EmailTemplate::where('name', 'pydi_admin_action_notif')->first();
         if($emailTemplate && $emailTemplate->is_active){
-            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydi_admin_action_notif', $details));
-        }else{
+            Mail::to($userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif(Auth::user()->email, 'pydi_admin_action_notif', $details));
+        } else {
             session()->flash('error', 'Email not sent. Email template is not active.');
         }
         
@@ -120,16 +117,15 @@ class ManagePydiIndex extends Component
             
             $userInfo = User::where('users.id', $entry->user_id)->first();
 
-
             $details = 'Request Status: ' . ucfirst($status) . '<br>';
-            if($this->action_feedback){
-                $details .= 'Feedback: ' . $this->action_feedback;
+            if($this->approveReason){
+                $details .= 'Feedback: ' . $this->approveReason;
             }
 
             $emailTemplate = EmailTemplate::where('name', 'edit_request_admin_action_notif')->first();
             if($emailTemplate && $emailTemplate->is_active){
-                Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
-            }else{
+                Mail::to($userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif(Auth::user()->email, 'edit_request_admin_action_notif', $details));
+            } else {
                 session()->flash('error', 'Email not sent. Email template is not active.');
             }
             
@@ -143,12 +139,19 @@ class ManagePydiIndex extends Component
 
     public function render()
     {
-        $query = PydiDataset::query()
+        // Load datasets with indicator and dimension relationships
+        $query = PydiDataset::with(['user', 'indicator.dimension', 'details'])
             ->whereNotNull('submitted_at')
             ->when($this->search, function ($q) {
                 $q->where(function ($sub) {
                     $sub->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('description', 'like', "%{$this->search}%");
+                        ->orWhere('description', 'like', "%{$this->search}%")
+                        ->orWhereHas('indicator', function($indicator) {
+                            $indicator->where('name', 'like', "%{$this->search}%");
+                        })
+                        ->orWhereHas('indicator.dimension', function($dimension) {
+                            $dimension->where('name', 'like', "%{$this->search}%");
+                        });
                 });
             });
 

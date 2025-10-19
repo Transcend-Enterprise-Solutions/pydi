@@ -171,118 +171,176 @@
         </div>
     </div>
 
-    <!-- Create/Edit Modal -->
+    <!-- Create/Edit Modal - WITH CONDITIONAL SIMPLIFIED VERSION -->
     @if ($showModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
                 <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">
-                    {{ $editMode ? 'Edit Dataset Details' : 'Add Dataset Details' }}
+                    {{ $editMode ? 'Edit Data' : 'Add Data' }}
                 </h3>
 
-                <!-- Dimension Selection -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dimension</label>
-                    <select wire:model.live="dimension" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                        <option value="">Please Select</option>
-                        @foreach ($dimensions as $row)
-                            <option value="{{ $row->id }}">{{ $row->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('dimension')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Custom Dimension Text (shown when "Others" is selected) -->
-                @if ($showDimensionOthers)
+                <!-- Show simplified form (Region, Age, Sex, Value only) when NOT editing custom dimension -->
+                @if (!$editMode || (!$showDimensionOthers && !$dimension))
+                    <!-- SIMPLIFIED FORM (As shown in image) -->
+                    
+                    <!-- Region Selection -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Specify Dimension
-                        </label>
-                        <input type="text" wire:model="dimensionOthersText"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Region:</label>
+                        <select wire:model="region" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            <option value="">Select Region</option>
+                            @foreach ($regions as $row)
+                                <option value="{{ $row->id }}">{{ $row->region_description }}</option>
+                            @endforeach
+                        </select>
+                        @error('region')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Age and Sex Row -->
+                    <div class="mb-4 flex gap-4">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age:</label>
+                            <input type="text" wire:model="age"
+                                class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                                placeholder="Enter Age">
+                            @error('age')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sex:</label>
+                            <select wire:model="sex" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                                <option value="">Select</option>
+                                @foreach ($gender as $row)
+                                    <option value="{{ $row }}">{{ $row }}</option>
+                                @endforeach
+                            </select>
+                            @error('sex')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Value Input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Value:</label>
+                        <input type="number" wire:model="value" step="any"
                             class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                            placeholder="Please specify the dimension">
-                        @error('dimensionOthersText')
+                            placeholder="Enter Value">
+                        @error('value')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                @else
+                    <!-- FULL FORM (For editing custom dimensions with "Others") -->
+
+                    <!-- Dimension Selection -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dimension</label>
+                        <select wire:model.live="dimension" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            <option value="">Please Select</option>
+                            @foreach ($dimensions as $row)
+                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('dimension')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Custom Dimension Text (shown when "Others" is selected) -->
+                    @if ($showDimensionOthers)
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Specify Dimension
+                            </label>
+                            <input type="text" wire:model="dimensionOthersText"
+                                class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                                placeholder="Please specify the dimension">
+                            @error('dimensionOthersText')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    @endif
+
+                    <!-- Indicator Selection/Input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Indicator</label>
+
+                        @if ($showIndicatorAsText)
+                            <!-- Text input when dimension is "Others" -->
+                            <input type="text" wire:model="indicatorText"
+                                class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                                placeholder="Please specify the indicator">
+                            @error('indicatorText')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        @else
+                            <!-- Dropdown for regular dimensions -->
+                            <select wire:model="indicator" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                                <option value="">Please Select</option>
+                                @foreach ($indicators as $row)
+                                    <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('indicator')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        @endif
+                    </div>
+
+                    <!-- Region Selection -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Region</label>
+                        <select wire:model="region" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            <option value="">Please Select</option>
+                            @foreach ($regions as $row)
+                                <option value="{{ $row->id }}">{{ $row->region_description }}</option>
+                            @endforeach
+                        </select>
+                        @error('region')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Age and Sex Row -->
+                    <div class="mb-4 flex gap-2">
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age</label>
+                            <input type="text" wire:model="age"
+                                class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                                placeholder="Enter Age">
+                            @error('age')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sex</label>
+                            <select wire:model="sex" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                                <option value="">Select</option>
+                                @foreach ($gender as $row)
+                                    <option value="{{ $row }}">{{ $row }}</option>
+                                @endforeach
+                            </select>
+                            @error('sex')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Value Input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Value of Indicator</label>
+                        <input type="number" wire:model="value" step="any"
+                            class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                            placeholder="Enter Value">
+                        @error('value')
                             <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
                 @endif
-
-                <!-- Indicator Selection/Input -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Indicator</label>
-
-                    @if ($showIndicatorAsText)
-                        <!-- Text input when dimension is "Others" -->
-                        <input type="text" wire:model="indicatorText"
-                            class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                            placeholder="Please specify the indicator">
-                        @error('indicatorText')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    @else
-                        <!-- Dropdown for regular dimensions -->
-                        <select wire:model="indicator" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            <option value="">Please Select</option>
-                            @foreach ($indicators as $row)
-                                <option value="{{ $row->id }}">{{ $row->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('indicator')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    @endif
-                </div>
-
-                <!-- Region Selection -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Region</label>
-                    <select wire:model="region" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                        <option value="">Please Select</option>
-                        @foreach ($regions as $row)
-                            <option value="{{ $row->id }}">{{ $row->region_description }}</option>
-                        @endforeach
-                    </select>
-                    @error('region')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Age and Sex Row -->
-                <div class="mb-4 flex gap-2">
-                    <div class="w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age</label>
-                        <input type="text" wire:model="age"
-                            class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                            placeholder="Enter Age">
-                        @error('age')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-                    <div class="w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sex</label>
-                        <select wire:model="sex" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            <option value="">Select</option>
-                            @foreach ($gender as $row)
-                                <option value="{{ $row }}">{{ $row }}</option>
-                            @endforeach
-                        </select>
-                        @error('sex')
-                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Value Input -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Value of Indicator</label>
-                    <input type="number" wire:model="value" step="any"
-                        class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-                        placeholder="Enter Value">
-                    @error('value')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
 
                 <!-- Modal Buttons -->
                 <div class="flex justify-end gap-2 pt-4">
@@ -292,9 +350,9 @@
                     </button>
                     <button wire:click="save" wire:loading.attr="disabled"
                         class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50">
-                        <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
+                        <span wire:loading.remove wire:target="save">Save</span>
                         <span wire:loading wire:target="save" class="flex items-center gap-2">
-                            <i class="fas fa-spinner fa-spin"></i> {{ $editMode ? 'Updating...' : 'Saving...' }}
+                            <i class="fas fa-spinner fa-spin"></i> Saving...
                         </span>
                     </button>
                 </div>
