@@ -2,7 +2,7 @@
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Manage PYDP Datasets</h2>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Manage PYDI Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
                         class="w-52 py-1 px-2 border text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
@@ -93,7 +93,6 @@
                 </div>
             </div>
 
-
             @include('livewire.user.session-flash')
 
             <div class="border border-gray-200 dark:border-gray-700">
@@ -102,9 +101,9 @@
                         <thead class="bg-gray-100 dark:bg-slate-700">
                             <tr class="uppercase text-xs">
                                 <th class="px-4 py-2 whitespace-nowrap">Account Name</th>
-                                <th class="px-4 py-2">Title</th>
-                                <th class="px-4 py-2">Level</th>
-                                <th class="px-4 py-2">Year Covered</th>
+                                <th class="px-4 py-2">Indicator</th>
+                                <th class="px-4 py-2">Data Source</th>
+                                <th class="px-4 py-2">Reference Year</th>
                                 <th class="px-4 py-2">Status</th>
                                 <th class="px-4 py-2">Date</th>
                                 <th class="px-4 py-2 text-center sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
@@ -113,26 +112,25 @@
                         <tbody>
                             @forelse ($tableDatas as $index => $row)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
-                                    <td class="px-4 py-2 whitespace-nowrap">{{ $row->user->name }}</td>
-                                    <td class="px-4 py-2">{{ $row->name }}</td>
+                                    <td class="px-4 py-2 whitespace-nowrap">{{ $row->user->name ?? 'N/A' }}</td>
                                     <td class="px-4 py-2">
-                                        @php
-                                            $levels = $row->details->pluck('indicator.level.title')->unique()->filter()->values();
-                                        @endphp
-
-                                        @if($levels->count() > 0)
-                                            @foreach($levels as $index => $level)
-                                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-white text-xs rounded mr-1 mb-1">
-                                                    {{ $level }}
+                                        @if($row->indicator)
+                                            <div class="flex flex-col">
+                                                <span class="font-semibold text-blue-600 dark:text-blue-400">
+                                                    {{ $row->indicator->dimension->name ?? 'N/A' }}
                                                 </span>
-                                            @endforeach
+                                                <span class="text-gray-600 dark:text-gray-400">
+                                                    {{ $row->indicator->name }}
+                                                </span>
+                                            </div>
                                         @else
-                                            <span class="text-gray-400 italic">No levels</span>
+                                            <span class="text-gray-500 italic">{{ $row->name }}</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-2">
-                                        {{ $row->type->year_start . ' - ' . $row->type->year_end }}
+                                        {{ Str::limit($row->description, 50) }}
                                     </td>
+                                    <td class="px-4 py-2">{{ $row->year }}</td>
 
                                     <td class="px-4 py-2">
                                         <div class="flex justify-start items-center gap-1">
@@ -149,7 +147,6 @@
                                                 <span
                                                     class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
                                             @endif
-
 
                                             @if ($row->finalized_at && $row->feedback)
                                                 <div class="relative group inline-flex">
@@ -208,7 +205,6 @@
                                                     </div>
                                                 </div>
                                             @endif
-
                                         </div>
                                     </td>
 
@@ -259,8 +255,8 @@
                                             </div>
                                         </div>
                                     </td>
-
-                                @empty
+                                </tr>
+                            @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-4 text-gray-500">
                                         No records found.
@@ -278,17 +274,16 @@
         </div>
     </div>
 
-
     <!-- Action Confirmation Modal -->
     @if ($showActionModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">Take Action on Dataset</h3>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Take Action on Dataset</h3>
 
                 <!-- Status Dropdown -->
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Status</label>
-                    <select wire:model="action_status" class="border rounded w-full px-3 py-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                    <select wire:model="action_status" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                         <option value="">Select Status</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
@@ -302,8 +297,8 @@
 
                 <!-- Feedback -->
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Feedback</label>
-                    <textarea wire:model="action_feedback" class="border rounded w-full px-3 py-2"
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Feedback</label>
+                    <textarea wire:model="action_feedback" class="border rounded w-full px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                         placeholder="Leave feedback for the user (optional)..."></textarea>
                     @error('action_feedback')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -313,7 +308,7 @@
                 <!-- Buttons -->
                 <div class="flex justify-end gap-2">
                     <button wire:click="$set('showActionModal', false)"
-                        class="px-4 py-2 border rounded">Cancel</button>
+                        class="px-4 py-2 border rounded dark:border-gray-600 dark:text-gray-300">Cancel</button>
                     <button wire:click="submitAction" wire:loading.attr="disabled"
                         class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center gap-2">
                         <span wire:loading.remove wire:target="submitAction">Save Action</span>
@@ -330,7 +325,7 @@
     @if ($showMessageModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
-                <h3 class="text-lg font-bold mb-4">Feedback</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Feedback</h3>
 
                 <div class="mb-4 text-gray-700 dark:text-gray-300">
                     {!! nl2br(e($feedbackMessage)) !!}
@@ -349,17 +344,17 @@
     <!-- Edit Request Approval Modal -->
     @if ($showEditRequestModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
+            <div class="w-full max-w-md p-6 mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Process Edit Request</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Process Edit Request</h3>
                     <button wire:click="$set('showEditRequestModal', false)" title="Close"
-                        class="text-gray-400 hover:text-gray-600 transition">
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
 
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
                         This entry has requested edits. Please review and choose to approve or reject the request.
                     </p>
                 </div>
@@ -385,5 +380,4 @@
             </div>
         </div>
     @endif
-
 </div>

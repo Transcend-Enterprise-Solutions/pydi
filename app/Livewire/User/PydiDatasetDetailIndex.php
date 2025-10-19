@@ -53,7 +53,7 @@ class PydiDatasetDetailIndex extends Component
 
     public function mount($id)
     {
-        $this->datasetInfo = PydiDataset::findOrFail($id);
+        $this->datasetInfo = PydiDataset::with('indicator.dimension')->findOrFail($id);
 
         // Get all dimensions from admin - ordered with Others at the end
         $adminDimensions = Dimension::select('id', 'name')->orderBy('name')->get();
@@ -133,18 +133,22 @@ class PydiDatasetDetailIndex extends Component
             'value' => 'nullable|string',
         ];
 
-        // Check if selected dimension is "Others"
-        $selectedDimension = Dimension::find($this->dimension);
-        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+        // Check if we're using the parent dataset's indicator or custom dimension
+        if ($this->dimension) {
+            // User manually selected a dimension (for "Others" case)
+            $selectedDimension = Dimension::find($this->dimension);
+            $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
 
-        if ($isOthers) {
-            $rules['dimensionOthersText'] = 'required|string|max:255';
-            $rules['indicatorText'] = 'required|string|max:255';
-            $rules['dimension'] = 'required|integer|exists:dimensions,id';
-        } else {
-            $rules['dimension'] = 'required|integer|exists:dimensions,id';
-            $rules['indicator'] = 'required|integer|exists:indicators,id';
+            if ($isOthers) {
+                $rules['dimensionOthersText'] = 'required|string|max:255';
+                $rules['indicatorText'] = 'required|string|max:255';
+                $rules['dimension'] = 'required|integer|exists:dimensions,id';
+            } else {
+                $rules['dimension'] = 'required|integer|exists:dimensions,id';
+                $rules['indicator'] = 'required|integer|exists:indicators,id';
+            }
         }
+        // If no dimension selected, we'll use the parent dataset's indicator (simplified flow)
 
         return $rules;
     }
@@ -208,10 +212,6 @@ class PydiDatasetDetailIndex extends Component
     {
         $this->validate();
 
-        // Check if selected dimension is "Others"
-        $selectedDimension = Dimension::find($this->dimension);
-        $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
-
         $data = [
             'pydi_dataset_id' => $this->datasetInfo['id'],
             'philippine_region_id' => $this->region,
@@ -220,16 +220,28 @@ class PydiDatasetDetailIndex extends Component
             'value' => $this->value,
         ];
 
-        if ($isOthers) {
-            // Save with Others dimension ID and custom text
-            $data['dimension_id'] = $this->dimension; // Use the actual "Others" dimension ID
-            $data['indicator_id'] = null; // No indicator for Others
-            $data['dimension_others_text'] = $this->dimensionOthersText;
-            $data['indicator_others_text'] = $this->indicatorText;
+        // Check if user manually selected a dimension (for "Others" custom entries)
+        if ($this->dimension) {
+            $selectedDimension = Dimension::find($this->dimension);
+            $isOthers = $selectedDimension && strtolower($selectedDimension->name) === 'others';
+
+            if ($isOthers) {
+                // Save with Others dimension ID and custom text
+                $data['dimension_id'] = $this->dimension;
+                $data['indicator_id'] = null;
+                $data['dimension_others_text'] = $this->dimensionOthersText;
+                $data['indicator_others_text'] = $this->indicatorText;
+            } else {
+                // Save with regular dimension/indicator IDs
+                $data['dimension_id'] = $this->dimension;
+                $data['indicator_id'] = $this->indicator;
+                $data['dimension_others_text'] = null;
+                $data['indicator_others_text'] = null;
+            }
         } else {
-            // Save with regular dimension/indicator IDs
-            $data['dimension_id'] = $this->dimension;
-            $data['indicator_id'] = $this->indicator;
+            // Use parent dataset's indicator (simplified flow from the image)
+            $data['dimension_id'] = $this->datasetInfo->indicator->dimension_id ?? null;
+            $data['indicator_id'] = $this->datasetInfo->indicator_id ?? null;
             $data['dimension_others_text'] = null;
             $data['indicator_others_text'] = null;
         }
@@ -241,7 +253,7 @@ class PydiDatasetDetailIndex extends Component
 
         // Log the action
         $action = $this->editMode ? 'Updated' : 'Created';
-        $dimensionName = $isOthers ? $this->dimensionOthersText : ($selectedDimension->name ?? 'Unknown');
+        $dimensionName = $data['dimension_others_text'] ?? ($selectedDimension->name ?? 'from parent dataset');
         $this->logs("{$action} dataset detail for dimension: {$dimensionName}");
 
         session()->flash('success', $this->editMode ? 'Dataset detail updated!' : 'New dataset added!');
