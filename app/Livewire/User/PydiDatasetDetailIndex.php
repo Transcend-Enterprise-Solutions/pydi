@@ -84,6 +84,11 @@ class PydiDatasetDetailIndex extends Component
         $this->regions = PhilippineRegions::select('id', 'region_description')->get();
     }
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
     // Watch for dimension changes
     public function updatedDimension($value)
     {
@@ -289,18 +294,25 @@ class PydiDatasetDetailIndex extends Component
             'selectedDimension' => 'required',
         ]);
 
-        $title = 'dataset_template';
         $selectedDimension = Dimension::find($this->selectedDimension);
 
-        if ($selectedDimension && strtolower($selectedDimension->name) !== 'others') {
-            $title = strtolower(str_replace(' ', '_', $selectedDimension->name));
+        // Generate filename based on dimension name
+        if ($selectedDimension) {
+            // Convert dimension name to slug format
+            $dimensionSlug = strtolower($selectedDimension->name);
+            $dimensionSlug = preg_replace('/[^a-z0-9]+/', '_', $dimensionSlug);
+            $dimensionSlug = trim($dimensionSlug, '_');
+            
+            $filename = $dimensionSlug . '_template.xlsx';
+        } else {
+            $filename = 'dataset_template.xlsx';
         }
 
         $this->showFormatModal = false;
 
         return Excel::download(
             new PydiDatasetTemplateExport($this->selectedDimension),
-            $title . '_template.xlsx'
+            $filename
         );
     }
 
@@ -340,23 +352,25 @@ class PydiDatasetDetailIndex extends Component
     // generate export of dataset details
     public function export($type = 'csv')
     {
-        $filename = 'pydi_dataset_details_' . now()->format('Ymd_His') . '.' . $type;
+        // Create export instance
+        $export = new PydiDatasetDetailsExport($this->datasetInfo->id);
+        
+        // Generate dynamic filename based on indicator name
+        $indicatorSlug = $export->getIndicatorSlug();
+        $filename = $indicatorSlug . '.' . $type;
 
         $this->showExportModal = false;
 
         $this->logs("Exported dataset details as {$type}");
 
-        return Excel::download(
-            new PydiDatasetDetailsExport($this->datasetInfo['id']),
-            $filename
-        );
+        return Excel::download($export, $filename);
     }
 
     public function logs($action)
     {
         UserLog::create([
             'user_id' => auth()->id(),
-            'action' => $action,
+            'action' => $action . ' at ' . now()->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -404,11 +418,22 @@ class PydiDatasetDetailIndex extends Component
         $query = PydiDatasetDetail::with(['region', 'dimension', 'indicator'])
             ->where('pydi_dataset_id', $this->datasetInfo['id'])
             ->when($this->search, function ($q) {
-                $q->where('sex', 'like', "%{$this->search}%")
-                    ->orWhere('age', 'like', "%{$this->search}%")
-                    ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
-                    ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
-                    ->orWhereHas('region', fn($ds) => $ds->where('region_description', 'like', "%{$this->search}%"));
+                $q->where(function ($sub) {
+                    $sub->where('sex', 'like', "%{$this->search}%")
+                        ->orWhere('age', 'like', "%{$this->search}%")
+                        ->orWhere('value', 'like', "%{$this->search}%")
+                        ->orWhere('dimension_others_text', 'like', "%{$this->search}%")
+                        ->orWhere('indicator_others_text', 'like', "%{$this->search}%")
+                        ->orWhereHas('region', function($region) {
+                            $region->where('region_description', 'like', "%{$this->search}%");
+                        })
+                        ->orWhereHas('dimension', function($dimension) {
+                            $dimension->where('name', 'like', "%{$this->search}%");
+                        })
+                        ->orWhereHas('indicator', function($indicator) {
+                            $indicator->where('name', 'like', "%{$this->search}%");
+                        });
+                });
             });
 
         $details = $query->latest()->paginate($this->showEntries);

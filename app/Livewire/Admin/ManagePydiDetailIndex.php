@@ -5,7 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\{Title, Layout};
-use App\Models\{PydiDatasetDetail, PydiDataset};
+use App\Models\{PydiDatasetDetail, PydiDataset, UserLog};
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PydiDatasetDetailsExport;
 
@@ -45,19 +45,30 @@ class ManagePydiDetailIndex extends Component
             'showExportModal' => 'boolean',
         ]);
 
-        $filename = 'pydi_dataset_details_' . now()->format('Ymd_His') . '.' . $type;
+        // Create export instance
+        $export = new PydiDatasetDetailsExport($this->datasetInfo->id);
+        
+        // Generate dynamic filename based on indicator name
+        $indicatorSlug = $export->getIndicatorSlug();
+        $filename = $indicatorSlug . '.' . $type;
 
         $this->showExportModal = false;
         
         try {
-            return Excel::download(
-                new PydiDatasetDetailsExport($this->datasetInfo->id), 
-                $filename
-            );
+            $this->logs("Exported dataset details as {$type}");
+            return Excel::download($export, $filename);
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to export dataset details. Please try again.');
             return null;
         }
+    }
+
+    public function logs($action)
+    {
+        UserLog::create([
+            'user_id' => auth()->id(),
+            'action' => $action . ' at ' . now()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     public function render()
