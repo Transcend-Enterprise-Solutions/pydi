@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Dimension;
+use App\Models\PydiDataset;
+use App\Models\PydiDatasetDetail;
+use App\Models\PydiDataRecord;
 
 class Indicator extends Model
 {
@@ -23,7 +27,15 @@ class Indicator extends Model
      */
     public function dimension(): BelongsTo
     {
-        return $this->belongsTo(Dimension::class);
+        return $this->belongsTo(Dimension::class, 'dimension_id', 'id');
+    }
+
+    /**
+     * Get all PYDI datasets for this indicator.
+     */
+    public function pydiDatasets(): HasMany
+    {
+        return $this->hasMany(PydiDataset::class, 'indicator_id', 'id');
     }
 
     /**
@@ -31,7 +43,15 @@ class Indicator extends Model
      */
     public function dataRecords(): HasMany
     {
-        return $this->hasMany(PydiDataRecord::class);
+        return $this->hasMany(PydiDataRecord::class, 'indicator_id', 'id');
+    }
+
+    /**
+     * Get all PYDI dataset details for this indicator.
+     */
+    public function pydiDatasetDetails(): HasMany
+    {
+        return $this->hasMany(PydiDatasetDetail::class, 'indicator_id', 'id');
     }
 
     /**
@@ -39,7 +59,7 @@ class Indicator extends Model
      */
     public function approvedDataRecords(): HasMany
     {
-        return $this->hasMany(PydiDataRecord::class)->approved();
+        return $this->hasMany(PydiDataRecord::class, 'indicator_id', 'id')->where('status', 'approved');
     }
 
     /**
@@ -47,7 +67,7 @@ class Indicator extends Model
      */
     public function submittedDataRecords(): HasMany
     {
-        return $this->hasMany(PydiDataRecord::class)->submitted();
+        return $this->hasMany(PydiDataRecord::class, 'indicator_id', 'id')->where('is_submitted', true);
     }
 
     /**
@@ -55,7 +75,7 @@ class Indicator extends Model
      */
     public function draftDataRecords(): HasMany
     {
-        return $this->hasMany(PydiDataRecord::class)->draft();
+        return $this->hasMany(PydiDataRecord::class, 'indicator_id', 'id')->where('is_submitted', false);
     }
 
     /**
@@ -79,7 +99,7 @@ class Indicator extends Model
      */
     public function getFullNameAttribute(): string
     {
-        return $this->dimension->name . ' - ' . $this->name;
+        return $this->dimension ? $this->dimension->name . ' - ' . $this->name : $this->name;
     }
 
     /**

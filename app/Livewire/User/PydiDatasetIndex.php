@@ -8,6 +8,7 @@ use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\{WithPagination, WithFileUploads};
 use App\Models\PydiDataset;
+use App\Models\Indicator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -35,12 +36,18 @@ class PydiDatasetIndex extends Component
     public $selectedId = null;
     public $file;
 
-    public $datasetId, $name, $description, $year;
+    public $datasetId, $indicator_id, $name, $description, $year;
 
     protected $rules = [
-        'name' => 'required|string|max:255',
+        'indicator_id' => 'required',
+        'name' => 'required_if:indicator_id,other|string|max:255',
         'description' => 'required|string',
         'year' => 'required|integer|min:2000|max:2100'
+    ];
+
+    protected $messages = [
+        'indicator_id.required' => 'Please select an indicator.',
+        'name.required_if' => 'Indicator name is required when "Other Indicator" is selected.',
     ];
 
     public function updatingSearch()
@@ -50,7 +57,7 @@ class PydiDatasetIndex extends Component
 
     public function create()
     {
-        $this->reset(['datasetId', 'name', 'description', 'year']);
+        $this->reset(['datasetId', 'indicator_id', 'name', 'description', 'year']);
         $this->year = date('Y');
         $this->editMode = false;
         $this->showModal = true;
@@ -60,7 +67,16 @@ class PydiDatasetIndex extends Component
     {
         $dataset = PydiDataset::findOrFail($id);
         $this->datasetId = $dataset->id;
-        $this->name = $dataset->name;
+
+        // Check if the dataset has an indicator_id
+        if ($dataset->indicator_id) {
+            $this->indicator_id = $dataset->indicator_id;
+        } else {
+            // If no indicator_id, it's a custom indicator
+            $this->indicator_id = 'other';
+            $this->name = $dataset->name;
+        }
+
         $this->description = $dataset->description;
         $this->year = $dataset->year;
 
@@ -68,28 +84,50 @@ class PydiDatasetIndex extends Component
         $this->showModal = true;
     }
 
+    public function onIndicatorChange()
+    {
+        // If a predefined indicator is selected, clear the custom name
+        if ($this->indicator_id !== 'other') {
+            $this->name = '';
+        }
+    }
+
     public function save()
     {
         $this->validate();
 
+        $data = [
+            'description' => $this->description,
+            'year' => $this->year,
+        ];
+
+        // If "Other" is selected, use custom name and no indicator_id
+        if ($this->indicator_id === 'other') {
+            $data['name'] = $this->name;
+            $data['indicator_id'] = null;
+        } else {
+            // Use the selected indicator
+            $indicator = Indicator::with('dimension')->find($this->indicator_id);
+            if ($indicator) {
+                if ($indicator->dimension) {
+                    $data['name'] = $indicator->dimension->name . ' - ' . $indicator->name;
+                } else {
+                    $data['name'] = $indicator->name;
+                }
+                $data['indicator_id'] = $this->indicator_id;
+            }
+        }
+
         if ($this->editMode && $this->datasetId) {
-            PydiDataset::findOrFail($this->datasetId)->update([
-                'name' => $this->name,
-                'description' => $this->description,
-                'year' => $this->year,
-            ]);
+            PydiDataset::findOrFail($this->datasetId)->update($data);
             session()->flash('success', 'Dataset updated successfully!');
         } else {
-            PydiDataset::create([
-                'user_id' => auth()->id(),
-                'name' => $this->name,
-                'description' => $this->description,
-                'year' => $this->year,
-            ]);
+            $data['user_id'] = auth()->id();
+            PydiDataset::create($data);
             session()->flash('success', 'Dataset created successfully!');
         }
 
-        $this->reset(['showModal', 'datasetId', 'name', 'description', 'year', 'editMode']);
+        $this->reset(['showModal', 'datasetId', 'indicator_id', 'name', 'description', 'year', 'editMode']);
     }
 
     public function delete()
@@ -195,13 +233,20 @@ class PydiDatasetIndex extends Component
             Mail::to('jhonfrancisduarte12345@gmail.com')->send(new UserActionNotif( Auth::user()->email, 'user_request_edit_notif', 'PYDI',  $details));
         }
 
-
         session()->flash('success', 'Edit request has been sent successfully!');
         $this->showRequestEditModal = false;
     }
 
     public function render()
     {
+        // Get all indicators - check if dimension relationship exists
+        try {
+            $indicators = Indicator::with('dimension')->get();
+        } catch (\Exception $e) {
+            // Fallback if dimension relationship doesn't exist
+            $indicators = Indicator::all();
+        }
+
         $query = PydiDataset::query()
             ->where('user_id', auth()->id())
             ->when($this->search, function ($q) {
@@ -213,6 +258,6 @@ class PydiDatasetIndex extends Component
 
         $tableDatas = $query->latest()->paginate($this->showEntries);
 
-        return view('livewire.user.pydi-dataset-index', compact('tableDatas'));
+        return view('livewire.user.pydi-dataset-index', compact('tableDatas', 'indicators'));
     }
 }

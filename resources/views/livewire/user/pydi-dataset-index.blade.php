@@ -15,7 +15,7 @@
                     </select>
                     <button wire:click="create()"
                         class="bg-blue-500 text-sm text-white py-2 px-3 rounded hover:bg-blue-600 transition">
-                        <i class="bi bi-plus-lg"></i> Add Dataset
+                        <i class="bi bi-plus-lg"></i> Add Indicator
                     </button>
                 </div>
             </div>
@@ -28,9 +28,9 @@
                         <thead class="rounded-t-lg bg-gray-200 dark:bg-gray-700 uppercase font-semibold">
                             <tr>
                                 <th class="px-4 py-2">#</th>
-                                <th class="px-4 py-2">Title</th>
-                                <th class="px-4 py-2">Description</th>
-                                <th class="px-4 py-2">Year</th>
+                                <th class="px-4 py-2">Indicator</th>
+                                <th class="px-4 py-2">Data Source</th>
+                                <th class="px-4 py-2">Reference Year</th>
                                 <th class="px-4 py-2">Status</th>
                                 <th class="px-4 py-2">Date</th>
                                 <th class="px-4 py-2 text-center">Actions</th>
@@ -61,7 +61,6 @@
                                             @endif
 
                                             @if ($row->finalized_at && $row->feedback)
-                                                <!-- Message Button with Tooltip -->
                                                 <div class="relative group inline-flex">
                                                     <span wire:click="message({{ $row->id }})"
                                                         class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
@@ -81,7 +80,6 @@
                                             @endif
 
                                             @if ($row->is_submitted && $row->status === 'pending')
-                                                <!-- Send Check Button with Tooltip -->
                                                 <div class="relative group inline-flex">
                                                     <span
                                                         class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md hover:bg-blue-200 transition">
@@ -116,17 +114,14 @@
                                         @endif
                                     </td>
 
-                                    <!-- Action Buttons as Dropdown -->
                                     <td class="px-4 py-2 text-center">
                                         <div x-data="{ open: false }" class="relative inline-block text-left">
-                                            <!-- Dropdown Trigger -->
                                             <button @click="open = !open"
                                                 class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
                                                 aria-label="Toggle actions menu" title="More actions">
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
 
-                                            <!-- Dropdown Menu -->
                                             <div x-show="open" @click.away="open = false" x-transition
                                                 class="absolute z-50 right-0 mt-2 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-xl overflow-hidden">
                                                 <ul
@@ -204,41 +199,70 @@
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-md p-6">
                 <h3 class="text-lg font-bold mb-4 text-gray-700 dark:text-gray-200">
-                    {{ $editMode ? 'Edit Dataset' : 'Create New Dataset' }}
+                    {{ $editMode ? 'Edit Dataset' : 'Add Indicator' }}
                 </h3>
 
                 @php $currentYear = now()->year; @endphp
 
+                <!-- Indicator Dropdown -->
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Name</label>
-                    <input type="text" wire:model="name" class="border rounded w-full px-3 py-2 dark:bg-slate-700"
-                        placeholder="Enter Name">
-                    @error('name')
+                    <label class="block text-sm font-medium mb-1">Select Indicator</label>
+                    <select wire:model="indicator_id"
+                        class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
+                        wire:change="onIndicatorChange">
+                        <option value="">-- Select an Indicator --</option>
+                        @foreach($indicators as $indicator)
+                            <option value="{{ $indicator->id }}">
+                                @if($indicator->dimension)
+                                    {{ $indicator->dimension->name }} - {{ $indicator->name }}
+                                @else
+                                    {{ $indicator->name }}
+                                @endif
+                            </option>
+                        @endforeach
+                        <option value="other">Other Indicator</option>
+                    </select>
+                    @error('indicator_id')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
 
+                <!-- Show custom name input only if "Other Indicator" is selected -->
+                @if($indicator_id === 'other')
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium">Indicator Name</label>
+                        <input type="text" wire:model="name"
+                            class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
+                            placeholder="Enter Indicator Name">
+                        @error('name')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
+                    </div>
+                @endif
+
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Description</label>
-                    <textarea wire:model="description" class="border rounded w-full px-3 py-2 dark:bg-slate-700" placeholder="Enter Description"></textarea>
+                    <label class="block text-sm font-medium">Data Source</label>
+                    <textarea wire:model="description"
+                        class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
+                        placeholder="Enter Data Source"></textarea>
                     @error('description')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Year</label>
+                    <label class="block text-sm font-medium">Reference Year</label>
                     <select wire:model="year"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border px-3 dark:bg-slate-700 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border px-3 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                         @php
                             $currentYear = date('Y');
                             $startYear = $currentYear - 4;
                             $endYear = $currentYear + 4;
                         @endphp
 
-                        @for ($year = $startYear; $year <= $endYear; $year++)
-                            <option value="{{ $year }}" {{ $year == $year ? 'selected' : '' }}>
-                                {{ $year }}
+                        @for ($yearOption = $startYear; $yearOption <= $endYear; $yearOption++)
+                            <option value="{{ $yearOption }}" {{ $yearOption == $year ? 'selected' : '' }}>
+                                {{ $yearOption }}
                             </option>
                         @endfor
                     </select>
@@ -248,7 +272,10 @@
                 </div>
 
                 <div class="flex justify-end gap-2">
-                    <button wire:click="$set('showModal', false)" class="px-4 py-2 border rounded dark:border-gray-700">Cancel</button>
+                    <button wire:click="$set('showModal', false)"
+                        class="px-4 py-2 border rounded dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                        Cancel
+                    </button>
                     <button wire:click="save" wire:loading.attr="disabled"
                         class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center gap-2">
                         <span wire:loading.remove wire:target="save">{{ $editMode ? 'Update' : 'Save' }}</span>
@@ -261,6 +288,7 @@
         </div>
     @endif
 
+    <!-- Other modals remain the same -->
     <!-- Delete Confirmation Modal -->
     @if ($showDeleteModal)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -312,7 +340,6 @@
                 <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Confirm Send</h3>
                 <p class="text-gray-600 dark:text-gray-300 mb-5">Are you sure you want to send this dataset?</p>
 
-                {{-- Optional file attachment --}}
                 <div class="mb-5 text-left">
                     <label class="block text-sm font-medium mb-1">Optional Attachment</label>
                     <input type="file" wire:model="file" class="border rounded w-full px-3 py-2">
