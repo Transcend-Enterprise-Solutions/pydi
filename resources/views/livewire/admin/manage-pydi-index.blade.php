@@ -95,177 +95,176 @@
 
             @include('livewire.user.session-flash')
 
-            <div class="border border-gray-200 dark:border-gray-700">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-100 dark:bg-slate-700">
-                            <tr class="uppercase text-xs">
-                                <th class="px-4 py-2 whitespace-nowrap">Account Name</th>
-                                <th class="px-4 py-2">Indicator</th>
-                                <th class="px-4 py-2">Data Source</th>
-                                <th class="px-4 py-2">Reference Year</th>
-                                <th class="px-4 py-2">Status</th>
-                                <th class="px-4 py-2">Date</th>
-                                <th class="px-4 py-2 text-center sticky right-0 z-10 bg-gray-200 dark:bg-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($tableDatas as $index => $row)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
-                                    <td class="px-4 py-2 whitespace-nowrap">{{ $row->user->name ?? 'N/A' }}</td>
-                                    <td class="px-4 py-2">
-                                        @if($row->indicator)
-                                            <div class="flex flex-col">
-                                                <span class="font-semibold text-blue-600 dark:text-blue-400">
-                                                    {{ $row->indicator->dimension->name ?? 'N/A' }}
-                                                </span>
-                                                <span class="text-gray-600 dark:text-gray-400">
-                                                    {{ $row->indicator->name }}
-                                                </span>
-                                            </div>
+            <div class="border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-100 dark:bg-slate-700">
+                        <tr class="uppercase text-xs">
+                            <th class="px-4 py-2 whitespace-nowrap">Account Name</th>
+                            <th class="px-4 py-2">Indicator</th>
+                            <th class="px-4 py-2">Data Source</th>
+                            <th class="px-4 py-2">Reference Year</th>
+                            <th class="px-4 py-2">Status</th>
+                            <th class="px-4 py-2">Date</th>
+                            <th class="px-4 py-2 text-center sticky right-0 z-10 bg-gray-100 dark:bg-slate-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($tableDatas as $index => $row)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 text-xs text-gray-700 dark:text-gray-200">
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $row->user->name ?? 'N/A' }}</td>
+                                <td class="px-4 py-2">
+                                    @if($row->indicator)
+                                        <div class="flex flex-col">
+                                            <span class="font-semibold text-blue-600 dark:text-blue-400">
+                                                {{ $row->indicator->dimension->name ?? 'N/A' }}
+                                            </span>
+                                            <span class="text-gray-600 dark:text-gray-400">
+                                                {{ $row->indicator->name }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <span class="text-gray-500 italic">{{ $row->name }}</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-2">
+                                    {{ Str::limit($row->description, 50) }}
+                                </td>
+                                <td class="px-4 py-2">{{ $row->year }}</td>
+
+                                <td class="px-4 py-2">
+                                    <div class="flex justify-start items-center gap-1">
+                                        @if ($row->status === 'approved')
+                                            <span
+                                                class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
+                                        @elseif ($row->status === 'rejected')
+                                            <span
+                                                class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
+                                        @elseif ($row->status === 'needs_revision')
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
+                                                Revision</span>
                                         @else
-                                            <span class="text-gray-500 italic">{{ $row->name }}</span>
+                                            <span
+                                                class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
                                         @endif
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        {{ Str::limit($row->description, 50) }}
-                                    </td>
-                                    <td class="px-4 py-2">{{ $row->year }}</td>
 
-                                    <td class="px-4 py-2">
-                                        <div class="flex justify-start items-center gap-1">
-                                            @if ($row->status === 'approved')
-                                                <span
-                                                    class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Approved</span>
-                                            @elseif ($row->status === 'rejected')
-                                                <span
-                                                    class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Rejected</span>
-                                            @elseif ($row->status === 'needs_revision')
-                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Needs
-                                                    Revision</span>
-                                            @else
-                                                <span
-                                                    class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">Pending</span>
-                                            @endif
-
-                                            @if ($row->finalized_at && $row->feedback)
-                                                <div class="relative group inline-flex">
-                                                    <span wire:click="message({{ $row->id }})"
-                                                        class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                        <i class="bi bi-chat-left-text"></i>
-                                                    </span>
+                                        @if ($row->finalized_at && $row->feedback)
+                                            <div class="relative group inline-flex">
+                                                <span wire:click="message({{ $row->id }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                                    <i class="bi bi-chat-left-text"></i>
+                                                </span>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
                                                     <div
-                                                        class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        View feedback
                                                         <div
-                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                            View feedback
-                                                            <div
-                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                            </div>
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endif
+                                            </div>
+                                        @endif
 
-                                            @if ($row->file_path)
-                                                <div class="relative group inline-flex">
-                                                    <a href="{{ Storage::url($row->file_path) }}" target="_blank"
-                                                        class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
-                                                        <i class="bi bi-file-earmark-pdf"></i>
-                                                    </a>
+                                        @if ($row->file_path)
+                                            <div class="relative group inline-flex">
+                                                <a href="{{ Storage::url($row->file_path) }}" target="_blank"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-blue-600 rounded-md cursor-pointer hover:bg-blue-200 transition">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </a>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
                                                     <div
-                                                        class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        View attached file
                                                         <div
-                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                            View attached file
-                                                            <div
-                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                            </div>
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endif
+                                            </div>
+                                        @endif
 
-                                            @if ($row->is_request_edit === 1)
-                                                <!-- Edit Request Button with Tooltip -->
-                                                <div class="relative group inline-flex">
-                                                    <span wire:click="showEditRequest({{ $row->id }})"
-                                                        class="inline-flex items-center justify-center w-8 h-8 text-yellow-600 rounded-md cursor-pointer hover:bg-yellow-100 transition">
-                                                        <i class="bi bi-clock-history"></i>
-                                                    </span>
+                                        @if ($row->is_request_edit === 1)
+                                            <!-- Edit Request Button with Tooltip -->
+                                            <div class="relative group inline-flex">
+                                                <span wire:click="showEditRequest({{ $row->id }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 text-yellow-600 rounded-md cursor-pointer hover:bg-yellow-100 transition">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </span>
+                                                <div
+                                                    class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
                                                     <div
-                                                        class="absolute z-10 hidden group-hover:block -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full">
+                                                        class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                        Pending Edit Request
                                                         <div
-                                                            class="px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                            Pending Edit Request
-                                                            <div
-                                                                class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
-                                                            </div>
+                                                            class="absolute w-2 h-2 bg-gray-800 transform rotate-45 -bottom-1 left-1/2 -translate-x-1/2">
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endif
-                                        </div>
-                                    </td>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
 
-                                    <td class="px-4 py-2 text-sm text-gray-600">
+                                <td class="px-4 py-2 text-sm text-gray-600">
+                                    <div class="text-gray-800 dark:text-gray-200 text-xs">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">Created:</span>
+                                        {{ $row->created_at->format('M d, Y') }}
+                                    </div>
+                                    @if ($row->finalized_at)
                                         <div class="text-gray-800 dark:text-gray-200 text-xs">
-                                            <span class="font-semibold text-gray-700 dark:text-gray-300">Created:</span>
-                                            {{ $row->created_at->format('M d, Y') }}
+                                            <span class="font-semibold text-gray-700 dark:text-gray-300">Finalized:</span>
+                                            {{ \Carbon\Carbon::parse($row->finalized_at)->format('M d, Y') }}
                                         </div>
-                                        @if ($row->finalized_at)
-                                            <div class="text-gray-800 dark:text-gray-200 text-xs">
-                                                <span class="font-semibold text-gray-700 dark:text-gray-300">Finalized:</span>
-                                                {{ \Carbon\Carbon::parse($row->finalized_at)->format('M d, Y') }}
-                                            </div>
-                                        @endif
-                                    </td>
+                                    @endif
+                                </td>
 
-                                    <!-- Action Buttons -->
-                                    <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
-                                        <div x-data="{ open: false }" class="relative inline-block text-left">
-                                            <!-- Trigger -->
-                                            <button @click="open = !open"
-                                                class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
-                                                title="Actions">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
+                                <!-- Action Buttons -->
+                                <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <!-- Trigger -->
+                                        <button @click="open = !open" x-ref="trigger"
+                                            class="w-8 h-8 flex items-center justify-center bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition"
+                                            title="Actions">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
 
-                                            <!-- Dropdown Menu -->
-                                            <div x-show="open" @click.away="open = false" x-transition
-                                                class="absolute z-50 right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden">
+                                        <!-- Dropdown Menu -->
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                            x-anchor.bottom-end="$refs.trigger"
+                                            class="absolute z-[100] right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden">
 
-                                                <ul class="text-sm text-gray-700 dark:text-gray-200">
-                                                    @if ($row->status !== 'approved' && $row->status !== 'rejected')
-                                                        <li>
-                                                            <button wire:click="openActionModal({{ $row->id }})"
-                                                                class="w-full flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                                <i class="bi bi-gear mr-2"></i> Take Action
-                                                            </button>
-                                                        </li>
-                                                    @endif
-
+                                            <ul class="text-sm text-gray-700 dark:text-gray-200">
+                                                @if ($row->status !== 'approved' && $row->status !== 'rejected')
                                                     <li>
-                                                        <a href="{{ route('manage-pydi-dataset-details', $row->id) }}"
+                                                        <button wire:click="openActionModal({{ $row->id }})"
                                                             class="w-full flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
-                                                            <i class="bi bi-clipboard-data mr-2"></i> Monitor Dataset
-                                                        </a>
+                                                            <i class="bi bi-gear mr-2"></i> Take Action
+                                                        </button>
                                                     </li>
-                                                </ul>
-                                            </div>
+                                                @endif
+
+                                                <li>
+                                                    <a href="{{ route('manage-pydi-dataset-details', $row->id) }}"
+                                                        class="w-full flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                                        <i class="bi bi-clipboard-data mr-2"></i> Monitor Dataset
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-4 text-gray-500">
-                                        No records found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-gray-500">
+                                    No records found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
             <div class="mt-4">
