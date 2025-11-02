@@ -118,28 +118,17 @@
                                         'label' => 'Dashboard',
                                     ],
                                 ],
-                                'Settings' => [
-                                    [
-                                        'route' => 'pydp-levels',
-                                        'icon' => 'sliders',
-                                        'label' => 'PYDP Levels',
-                                    ],
-                                    [
-                                        'route' => 'logs',
-                                        'icon' => 'activity',
-                                        'label' => Auth::user()->user_role === 'user' ? 'User logs' : 'System Logs',
-                                    ],
-                                ],
                                 'Input Datasets' => [
-                                    [
-                                        'route' => 'pydp-datasets',
-                                        'icon' => 'database',
-                                        'label' => 'PYDP Datasets',
-                                    ],
+                                    
                                     [
                                         'route' => 'pydi-datasets',
                                         'icon' => 'bar-chart-line',
                                         'label' => 'PYDI Datasets',
+                                    ],
+                                    [
+                                        'route' => 'pydp-levels',
+                                        'icon' => 'sliders',
+                                        'label' => 'PYDP Datasets',
                                     ],
                                 ],
                             ];
