@@ -2,10 +2,8 @@
 
 namespace App\Livewire\Admin;
 
-use App\Jobs\SendBulkEmailJob;
 use App\Mail\SubmissionReminderNotif;
 use App\Mail\UserRegistrationNotif;
-use App\Models\EmailTemplate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
@@ -13,7 +11,6 @@ use App\Services\EmailService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 

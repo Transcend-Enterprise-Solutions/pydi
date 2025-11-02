@@ -22,7 +22,7 @@
     <script defer src="build/assets/app-BUdMCiQf.js"></script>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="build/assets/app-BLXy9E6t.css">
+    <link rel="stylesheet" href="build/assets/app-CQVE3cJ-.css">
 
     @livewireStyles
     <style>

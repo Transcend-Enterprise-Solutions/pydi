@@ -2,16 +2,19 @@
 
 namespace App\Livewire\Admin;
 
+use App\Mail\AdminActionNotif;
+use App\Models\EmailTemplate;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\{Title, Layout};
 use Livewire\WithPagination;
-use App\Models\PydiDataset;
+use App\Models\PydpDataset;
 use App\Models\User;
-use App\Services\EmailService;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
-#[Title('Manage PYDI Datasets')]
-class ManagePydiIndex extends Component
+#[Title('Manage PYDP Datasets')]
+class ManagePydpIndex extends Component
 {
     use WithPagination;
 
@@ -32,23 +35,15 @@ class ManagePydiIndex extends Component
     public $selectedEditRequestId;
     public $approveReason = '';
 
-    protected EmailService $emailService;
-
-    public function __construct()
-    {
-        $this->emailService = app(EmailService::class);
-    }
-
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
-    // Action Modal Handling 
     public function openActionModal($id)
     {
         $this->selectedDatasetId = $id;
-        $dataset = PydiDataset::findOrFail($id);
+        $dataset = PydpDataset::findOrFail($id);
         $this->action_status = $dataset->status;
         $this->action_feedback = $dataset->feedback ?? '';
         $this->showActionModal = true;
@@ -61,15 +56,18 @@ class ManagePydiIndex extends Component
             'action_feedback' => 'nullable|string|max:500',
         ]);
 
-        $dataset = PydiDataset::findOrFail($this->selectedDatasetId);
+        $dataset = PydpDataset::findOrFail($this->selectedDatasetId);
 
         $dataset->status = $this->action_status;
         $dataset->feedback = $this->action_feedback ?? null;
         $dataset->is_submitted = $dataset->status !== 'needs_revision';
         $dataset->reviewer_id = auth()->id();
         $dataset->finalized_at = now();
+        $dataset->save();
 
-        
+        $userInfo = User::where('users.id', $dataset->user_id)->first();
+
+
         $details = null;
         if($dataset){
             $status = str_replace('_', ' ', $this->action_status);
@@ -78,32 +76,26 @@ class ManagePydiIndex extends Component
                 $details .= 'Feedback: ' . $this->action_feedback;
             }
         }
-
-        $dataset->save();
         
-        
-        // Send email notification -------------------- //
-        $result = $this->emailService->sendEmailNotificationForUser($dataset, 'pydi_admin_action_notif', $details);
-        if($result['success']){
-            session()->flash('success', $result['message']);
+        $emailTemplate = EmailTemplate::where('name', 'pydp_admin_action_notif')->first();
+        if($emailTemplate && $emailTemplate->is_active){
+            Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'pydp_admin_action_notif', $details));
         }else{
-            session()->flash('error', $result['message']);
+            session()->flash('error', 'Email not sent. Email template is not active.');
         }
         
         session()->flash('success', 'Dataset status updated successfully!');
         $this->showActionModal = false;
     }
 
-    // Message Modal Handling
     public function message($id)
     {
-        $dataset = PydiDataset::find($id);
+        $dataset = PydpDataset::find($id);
 
         $this->feedbackMessage = $dataset->feedback ?? 'No feedback provided yet.';
         $this->showMessageModal = true;
     }
 
-    // Edit Request Handling
     public function showEditRequest($id)
     {
         $this->selectedEditRequestId = $id;
@@ -114,7 +106,7 @@ class ManagePydiIndex extends Component
     {
         $action = $status === 'approve' ? 2 : 3;
 
-        $entry = PydiDataset::find($this->selectedEditRequestId);
+        $entry = PydpDataset::find($this->selectedEditRequestId);
 
         if ($entry) {
             $entry->update([
@@ -123,20 +115,19 @@ class ManagePydiIndex extends Component
             
             $userInfo = User::where('users.id', $entry->user_id)->first();
 
+
             $details = 'Request Status: ' . ucfirst($status) . '<br>';
-            if($this->approveReason){
-                $details .= 'Feedback: ' . $this->approveReason;
+            if($this->action_feedback){
+                $details .= 'Feedback: ' . $this->action_feedback;
             }
 
-
-            // Send email notification -------------------- //
-            $result = $this->emailService->sendEmailNotificationForUser($entry, 'pydi_dataset_edit_request_admin_action_notif', $details);
-            if($result['success']){
-                session()->flash('success', $result['message']);
+            $emailTemplate = EmailTemplate::where('name', 'edit_request_admin_action_notif')->first();
+            if($emailTemplate && $emailTemplate->is_active){
+                Mail::to( $userInfo ? $userInfo->email : 'test@gmail.com')->send(new AdminActionNotif( Auth::user()->email, 'edit_request_admin_action_notif', $details));
             }else{
-                session()->flash('error', $result['message']);
+                session()->flash('error', 'Email not sent. Email template is not active.');
             }
-            
+
             session()->flash('success', 'Edit request has been processed successfully!');
         } else {
             session()->flash('error', 'Dataset not found.');
@@ -147,24 +138,21 @@ class ManagePydiIndex extends Component
 
     public function render()
     {
-        // Load datasets with indicator and dimension relationships
-        $query = PydiDataset::with(['user', 'indicator.dimension', 'details'])
+        $query = PydpDataset::with([
+            'type',
+            'user',
+            'details.indicator.level'
+        ])
             ->whereNotNull('submitted_at')
             ->when($this->search, function ($q) {
                 $q->where(function ($sub) {
                     $sub->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('description', 'like', "%{$this->search}%")
-                        ->orWhereHas('indicator', function($indicator) {
-                            $indicator->where('name', 'like', "%{$this->search}%");
-                        })
-                        ->orWhereHas('indicator.dimension', function($dimension) {
-                            $dimension->where('name', 'like', "%{$this->search}%");
-                        });
+                        ->orWhere('description', 'like', "%{$this->search}%");
                 });
             });
 
         $tableDatas = $query->latest()->paginate($this->showEntries);
 
-        return view('livewire.admin.manage-pydi-index', compact('tableDatas'));
+        return view('livewire.admin.manage-pydp-index', compact('tableDatas'));
     }
 }

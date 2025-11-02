@@ -235,7 +235,7 @@
                                                 <!-- Dropdown Menu - Fixed positioning -->
                                                 <div x-show="open" @click.away="open = false" x-transition x-cloak
                                                     class="absolute z-50 right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden"
-                                                    style="position: fixed;"
+                                                    style="position: fixed; z-index: 11"
                                                     x-ref="dropdown"
                                                     x-init="
                                                         $nextTick(() => {

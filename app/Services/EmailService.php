@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Mail\AdminActionNotif;
+use App\Mail\UserActionNotif;
 use App\Models\EmailTemplate;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\Mailer\Exception\TransportException;
 
 class EmailService
@@ -258,6 +262,80 @@ class EmailService
                 'failed' => count($recipients),
                 'errors' => [['email' => 'all', 'error' => 'Failed to queue bulk emails: ' . $e->getMessage()]]
             ];
+        }
+    }
+
+    public function sendEmailNotificationForAdmin($data, $templateName, $type = '')
+    {
+        try {
+            $userInfo = User::where('users.id', $data->user_id)
+                            ->join('user_data', 'user_data.user_id', 'users.id')
+                            ->first();
+
+            if ($userInfo) {
+                $details = 'Agency: ' . $userInfo->government_agency . '<br>' .
+                          'Representative: ' . $userInfo->name . '<br>' .
+                          $type . ' Dataset: ' . $data->name . '<br>' .
+                          'Description: ' . $data->description;
+
+                $emailTemplate = EmailTemplate::where('name', $templateName)->first();
+                if ($emailTemplate && $emailTemplate->is_active) {
+                    Mail::to(config('mail.admin_email'))->send(
+                        new UserActionNotif(Auth::user()->email, $templateName, $type, $details)
+                    );
+
+                    return [
+                        'success' => true,
+                        'message' => 'Email sent successfully.'
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Email was not sent. Email template is not set or inactive.'
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Email was not sent.' . $e->getMessage()
+            ];
+            throw $e;
+        }
+    }
+
+    public function sendEmailNotificationForUser($data, $templateName, $details)
+    {
+        try {
+            $userInfo = User::where('users.id', $data->user_id)
+            ->join('user_data', 'user_data.user_id', 'users.id')
+            ->first();
+            
+            if ($userInfo) {
+
+                $emailTemplate = EmailTemplate::where('name', $templateName)->first();
+                if ($emailTemplate && $emailTemplate->is_active) {
+                    Mail::to($userInfo ? $userInfo->email : 'jhonfrancisduarte12345@gmail.com')->send(
+                        new AdminActionNotif( Auth::user()->email, $templateName, $details)
+                    );
+
+                    return [
+                        'success' => true,
+                        'message' => 'Email sent successfully.'
+                    ];
+                }else{
+                    return [
+                        'success' => false,
+                        'message' => 'Email was not sent. Email template is not set or inactive.'
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Email was not sent.' . $e->getMessage()
+            ];
+            throw $e;
         }
     }
 }

@@ -10,11 +10,11 @@
      if (darkMode) {
          document.documentElement.classList.add('dark');
      }" 
-     class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+     class="min-h-screen bg-gray-50 dark:bg-gray-800 transition-colors rounded-xl overflow-hidden">
     
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-900 dark:to-blue-950 text-white py-12 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
+        <div class="mx-auto px-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-4xl md:text-5xl font-bold mb-2">
@@ -42,7 +42,7 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Statistics Cards - Single Row, No Counts -->
         <div class="grid grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-yellow-500 cursor-pointer" wire:click="$set('filterStatus', 'submitted')">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-yellow-500 cursor-pointer" wire:click="$set('filterStatus', 'submitted')">
                 <div class="flex items-center justify-between">
                     <p class="text-gray-700 dark:text-gray-300 text-sm font-semibold">Submitted</p>
                     <div class="bg-yellow-100 dark:bg-yellow-900 rounded-full p-2">
@@ -53,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-green-500 cursor-pointer" wire:click="$set('filterStatus', 'approved')">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-green-500 cursor-pointer" wire:click="$set('filterStatus', 'approved')">
                 <div class="flex items-center justify-between">
                     <p class="text-gray-700 dark:text-gray-300 text-sm font-semibold">Approved</p>
                     <div class="bg-green-100 dark:bg-green-900 rounded-full p-2">
@@ -64,7 +64,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-red-500 cursor-pointer" wire:click="$set('filterStatus', 'rejected')">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-red-500 cursor-pointer" wire:click="$set('filterStatus', 'rejected')">
                 <div class="flex items-center justify-between">
                     <p class="text-gray-700 dark:text-gray-300 text-sm font-semibold">Rejected</p>
                     <div class="bg-red-100 dark:bg-red-900 rounded-full p-2">
@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-orange-500 cursor-pointer" wire:click="$set('filterStatus', 'edit-requests')">
+            <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 border-l-4 border-orange-500 cursor-pointer" wire:click="$set('filterStatus', 'edit-requests')">
                 <div class="flex items-center justify-between">
                     <p class="text-gray-700 dark:text-gray-300 text-sm font-semibold">Edit Requests</p>
                     <div class="bg-orange-100 dark:bg-orange-900 rounded-full p-2">
@@ -313,7 +313,7 @@
                     @endif
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-12 text-center">
                     <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -324,7 +324,7 @@
         @else
             {{-- SUBMISSIONS VIEW --}}
             @forelse($items as $level)
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-4 overflow-hidden">
+                <div class="bg-white dark:bg-gray-700 rounded-lg shadow mb-4 overflow-hidden">
                     <div class="px-6 py-4 flex items-center bg-gradient-to-r from-blue-50 dark:from-blue-900/30 to-white dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
                         <!-- Checkbox -->
                         <div class="mr-3">
@@ -367,7 +367,7 @@
                     @if(in_array($level->id, $expandedLevels ?? []))
                         <div class="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                             @forelse($level->indicators as $indicator)
-                                <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div class="mb-6 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700">
                                     <button type="button"
                                             wire:click="toggleIndicator({{ $indicator->id }})"
                                             class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -505,7 +505,7 @@
                     @endif
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                <div class="bg-white dark:bg-gray-700 rounded-lg shadow p-12 text-center">
                     <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
