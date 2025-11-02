@@ -75,6 +75,22 @@ class PydpDatasetEntry extends Model
         return $this->belongsTo(User::class, 'submitted_by');
     }
 
+    /**
+     * Get the user who approved this entry (admin/approver)
+     */
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who rejected this entry (admin/rejector)
+     */
+    public function rejectedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
     // ============ STATUS CHECKERS ============
 
     /**
@@ -207,6 +223,38 @@ class PydpDatasetEntry extends Model
         }
 
         return (int)(($filled / count($fields)) * 100);
+    }
+
+    /**
+     * Get approver name and agency (if approved)
+     */
+    public function getApproverInfo(): array
+    {
+        if (!$this->isApproved() || !$this->approvedBy) {
+            return ['name' => 'N/A', 'agency' => 'N/A'];
+        }
+
+        return [
+            'name' => $this->approvedBy->userData?->first_name . ' ' . $this->approvedBy->userData?->last_name ?? 'Unknown',
+            'agency' => $this->approvedBy->userData?->government_agency ?? 'N/A',
+            'position' => $this->approvedBy->userData?->position_designation ?? 'N/A',
+        ];
+    }
+
+    /**
+     * Get rejector name and agency (if rejected)
+     */
+    public function getRejectorInfo(): array
+    {
+        if (!$this->isRejected() || !$this->rejectedBy) {
+            return ['name' => 'N/A', 'agency' => 'N/A'];
+        }
+
+        return [
+            'name' => $this->rejectedBy->userData?->first_name . ' ' . $this->rejectedBy->userData?->last_name ?? 'Unknown',
+            'agency' => $this->rejectedBy->userData?->government_agency ?? 'N/A',
+            'position' => $this->rejectedBy->userData?->position_designation ?? 'N/A',
+        ];
     }
 
     // ============ SCOPES ============

@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Log;
 #[Layout('layouts.app')]
 class PydpLevelController extends Component
 {
-    // ============ DISPLAY STATE ============
     public $dimensions;
     public $showDimensionModal = false;
     public $showIndicatorModal = false;
@@ -23,16 +22,16 @@ class PydpLevelController extends Component
     public $showSubmitModal = false;
     public $showEditRequestModal = false;
     public $showReportModal = false;
+    public $showBatchEditRequestModal = false;
     public $expandedIndicators = [];
     public $editModes = [];
     public $selectedLevels = [];
     
-    // ============ FORM DATA - DIMENSION/LEVEL ============
+    // ============ FORM DATA ============
     public $dimensionName = '';
     public $dimensionDescription = '';
     public $editingDimensionId = null;
     
-    // ============ FORM DATA - INDICATOR ============
     public $indicatorName = '';
     public $indicatorDescription = '';
     public $indicatorDataSources = '';
@@ -44,16 +43,17 @@ class PydpLevelController extends Component
     public $editingIndicatorId = null;
     public $selectedDimensionId = null;
     
-    // ============ FORM DATA - DELETE ============
     public $type = '';
     public $deleteId = null;
     
-    // ============ FORM DATA - SUBMISSION/EDIT ============
     public $submissionNotes = '';
     public $editRequestReason = '';
     public $currentLevelId = null;
+    public $currentIndicatorId = null;
 
-    // ============ LIFECYCLE ============
+    // ============ BATCH EDIT REQUEST ============
+    public $selectedIndicatorsForEdit = [];
+    public $batchEditReason = '';
 
     public function mount()
     {
@@ -75,7 +75,7 @@ class PydpLevelController extends Component
             ->get();
     }
 
-    // ============ DIMENSION (LEVEL) METHODS ============
+    // ============ DIMENSION METHODS ============
 
     public function openDimensionModal($id = null)
     {
@@ -116,13 +116,10 @@ class PydpLevelController extends Component
         $this->validate([
             'dimensionName' => 'required|string|max:255',
             'dimensionDescription' => 'nullable|string',
-        ], [
-            'dimensionName.required' => 'Level title is required.',
         ]);
 
         try {
             if ($this->editingDimensionId) {
-                // Update existing
                 $dimension = PydpLevel::where('user_id', auth()->id())
                     ->find($this->editingDimensionId);
                 
@@ -142,7 +139,6 @@ class PydpLevelController extends Component
                     'icon' => 'success'
                 ]);
             } else {
-                // Create new
                 PydpLevel::create([
                     'user_id' => auth()->id(),
                     'title' => $this->dimensionName,
@@ -228,19 +224,10 @@ class PydpLevelController extends Component
         $this->validate([
             'indicatorName' => 'required|string|max:255',
             'indicatorDescription' => 'nullable|string',
-            'indicatorDataSources' => 'nullable|string',
-            'indicatorFrequency' => 'nullable|string',
-            'indicatorResponsible' => 'nullable|string',
-            'indicatorValidation' => 'nullable|string',
-            'indicatorDataSharing' => 'nullable|string',
-            'indicatorMeasurementUnit' => 'nullable|string',
-        ], [
-            'indicatorName.required' => 'Indicator name is required.',
         ]);
 
         try {
             if ($this->editingIndicatorId) {
-                // Update existing
                 $indicator = PydpIndicator::find($this->editingIndicatorId);
                 
                 if (!$indicator) {
@@ -265,7 +252,6 @@ class PydpLevelController extends Component
                     'icon' => 'success'
                 ]);
             } else {
-                // Create new
                 $indicator = PydpIndicator::create([
                     'pydp_level_id' => $this->selectedDimensionId,
                     'title' => $this->indicatorName,
@@ -278,7 +264,6 @@ class PydpLevelController extends Component
                     'measurement_unit' => $this->indicatorMeasurementUnit,
                 ]);
 
-                // Create entries for 2023-2028
                 for ($year = 2023; $year <= 2028; $year++) {
                     PydpDatasetEntry::create([
                         'pydp_indicator_id' => $indicator->id,
@@ -350,7 +335,6 @@ class PydpLevelController extends Component
                 throw new \Exception('Level not found.');
             }
 
-            // Update all indicators in this level to submitted
             $indicators = $level->indicators;
             
             if ($indicators->isEmpty()) {
@@ -362,6 +346,7 @@ class PydpLevelController extends Component
                     'submission_status' => 'submitted',
                     'submission_notes' => $this->submissionNotes,
                     'submitted_at' => now(),
+                    'submitted_by' => auth()->id(),
                 ]);
             }
 
@@ -386,9 +371,108 @@ class PydpLevelController extends Component
         }
     }
 
-    // ============ EDIT REQUEST - PER LEVEL ============
+    // ============ EDIT REQUEST - PER INDICATOR (All Statuses) ============
 
-    public function openEditRequestModal($dimensionId)
+    public function openEditRequestModal($indicatorId)
+    {
+        $indicator = PydpIndicator::find($indicatorId);
+        
+        if (!$indicator) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Indicator not found.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
+        $this->currentIndicatorId = $indicatorId;
+        $this->editRequestReason = '';
+        $this->showEditRequestModal = true;
+    }
+
+    public function requestEditAccessIndicator()
+    {
+        $this->validate([
+            'editRequestReason' => 'required|string|min:10',
+        ], [
+            'editRequestReason.required' => 'Please provide a reason for the edit request.',
+            'editRequestReason.min' => 'Reason must be at least 10 characters.',
+        ]);
+
+        try {
+            $indicator = PydpIndicator::find($this->currentIndicatorId);
+            
+            if (!$indicator) {
+                throw new \Exception('Indicator not found.');
+            }
+
+            $level = $indicator->level;
+            if (!$level) {
+                throw new \Exception('Level not found for this indicator.');
+            }
+
+            if ($level->user_id !== auth()->id()) {
+                throw new \Exception('You do not have permission to edit this indicator.');
+            }
+
+            $entries = $indicator->entries;
+            
+            if ($entries->isEmpty()) {
+                throw new \Exception('This indicator has no data entries.');
+            }
+
+            Log::info('Requesting edit for indicator: ' . $indicator->title, [
+                'indicator_id' => $indicator->id,
+                'entry_count' => $entries->count(),
+                'user_id' => auth()->id(),
+            ]);
+
+            // Update all entries for this indicator
+            $updatedCount = PydpDatasetEntry::where('pydp_indicator_id', $this->currentIndicatorId)
+                ->update([
+                    'edit_requested' => true,
+                    'edit_request_reason' => $this->editRequestReason,
+                    'edit_requested_at' => now(),
+                ]);
+
+            Log::info('Updated ' . $updatedCount . ' entries with edit request');
+
+            if ($updatedCount === 0) {
+                throw new \Exception('Failed to update entries. Please try again.');
+            }
+
+            $indicatorTitle = $indicator->title;
+            $this->logAction("Requested edit access for indicator: {$indicatorTitle} - Reason: {$this->editRequestReason}");
+            
+            $this->dispatch('swal', [
+                'title' => 'Success!',
+                'text' => "Edit request for '{$indicatorTitle}' sent to admin. Pending approval.",
+                'icon' => 'success'
+            ]);
+
+            $this->showEditRequestModal = false;
+            $this->editRequestReason = '';
+            $this->currentIndicatorId = null;
+            $this->loadDimensions();
+
+        } catch (\Exception $e) {
+            Log::error('Error requesting edit access: ' . $e->getMessage(), [
+                'indicator_id' => $this->currentIndicatorId,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ BATCH EDIT REQUEST - PER INDICATORS ============
+
+    public function openBatchEditRequestModal($dimensionId)
     {
         $level = PydpLevel::where('user_id', auth()->id())->find($dimensionId);
         
@@ -402,17 +486,21 @@ class PydpLevelController extends Component
         }
 
         $this->currentLevelId = $dimensionId;
-        $this->editRequestReason = '';
-        $this->showEditRequestModal = true;
+        $this->selectedIndicatorsForEdit = [];
+        $this->batchEditReason = '';
+        $this->showBatchEditRequestModal = true;
     }
 
-    public function requestEditAccessLevel()
+    public function requestBatchEditAccess()
     {
         $this->validate([
-            'editRequestReason' => 'required|string|min:10',
+            'selectedIndicatorsForEdit' => 'required|array|min:1',
+            'batchEditReason' => 'required|string|min:10',
         ], [
-            'editRequestReason.required' => 'Please provide a reason for the edit request.',
-            'editRequestReason.min' => 'Reason must be at least 10 characters.',
+            'selectedIndicatorsForEdit.required' => 'Please select at least one indicator.',
+            'selectedIndicatorsForEdit.min' => 'Please select at least one indicator.',
+            'batchEditReason.required' => 'Please provide a reason for the edit request.',
+            'batchEditReason.min' => 'Reason must be at least 10 characters.',
         ]);
 
         try {
@@ -423,34 +511,37 @@ class PydpLevelController extends Component
                 throw new \Exception('Level not found.');
             }
 
-            // Update all indicators in this level with edit request
-            $indicators = $level->indicators;
-            
-            if ($indicators->isEmpty()) {
-                throw new \Exception('This level has no indicators to edit.');
-            }
-
-            foreach ($indicators as $indicator) {
-                $indicator->entries()->update([
+            // Update all entries for selected indicators
+            $updatedCount = PydpDatasetEntry::whereIn('pydp_indicator_id', $this->selectedIndicatorsForEdit)
+                ->update([
                     'edit_requested' => true,
-                    'edit_request_reason' => $this->editRequestReason,
+                    'edit_request_reason' => $this->batchEditReason,
                     'edit_requested_at' => now(),
+                    'edit_requested_by' => auth()->id(),
                 ]);
+
+            if ($updatedCount === 0) {
+                throw new \Exception('No entries found to request edit for.');
             }
 
-            $this->logAction("Requested edit for level: {$level->title}");
+            $indicatorNames = PydpIndicator::whereIn('id', $this->selectedIndicatorsForEdit)
+                ->pluck('title')
+                ->implode(', ');
+
+            $this->logAction("Requested batch edit for indicators: {$indicatorNames} in level: {$level->title}");
             
             $this->dispatch('swal', [
                 'title' => 'Request Sent!',
-                'text' => "Edit request for '{$level->title}' sent to admin. Pending approval.",
+                'text' => "Edit requests for " . count($this->selectedIndicatorsForEdit) . " indicator(s) sent to admin. Pending approval.",
                 'icon' => 'success'
             ]);
 
-            $this->showEditRequestModal = false;
-            $this->editRequestReason = '';
+            $this->showBatchEditRequestModal = false;
+            $this->selectedIndicatorsForEdit = [];
+            $this->batchEditReason = '';
             $this->loadDimensions();
         } catch (\Exception $e) {
-            Log::error('Error requesting edit: ' . $e->getMessage());
+            Log::error('Error requesting batch edit: ' . $e->getMessage());
             $this->dispatch('swal', [
                 'title' => 'Error!',
                 'text' => $e->getMessage(),
@@ -503,13 +594,11 @@ class PydpLevelController extends Component
                 throw new \Exception('Indicator not found.');
             }
 
-            // Find or create entry
             $entry = PydpDatasetEntry::where('pydp_indicator_id', $indicatorId)
                 ->where('year', $year)
                 ->first();
 
             if (!$entry) {
-                // Create entry if it doesn't exist
                 $entry = PydpDatasetEntry::create([
                     'pydp_indicator_id' => $indicatorId,
                     'year' => $year,
@@ -518,16 +607,12 @@ class PydpLevelController extends Component
                 ]);
             }
 
-            // Get old value for logging
             $oldValue = $entry->$field ?? null;
-            
-            // Update the field
             $entry->$field = $value;
             $entry->save();
 
-            // Log significant changes
             if ($oldValue !== $value && !is_null($value)) {
-                $this->logAction("Updated {$field} for indicator '{$indicator->title}' (Year: {$year}) from '{$oldValue}' to '{$value}'");
+                $this->logAction("Updated {$field} for indicator '{$indicator->title}' (Year: {$year})");
             }
 
             Log::debug("Entry saved successfully", [
@@ -538,13 +623,7 @@ class PydpLevelController extends Component
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Error saving entry: ' . $e->getMessage(), [
-                'indicator_id' => $indicatorId,
-                'year' => $year,
-                'field' => $field,
-                'value' => $value,
-                'exception' => $e
-            ]);
+            Log::error('Error saving entry: ' . $e->getMessage());
             $this->dispatch('swal', [
                 'title' => 'Error!',
                 'text' => 'Failed to save entry: ' . $e->getMessage(),
@@ -568,7 +647,6 @@ class PydpLevelController extends Component
                 return;
             }
 
-            // Check if any indicator in this level is submitted/approved
             $lockedIndicators = $dimension->indicators()
                 ->whereHas('entries', function ($query) {
                     $query->whereIn('submission_status', ['submitted', 'approved']);
@@ -594,7 +672,6 @@ class PydpLevelController extends Component
                 return;
             }
 
-            // Check if indicator is submitted/approved
             $status = $indicator->entries()->first()?->submission_status ?? 'draft';
             if (in_array($status, ['submitted', 'approved'])) {
                 $this->dispatch('swal', [
@@ -686,7 +763,6 @@ class PydpLevelController extends Component
                 return;
             }
 
-            // Verify levels belong to user
             $levelsCount = PydpLevel::whereIn('id', $this->selectedLevels)
                 ->where('user_id', auth()->id())
                 ->count();
@@ -695,7 +771,6 @@ class PydpLevelController extends Component
                 throw new \Exception('Invalid level selection.');
             }
 
-            // Check if selected levels have indicators
             $hasIndicators = PydpIndicator::whereIn('pydp_level_id', $this->selectedLevels)
                 ->count();
 
@@ -746,8 +821,6 @@ class PydpLevelController extends Component
         }
     }
 
-    // ============ REFRESH METHODS ============
-
     public function refresh()
     {
         $this->loadDimensions();
@@ -760,10 +833,12 @@ class PydpLevelController extends Component
         $this->showDeleteModal = false;
         $this->showSubmitModal = false;
         $this->showEditRequestModal = false;
+        $this->showBatchEditRequestModal = false;
         $this->showReportModal = false;
         $this->expandedIndicators = [];
         $this->editModes = [];
         $this->selectedLevels = [];
+        $this->selectedIndicatorsForEdit = [];
         $this->editingDimensionId = null;
         $this->editingIndicatorId = null;
         $this->selectedDimensionId = null;

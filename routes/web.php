@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 use App\Livewire\{DashboardIndex, UserLogs};
 use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpDatasetIndex, PydpDatasetDetailIndex, PydpLevelController};
-use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, EmailTemplateManager, ManagePydpIndex, ManagePydpDetailIndex};
+use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, EmailTemplateManager, ManagePydpIndex, ManagePydpDetailIndex, PydpManagement};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
 Route::redirect('/', '/landing');
@@ -29,7 +29,8 @@ Route::middleware(['auth', 'checkrole:sa,admin'])->group(function () {
     Route::get('/dimension-indicator', DimensionIndicatorManager::class)->name('dimension-indicator');
 
     // Manage PYDP Datasets
-    Route::get('/manage-pydp-datasets', ManagePydpIndex::class)->name('manage-pydp-datasets');
+    // Route::get('/manage-pydp-datasets', ManagePydpIndex::class)->name('manage-pydp-datasets');
+    Route::get('/manage-pydp-datasets', PydpManagement::class)->name('manage-pydp-datasets');
     Route::get('/manage-pydp-datasets/{id}', ManagePydpDetailIndex::class)->name('manage-pydp-dataset-details');
 
     // Manage PYDI Datasets
