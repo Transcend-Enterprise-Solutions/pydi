@@ -46,11 +46,11 @@
                                         'icon' => 'sliders',
                                         'label' => 'Dimension Indicators',
                                     ],
-                                    [
-                                        'route' => 'cover-year',
-                                        'icon' => 'bi bi-sliders2',
-                                        'label' => 'Covered Year (PYDP)',
-                                    ],
+                                    // [
+                                    //     'route' => 'cover-year',
+                                    //     'icon' => 'bi bi-sliders2',
+                                    //     'label' => 'Covered Year (PYDP)',
+                                    // ],
                                     [
                                         'route' => 'email-templates',
                                         'icon' => 'bi bi-envelope-plus',
