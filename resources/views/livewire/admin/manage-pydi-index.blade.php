@@ -223,7 +223,7 @@
                                         </td>
 
                                         <!-- Action Buttons -->
-                                        <td class="px-4 py-2 text-center sticky right-0 z-10 bg-white dark:bg-gray-800">
+                                        <td class="px-4 py-2 text-center sticky right-0 bg-white dark:bg-gray-800" style="z-index: {{ 10 + $showEntries - $index }}">
                                             <div x-data="{ open: false }" class="relative inline-block text-left">
                                                 <!-- Trigger -->
                                                 <button @click="open = !open"
@@ -235,7 +235,6 @@
                                                 <!-- Dropdown Menu - Fixed positioning -->
                                                 <div x-show="open" @click.away="open = false" x-transition x-cloak
                                                     class="absolute z-50 right-0 mt-2 w-52 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg overflow-hidden"
-                                                    style="position: fixed; z-index: 11"
                                                     x-ref="dropdown"
                                                     x-init="
                                                         $nextTick(() => {
