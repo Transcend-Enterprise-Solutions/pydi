@@ -3,82 +3,178 @@
 namespace App\Livewire\User;
 
 use Livewire\Component;
-use App\Models\{PydpLevel, PydpIndicator, UserLog};
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
+use App\Models\PydpLevel;
+use App\Models\PydpIndicator;
+use App\Models\PydpDatasetEntry;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PydpDataMultiSheetExport;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('layouts.app')]
-#[Title('Levels Indicators | PYDI')]
 class PydpLevelController extends Component
 {
     public $dimensions;
     public $showDimensionModal = false;
     public $showIndicatorModal = false;
-
-    // Form fields
+    public $showDeleteModal = false;
+    public $showSubmitModal = false;
+    public $showEditRequestModal = false;
+    public $showReportModal = false;
+    public $showBatchEditRequestModal = false;
+    public $expandedIndicators = [];
+    public $editModes = [];
+    public $selectedLevels = [];
+    
+    // ============ FORM DATA ============
     public $dimensionName = '';
     public $dimensionDescription = '';
     public $editingDimensionId = null;
-
+    
     public $indicatorName = '';
     public $indicatorDescription = '';
-    public $selectedDimensionId = null;
+    public $indicatorDataSources = '';
+    public $indicatorFrequency = '';
+    public $indicatorResponsible = '';
+    public $indicatorValidation = '';
+    public $indicatorDataSharing = '';
+    public $indicatorMeasurementUnit = '';
     public $editingIndicatorId = null;
-    public $showDeleteModal = false;
+    public $selectedDimensionId = null;
+    
+    public $type = '';
+    public $deleteId = null;
+    
+    public $submissionNotes = '';
+    public $editRequestReason = '';
+    public $currentLevelId = null;
+    public $currentIndicatorId = null;
 
-    public $valueId, $type;
+    // ============ BATCH EDIT REQUEST ============
+    public $selectedIndicatorsForEdit = [];
+    public $batchEditReason = '';
 
     public function mount()
     {
         $this->loadDimensions();
     }
 
+    public function render()
+    {
+        return view('livewire.user.pydp-level-controller', [
+            'dimensions' => $this->dimensions,
+        ]);
+    }
+
     public function loadDimensions()
     {
-        // Only load dimensions belonging to the authenticated user
-        $this->dimensions = PydpLevel::where('user_id', auth()->id())
-            ->with('indicators')
-            ->orderBy('title')
+        $this->dimensions = PydpLevel::with(['indicators.entries'])
+            ->where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 
-    public function openDimensionModal($dimensionId = null)
-    {
-        if ($dimensionId) {
-            // Ensure the dimension belongs to the authenticated user
-            $dimension = PydpLevel::where('user_id', auth()->id())
-                ->where('id', $dimensionId)
-                ->first();
+    // ============ DIMENSION METHODS ============
 
+    public function openDimensionModal($id = null)
+    {
+        if ($id) {
+            $dimension = PydpLevel::where('user_id', auth()->id())->find($id);
+            
             if (!$dimension) {
                 $this->dispatch('swal', [
                     'title' => 'Error!',
-                    'text' => 'Level not found or access denied.',
+                    'text' => 'Level not found.',
                     'icon' => 'error'
                 ]);
                 return;
             }
 
-            $this->editingDimensionId = $dimensionId;
+            $this->editingDimensionId = $id;
             $this->dimensionName = $dimension->title;
             $this->dimensionDescription = $dimension->content;
         } else {
-            $this->resetDimensionForm();
+            $this->editingDimensionId = null;
+            $this->dimensionName = '';
+            $this->dimensionDescription = '';
         }
+        
         $this->showDimensionModal = true;
     }
 
+    public function closeDimensionModal()
+    {
+        $this->showDimensionModal = false;
+        $this->editingDimensionId = null;
+        $this->dimensionName = '';
+        $this->dimensionDescription = '';
+    }
+
+    public function saveDimension()
+    {
+        $this->validate([
+            'dimensionName' => 'required|string|max:255',
+            'dimensionDescription' => 'nullable|string',
+        ]);
+
+        try {
+            if ($this->editingDimensionId) {
+                $dimension = PydpLevel::where('user_id', auth()->id())
+                    ->find($this->editingDimensionId);
+                
+                if (!$dimension) {
+                    throw new \Exception('Level not found.');
+                }
+
+                $dimension->update([
+                    'title' => $this->dimensionName,
+                    'content' => $this->dimensionDescription,
+                ]);
+
+                $this->logAction('Updated level: ' . $this->dimensionName);
+                $this->dispatch('swal', [
+                    'title' => 'Success!',
+                    'text' => 'Level updated successfully.',
+                    'icon' => 'success'
+                ]);
+            } else {
+                PydpLevel::create([
+                    'user_id' => auth()->id(),
+                    'title' => $this->dimensionName,
+                    'content' => $this->dimensionDescription,
+                ]);
+
+                $this->logAction('Created new level: ' . $this->dimensionName);
+                $this->dispatch('swal', [
+                    'title' => 'Success!',
+                    'text' => 'Level created successfully.',
+                    'icon' => 'success'
+                ]);
+            }
+
+            $this->loadDimensions();
+            $this->closeDimensionModal();
+        } catch (\Exception $e) {
+            Log::error('Error saving dimension: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ INDICATOR METHODS ============
+
     public function openIndicatorModal($dimensionId, $indicatorId = null)
     {
-        // Verify the dimension belongs to the authenticated user
-        $dimension = PydpLevel::where('user_id', auth()->id())
-            ->where('id', $dimensionId)
-            ->first();
-
+        $dimension = PydpLevel::where('user_id', auth()->id())->find($dimensionId);
+        
         if (!$dimension) {
             $this->dispatch('swal', [
                 'title' => 'Error!',
-                'text' => 'Level not found or access denied.',
+                'text' => 'Level not found.',
                 'icon' => 'error'
             ]);
             return;
@@ -87,15 +183,12 @@ class PydpLevelController extends Component
         $this->selectedDimensionId = $dimensionId;
 
         if ($indicatorId) {
-            // Ensure the indicator belongs to a level owned by the authenticated user
-            $indicator = PydpIndicator::whereHas('level', function ($query) {
-                $query->where('user_id', auth()->id());
-            })->where('id', $indicatorId)->first();
-
+            $indicator = PydpIndicator::where('pydp_level_id', $dimensionId)->find($indicatorId);
+            
             if (!$indicator) {
                 $this->dispatch('swal', [
                     'title' => 'Error!',
-                    'text' => 'Indicator not found or access denied.',
+                    'text' => 'Indicator not found.',
                     'icon' => 'error'
                 ]);
                 return;
@@ -104,252 +197,652 @@ class PydpLevelController extends Component
             $this->editingIndicatorId = $indicatorId;
             $this->indicatorName = $indicator->title;
             $this->indicatorDescription = $indicator->content;
+            $this->indicatorDataSources = $indicator->data_sources;
+            $this->indicatorFrequency = $indicator->frequency;
+            $this->indicatorResponsible = $indicator->responsible;
+            $this->indicatorValidation = $indicator->validation;
+            $this->indicatorDataSharing = $indicator->data_sharing;
+            $this->indicatorMeasurementUnit = $indicator->measurement_unit;
         } else {
+            $this->editingIndicatorId = null;
             $this->resetIndicatorForm();
-            $this->selectedDimensionId = $dimensionId;
         }
+        
         $this->showIndicatorModal = true;
-    }
-
-    public function closeDimensionModal()
-    {
-        $this->showDimensionModal = false;
-        $this->resetDimensionForm();
     }
 
     public function closeIndicatorModal()
     {
         $this->showIndicatorModal = false;
-        $this->resetIndicatorFormCompletely();
-    }
-
-    public function confirmAction($id, $type)
-    {
-        $this->showDeleteModal = true;
-        $this->valueId = $id;
-        $this->type = $type === 'deleteDimension' ? 'level' : 'indicator';
-    }
-
-    public function confirmDelete()
-    {
-        if ($this->type == 'level') {
-            // Ensure the level belongs to the authenticated user
-            $level = PydpLevel::where('user_id', auth()->id())
-                ->where('id', $this->valueId)
-                ->first();
-
-            if (!$level) {
-                $this->dispatch('swal', [
-                    'title' => 'Error!',
-                    'text' => 'Level not found or access denied.',
-                    'icon' => 'error'
-                ]);
-                $this->showDeleteModal = false;
-                return;
-            }
-
-            $name = $level->title;
-            $level->delete();
-
-            $this->logs("Deleted level: {$name}");
-
-            $this->loadDimensions();
-            $this->dispatch('swal', [
-                'title' => 'Deleted!',
-                'text' => 'Level deleted successfully.',
-                'icon' => 'success'
-            ]);
-        } elseif ($this->type == 'indicator') {
-            // Ensure the indicator belongs to a level owned by the authenticated user
-            $indicator = PydpIndicator::whereHas('level', function ($query) {
-                $query->where('user_id', auth()->id());
-            })->where('id', $this->valueId)->first();
-
-            if (!$indicator) {
-                $this->dispatch('swal', [
-                    'title' => 'Error!',
-                    'text' => 'Indicator not found or access denied.',
-                    'icon' => 'error'
-                ]);
-                $this->showDeleteModal = false;
-                return;
-            }
-
-            $name = $indicator->title;
-            $indicator->delete();
-
-            $this->logs("Deleted indicator: {$name}");
-
-            $this->loadDimensions();
-            $this->dispatch('swal', [
-                'title' => 'Deleted!',
-                'text' => 'Indicator deleted successfully.',
-                'icon' => 'success'
-            ]);
-        }
-
-        $this->showDeleteModal = false;
-    }
-
-    public function saveDimension()
-    {
-        $this->validate([
-            'dimensionName' => 'required|min:3',
-            'dimensionDescription' => 'nullable'
-        ]);
-
-        if ($this->editingDimensionId) {
-            // Ensure the dimension belongs to the authenticated user
-            $dimension = PydpLevel::where('user_id', auth()->id())
-                ->where('id', $this->editingDimensionId)
-                ->first();
-
-            if (!$dimension) {
-                $this->dispatch('swal', [
-                    'title' => 'Error!',
-                    'text' => 'Level not found or access denied.',
-                    'icon' => 'error'
-                ]);
-                return;
-            }
-
-            $dimension->update([
-                'title' => $this->dimensionName,
-                'content' => $this->dimensionDescription
-            ]);
-            $message = 'Level updated successfully';
-            $action = "Updated level: {$this->dimensionName}";
-        } else {
-            PydpLevel::create([
-                'user_id' => auth()->id(),
-                'title' => $this->dimensionName,
-                'content' => $this->dimensionDescription
-            ]);
-            $message = 'Level created successfully';
-            $action = "Created level: {$this->dimensionName}";
-        }
-
-        // save log
-        $this->logs($action);
-
-        $this->closeDimensionModal();
-        $this->loadDimensions();
-        $this->dispatch('swal', [
-            'title' => 'Success!',
-            'text' => $message,
-            'icon' => 'success'
-        ]);
+        $this->editingIndicatorId = null;
+        $this->selectedDimensionId = null;
+        $this->resetIndicatorForm();
     }
 
     public function saveIndicator()
     {
         $this->validate([
-            'indicatorName' => 'required|min:3',
-            'indicatorDescription' => 'nullable',
-            'selectedDimensionId' => 'required|exists:pydp_levels,id'
+            'indicatorName' => 'required|string|max:255',
+            'indicatorDescription' => 'nullable|string',
         ]);
-
-        // Verify the selected dimension belongs to the authenticated user
-        $dimension = PydpLevel::where('user_id', auth()->id())
-            ->where('id', $this->selectedDimensionId)
-            ->first();
-
-        if (!$dimension) {
-            $this->dispatch('swal', [
-                'title' => 'Error!',
-                'text' => 'Selected level not found or access denied.',
-                'icon' => 'error'
-            ]);
-            return;
-        }
 
         try {
             if ($this->editingIndicatorId) {
-                // Ensure the indicator belongs to a level owned by the authenticated user
-                $indicator = PydpIndicator::whereHas('level', function ($query) {
-                    $query->where('user_id', auth()->id());
-                })->where('id', $this->editingIndicatorId)->first();
-
+                $indicator = PydpIndicator::find($this->editingIndicatorId);
+                
                 if (!$indicator) {
-                    $this->dispatch('swal', [
-                        'title' => 'Error!',
-                        'text' => 'Indicator not found or access denied.',
-                        'icon' => 'error'
-                    ]);
-                    return;
+                    throw new \Exception('Indicator not found.');
                 }
 
                 $indicator->update([
                     'title' => $this->indicatorName,
                     'content' => $this->indicatorDescription,
+                    'data_sources' => $this->indicatorDataSources,
+                    'frequency' => $this->indicatorFrequency,
+                    'responsible' => $this->indicatorResponsible,
+                    'validation' => $this->indicatorValidation,
+                    'data_sharing' => $this->indicatorDataSharing,
+                    'measurement_unit' => $this->indicatorMeasurementUnit,
                 ]);
-                $message = 'Indicator updated successfully';
-                $action = "Updated indicator: {$this->indicatorName}";
+
+                $this->logAction('Updated indicator: ' . $this->indicatorName);
+                $this->dispatch('swal', [
+                    'title' => 'Success!',
+                    'text' => 'Indicator updated successfully.',
+                    'icon' => 'success'
+                ]);
             } else {
-                PydpIndicator::create([
+                $indicator = PydpIndicator::create([
                     'pydp_level_id' => $this->selectedDimensionId,
                     'title' => $this->indicatorName,
                     'content' => $this->indicatorDescription,
+                    'data_sources' => $this->indicatorDataSources,
+                    'frequency' => $this->indicatorFrequency,
+                    'responsible' => $this->indicatorResponsible,
+                    'validation' => $this->indicatorValidation,
+                    'data_sharing' => $this->indicatorDataSharing,
+                    'measurement_unit' => $this->indicatorMeasurementUnit,
                 ]);
-                $message = 'Indicator created successfully';
-                $action = "Created indicator: {$this->indicatorName}";
+
+                for ($year = 2023; $year <= 2028; $year++) {
+                    PydpDatasetEntry::create([
+                        'pydp_indicator_id' => $indicator->id,
+                        'year' => $year,
+                        'submission_status' => 'draft',
+                        'edit_requested' => false,
+                    ]);
+                }
+
+                $this->logAction('Created new indicator: ' . $this->indicatorName);
+                $this->dispatch('swal', [
+                    'title' => 'Success!',
+                    'text' => 'Indicator created with data entries for 2023-2028.',
+                    'icon' => 'success'
+                ]);
             }
 
-            // save log
-            $this->logs($action);
-
-            $this->closeIndicatorModal();
             $this->loadDimensions();
-            $this->dispatch('swal', [
-                'title' => 'Success!',
-                'text' => $message,
-                'icon' => 'success'
-            ]);
+            $this->closeIndicatorModal();
         } catch (\Exception $e) {
+            Log::error('Error saving indicator: ' . $e->getMessage());
             $this->dispatch('swal', [
                 'title' => 'Error!',
-                'text' => 'Failed to save indicator: ' . $e->getMessage(),
+                'text' => $e->getMessage(),
                 'icon' => 'error'
             ]);
         }
-    }
-
-    public function logs($action)
-    {
-        UserLog::create([
-            'user_id' => auth()->id(),
-            'action' => $action,
-        ]);
-    }
-
-    public function resetDimensionForm()
-    {
-        $this->dimensionName = '';
-        $this->dimensionDescription = '';
-        $this->editingDimensionId = null;
     }
 
     public function resetIndicatorForm()
     {
         $this->indicatorName = '';
         $this->indicatorDescription = '';
-        $this->editingIndicatorId = null;
+        $this->indicatorDataSources = '';
+        $this->indicatorFrequency = '';
+        $this->indicatorResponsible = '';
+        $this->indicatorValidation = '';
+        $this->indicatorDataSharing = '';
+        $this->indicatorMeasurementUnit = '';
     }
 
-    public function resetIndicatorFormCompletely()
+    // ============ SUBMISSION - PER LEVEL ============
+
+    public function openSubmitModal($dimensionId)
     {
-        $this->indicatorName = '';
-        $this->indicatorDescription = '';
+        $level = PydpLevel::where('user_id', auth()->id())->find($dimensionId);
+        
+        if (!$level) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Level not found.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
+        $this->currentLevelId = $dimensionId;
+        $this->submissionNotes = '';
+        $this->showSubmitModal = true;
+    }
+
+    public function submitLevelWithNotes()
+    {
+        try {
+            $level = PydpLevel::where('user_id', auth()->id())
+                ->find($this->currentLevelId);
+            
+            if (!$level) {
+                throw new \Exception('Level not found.');
+            }
+
+            $indicators = $level->indicators;
+            
+            if ($indicators->isEmpty()) {
+                throw new \Exception('This level has no indicators to submit.');
+            }
+
+            foreach ($indicators as $indicator) {
+                $indicator->entries()->update([
+                    'submission_status' => 'submitted',
+                    'submission_notes' => $this->submissionNotes,
+                    'submitted_at' => now(),
+                    'submitted_by' => auth()->id(),
+                ]);
+            }
+
+            $this->logAction("Submitted level: {$level->title} ({$indicators->count()} indicators)");
+            
+            $this->dispatch('swal', [
+                'title' => 'Success!',
+                'text' => "Level '{$level->title}' and all {$indicators->count()} indicator(s) submitted successfully.",
+                'icon' => 'success'
+            ]);
+
+            $this->showSubmitModal = false;
+            $this->submissionNotes = '';
+            $this->loadDimensions();
+        } catch (\Exception $e) {
+            Log::error('Error submitting level: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ EDIT REQUEST - PER INDICATOR (All Statuses) ============
+
+    public function openEditRequestModal($indicatorId)
+    {
+        $indicator = PydpIndicator::find($indicatorId);
+        
+        if (!$indicator) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Indicator not found.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
+        $this->currentIndicatorId = $indicatorId;
+        $this->editRequestReason = '';
+        $this->showEditRequestModal = true;
+    }
+
+    public function requestEditAccessIndicator()
+    {
+        $this->validate([
+            'editRequestReason' => 'required|string|min:10',
+        ], [
+            'editRequestReason.required' => 'Please provide a reason for the edit request.',
+            'editRequestReason.min' => 'Reason must be at least 10 characters.',
+        ]);
+
+        try {
+            $indicator = PydpIndicator::find($this->currentIndicatorId);
+            
+            if (!$indicator) {
+                throw new \Exception('Indicator not found.');
+            }
+
+            $level = $indicator->level;
+            if (!$level) {
+                throw new \Exception('Level not found for this indicator.');
+            }
+
+            if ($level->user_id !== auth()->id()) {
+                throw new \Exception('You do not have permission to edit this indicator.');
+            }
+
+            $entries = $indicator->entries;
+            
+            if ($entries->isEmpty()) {
+                throw new \Exception('This indicator has no data entries.');
+            }
+
+            Log::info('Requesting edit for indicator: ' . $indicator->title, [
+                'indicator_id' => $indicator->id,
+                'entry_count' => $entries->count(),
+                'user_id' => auth()->id(),
+            ]);
+
+            // Update all entries for this indicator
+            $updatedCount = PydpDatasetEntry::where('pydp_indicator_id', $this->currentIndicatorId)
+                ->update([
+                    'edit_requested' => true,
+                    'edit_request_reason' => $this->editRequestReason,
+                    'edit_requested_at' => now(),
+                ]);
+
+            Log::info('Updated ' . $updatedCount . ' entries with edit request');
+
+            if ($updatedCount === 0) {
+                throw new \Exception('Failed to update entries. Please try again.');
+            }
+
+            $indicatorTitle = $indicator->title;
+            $this->logAction("Requested edit access for indicator: {$indicatorTitle} - Reason: {$this->editRequestReason}");
+            
+            $this->dispatch('swal', [
+                'title' => 'Success!',
+                'text' => "Edit request for '{$indicatorTitle}' sent to admin. Pending approval.",
+                'icon' => 'success'
+            ]);
+
+            $this->showEditRequestModal = false;
+            $this->editRequestReason = '';
+            $this->currentIndicatorId = null;
+            $this->loadDimensions();
+
+        } catch (\Exception $e) {
+            Log::error('Error requesting edit access: ' . $e->getMessage(), [
+                'indicator_id' => $this->currentIndicatorId,
+                'user_id' => auth()->id(),
+            ]);
+
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ BATCH EDIT REQUEST - PER INDICATORS ============
+
+    public function openBatchEditRequestModal($dimensionId)
+    {
+        $level = PydpLevel::where('user_id', auth()->id())->find($dimensionId);
+        
+        if (!$level) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Level not found.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
+        $this->currentLevelId = $dimensionId;
+        $this->selectedIndicatorsForEdit = [];
+        $this->batchEditReason = '';
+        $this->showBatchEditRequestModal = true;
+    }
+
+    public function requestBatchEditAccess()
+    {
+        $this->validate([
+            'selectedIndicatorsForEdit' => 'required|array|min:1',
+            'batchEditReason' => 'required|string|min:10',
+        ], [
+            'selectedIndicatorsForEdit.required' => 'Please select at least one indicator.',
+            'selectedIndicatorsForEdit.min' => 'Please select at least one indicator.',
+            'batchEditReason.required' => 'Please provide a reason for the edit request.',
+            'batchEditReason.min' => 'Reason must be at least 10 characters.',
+        ]);
+
+        try {
+            $level = PydpLevel::where('user_id', auth()->id())
+                ->find($this->currentLevelId);
+            
+            if (!$level) {
+                throw new \Exception('Level not found.');
+            }
+
+            // Update all entries for selected indicators
+            $updatedCount = PydpDatasetEntry::whereIn('pydp_indicator_id', $this->selectedIndicatorsForEdit)
+                ->update([
+                    'edit_requested' => true,
+                    'edit_request_reason' => $this->batchEditReason,
+                    'edit_requested_at' => now(),
+                    'edit_requested_by' => auth()->id(),
+                ]);
+
+            if ($updatedCount === 0) {
+                throw new \Exception('No entries found to request edit for.');
+            }
+
+            $indicatorNames = PydpIndicator::whereIn('id', $this->selectedIndicatorsForEdit)
+                ->pluck('title')
+                ->implode(', ');
+
+            $this->logAction("Requested batch edit for indicators: {$indicatorNames} in level: {$level->title}");
+            
+            $this->dispatch('swal', [
+                'title' => 'Request Sent!',
+                'text' => "Edit requests for " . count($this->selectedIndicatorsForEdit) . " indicator(s) sent to admin. Pending approval.",
+                'icon' => 'success'
+            ]);
+
+            $this->showBatchEditRequestModal = false;
+            $this->selectedIndicatorsForEdit = [];
+            $this->batchEditReason = '';
+            $this->loadDimensions();
+        } catch (\Exception $e) {
+            Log::error('Error requesting batch edit: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ DETAILS TOGGLE ============
+
+    public function toggleIndicatorDetails($indicatorId)
+    {
+        if (in_array($indicatorId, $this->expandedIndicators)) {
+            $this->expandedIndicators = array_values(
+                array_filter($this->expandedIndicators, fn($id) => $id !== $indicatorId)
+            );
+        } else {
+            $this->expandedIndicators[] = $indicatorId;
+        }
+    }
+
+    public function toggleEditMode($indicatorId)
+    {
+        $indicator = PydpIndicator::find($indicatorId);
+        
+        if (!$indicator) {
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Indicator not found.',
+                'icon' => 'error'
+            ]);
+            return;
+        }
+
+        if (isset($this->editModes[$indicatorId]) && $this->editModes[$indicatorId]) {
+            $this->editModes[$indicatorId] = false;
+        } else {
+            $this->editModes[$indicatorId] = true;
+        }
+    }
+
+    // ============ DATA ENTRIES ============
+
+    public function saveEntry($indicatorId, $year, $field, $value)
+    {
+        try {
+            $indicator = PydpIndicator::find($indicatorId);
+            
+            if (!$indicator) {
+                throw new \Exception('Indicator not found.');
+            }
+
+            $entry = PydpDatasetEntry::where('pydp_indicator_id', $indicatorId)
+                ->where('year', $year)
+                ->first();
+
+            if (!$entry) {
+                $entry = PydpDatasetEntry::create([
+                    'pydp_indicator_id' => $indicatorId,
+                    'year' => $year,
+                    'submission_status' => 'draft',
+                    'edit_requested' => false,
+                ]);
+            }
+
+            $oldValue = $entry->$field ?? null;
+            $entry->$field = $value;
+            $entry->save();
+
+            if ($oldValue !== $value && !is_null($value)) {
+                $this->logAction("Updated {$field} for indicator '{$indicator->title}' (Year: {$year})");
+            }
+
+            Log::debug("Entry saved successfully", [
+                'indicator_id' => $indicatorId,
+                'year' => $year,
+                'field' => $field,
+                'value' => $value
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error saving entry: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Failed to save entry: ' . $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ DELETE ============
+
+    public function confirmAction($id, $type)
+    {
+        if ($type === 'deleteDimension') {
+            $dimension = PydpLevel::where('user_id', auth()->id())->find($id);
+            if (!$dimension) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Level not found.',
+                    'icon' => 'error'
+                ]);
+                return;
+            }
+
+            $lockedIndicators = $dimension->indicators()
+                ->whereHas('entries', function ($query) {
+                    $query->whereIn('submission_status', ['submitted', 'approved']);
+                })
+                ->count();
+
+            if ($lockedIndicators > 0) {
+                $this->dispatch('swal', [
+                    'title' => 'Cannot Delete!',
+                    'text' => 'Cannot delete level with submitted or approved indicators. Please contact admin.',
+                    'icon' => 'warning'
+                ]);
+                return;
+            }
+        } else {
+            $indicator = PydpIndicator::find($id);
+            if (!$indicator) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Indicator not found.',
+                    'icon' => 'error'
+                ]);
+                return;
+            }
+
+            $status = $indicator->entries()->first()?->submission_status ?? 'draft';
+            if (in_array($status, ['submitted', 'approved'])) {
+                $this->dispatch('swal', [
+                    'title' => 'Cannot Delete!',
+                    'text' => 'Cannot delete indicator with submitted or approved status. Please contact admin.',
+                    'icon' => 'warning'
+                ]);
+                return;
+            }
+        }
+
+        $this->deleteId = $id;
+        $this->type = $type === 'deleteDimension' ? 'Level' : 'Indicator';
+        $this->showDeleteModal = true;
+    }
+
+    public function confirmDelete()
+    {
+        try {
+            if ($this->type === 'Level') {
+                $level = PydpLevel::where('user_id', auth()->id())
+                    ->find($this->deleteId);
+                
+                if (!$level) {
+                    throw new \Exception('Level not found.');
+                }
+
+                $levelTitle = $level->title;
+                $indicatorCount = $level->indicators->count();
+                
+                $level->delete();
+                
+                $this->logAction("Deleted level: {$levelTitle} (with {$indicatorCount} indicators)");
+                
+                $this->dispatch('swal', [
+                    'title' => 'Deleted!',
+                    'text' => "Level '{$levelTitle}' and all its indicators have been deleted.",
+                    'icon' => 'success'
+                ]);
+            } else {
+                $indicator = PydpIndicator::find($this->deleteId);
+                
+                if (!$indicator) {
+                    throw new \Exception('Indicator not found.');
+                }
+
+                $indicatorTitle = $indicator->title;
+                
+                $indicator->delete();
+                
+                $this->logAction("Deleted indicator: {$indicatorTitle}");
+                
+                $this->dispatch('swal', [
+                    'title' => 'Deleted!',
+                    'text' => "Indicator '{$indicatorTitle}' has been deleted.",
+                    'icon' => 'success'
+                ]);
+            }
+
+            $this->showDeleteModal = false;
+            $this->loadDimensions();
+        } catch (\Exception $e) {
+            Log::error('Error deleting: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ REPORT GENERATION ============
+
+    public function openReportModal()
+    {
+        $this->selectedLevels = [];
+        $this->showReportModal = true;
+    }
+
+    public function generateReport()
+    {
+        try {
+            if (empty($this->selectedLevels)) {
+                $this->dispatch('swal', [
+                    'title' => 'Error!',
+                    'text' => 'Please select at least one level to generate the report.',
+                    'icon' => 'error'
+                ]);
+                return;
+            }
+
+            $levelsCount = PydpLevel::whereIn('id', $this->selectedLevels)
+                ->where('user_id', auth()->id())
+                ->count();
+
+            if ($levelsCount !== count($this->selectedLevels)) {
+                throw new \Exception('Invalid level selection.');
+            }
+
+            $hasIndicators = PydpIndicator::whereIn('pydp_level_id', $this->selectedLevels)
+                ->count();
+
+            if ($hasIndicators === 0) {
+                $this->dispatch('swal', [
+                    'title' => 'No Data!',
+                    'text' => 'Selected levels have no indicators with data.',
+                    'icon' => 'info'
+                ]);
+                return;
+            }
+
+            $user = auth()->user();
+            $fileName = 'PYDP_Report_' . str_replace(' ', '_', $user->name) . '_' . now()->format('Y_m_d_His') . '.xlsx';
+            
+            $this->logAction("Generated Excel report: {$fileName} with " . count($this->selectedLevels) . " level(s)");
+
+            $this->showReportModal = false;
+            $selectedLevelsCopy = $this->selectedLevels;
+            $this->selectedLevels = [];
+
+            return Excel::download(
+                new PydpDataMultiSheetExport(auth()->id(), $selectedLevelsCopy),
+                $fileName
+            );
+        } catch (\Exception $e) {
+            Log::error('Export error: ' . $e->getMessage());
+            $this->dispatch('swal', [
+                'title' => 'Error!',
+                'text' => 'Failed to generate report: ' . $e->getMessage(),
+                'icon' => 'error'
+            ]);
+        }
+    }
+
+    // ============ HELPERS ============
+
+    public function logAction($message)
+    {
+        try {
+            Log::channel('pydp_actions')->info($message, [
+                'user_id' => auth()->id(),
+                'user_name' => auth()->user()?->name,
+                'timestamp' => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error logging action: ' . $e->getMessage());
+        }
+    }
+
+    public function refresh()
+    {
+        $this->loadDimensions();
+    }
+
+    public function resetAllState()
+    {
+        $this->showDimensionModal = false;
+        $this->showIndicatorModal = false;
+        $this->showDeleteModal = false;
+        $this->showSubmitModal = false;
+        $this->showEditRequestModal = false;
+        $this->showBatchEditRequestModal = false;
+        $this->showReportModal = false;
+        $this->expandedIndicators = [];
+        $this->editModes = [];
+        $this->selectedLevels = [];
+        $this->selectedIndicatorsForEdit = [];
+        $this->editingDimensionId = null;
         $this->editingIndicatorId = null;
         $this->selectedDimensionId = null;
-    }
-
-    public function render()
-    {
-        return view('livewire.user.pydp-level-controller', [
-            'selectedDimensionName' => $this->selectedDimensionId
-                ? $this->dimensions->find($this->selectedDimensionId)?->title
-                : null
-        ]);
+        $this->currentLevelId = null;
+        $this->resetIndicatorForm();
     }
 }
