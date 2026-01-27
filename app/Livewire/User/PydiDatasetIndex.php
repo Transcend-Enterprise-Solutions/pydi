@@ -228,7 +228,9 @@ class PydiDatasetIndex extends Component
     {
         // Get all indicators - check if dimension relationship exists
         try {
-            $indicators = Indicator::with('dimension')->get();
+            $indicators = Indicator::with('dimension')
+                ->orderBy('name', 'asc')
+                ->get();
         } catch (\Exception $e) {
             // Fallback if dimension relationship doesn't exist
             $indicators = Indicator::all();

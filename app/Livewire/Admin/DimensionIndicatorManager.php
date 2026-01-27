@@ -14,6 +14,7 @@ class DimensionIndicatorManager extends Component
     public $dimensions;
     public $showDimensionModal = false;
     public $showIndicatorModal = false;
+    public $searchTerm = '';
 
     // Form fields
     public $dimensionName = '';
@@ -31,9 +32,19 @@ class DimensionIndicatorManager extends Component
         $this->loadDimensions();
     }
 
+    public function updatedSearchTerm()
+    {
+        $this->loadDimensions();
+    }
+
     public function loadDimensions()
     {
-        $this->dimensions = Dimension::with('indicators')->orderBy('name')->get();
+        $this->dimensions = Dimension::with('indicators')
+            ->when($this->searchTerm, function ($query) {
+                $query->where('name', 'like', '%' . $this->searchTerm . '%');
+            })
+            ->orderBy('name')
+            ->get();
     }
 
     public function openDimensionModal($dimensionId = null)

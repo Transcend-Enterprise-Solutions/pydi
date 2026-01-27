@@ -106,30 +106,47 @@
             style="background-image: url(images/bg.jpg); background-color: rgba(255, 255, 255, 0.5); background-blend-mode: overlay;">
         </div>
         <div class="relative flex overflow-hidden justify-center lg:justify-between" style="z-index: 99">
+    
+            <!-- Header - Outside left-side, spans both sides -->
+<div class="absolute top-0 left-0 right-0 z-50">
+    <div class="flex items-center h-auto px-8 lg:px-12 pt-8 pb-6">
+        <!-- Logo and Branding - Clickable to Landing Page -->
+        <a class="flex items-center gap-5 hover:opacity-90 transition-opacity" href="{{ url('/') }}">
+            <!-- Logo -->
+            <img src="/images/bk-logo.png" alt="logo" class="h-48 w-48">
+            <!-- Branding Text -->
+            <div class="flex flex-col">
+    <h1 class="text-4xl font-bold tracking-wide whitespace-nowrap" style="color: #21B8D8; letter-spacing: 0.08em;">
+        BILANG KABATAAN
+    </h1>
+    <p class="text-base text-gray-800 font-medium mt-1 whitespace-nowrap">
+        Youth Development Reporting System
+    </p>
+</div>
+        </a>
+    </div>
+</div>
 
             <!-- Content -->
             <div class="left-side">
-                <div class="min-h-[100dvh] h-full flex flex-col after:flex-1">
+                <div class="min-h-[100dvh] h-full flex flex-col">
+        
+                    <!-- Top Spacer (replaces header space) -->
+                    <div class="flex-1"></div>
 
-                    <!-- Header -->
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                            <!-- Logo -->
-                            <a class="block" href="{{ url('/') }}">
-                                <img src="/images/nyc_logo.png" alt="logo" class="h-12">
-                            </a>
+                        <!-- Centered Content -->
+                        <div class="max-w-sm mx-auto w-full px-4 py-8">
+                            {{ $slot }}
+
+                            <p class="text-sm text-center text-gray-600">Don't have an account? <a href="register"
+                                    class="text-blue-500 hover:text-blue-600">SIGN UP</a></p>
                         </div>
+
+                        <!-- Bottom Spacer -->
+                        <div class="flex-1"></div>
+
                     </div>
-
-                    <div class="max-w-sm mx-auto w-full px-4 py-8">
-                        {{ $slot }}
-
-                        <p class="text-sm text-center text-gray-600">Don't have an account? <a href="register"
-                                class="text-blue-500 hover:text-blue-600">SIGN UP</a></p>
-                    </div>
-
                 </div>
-            </div>
 
             <!-- Image -->
             <div class="hidden sm:block md:hidden lg:block absolute top-0 bottom-0 right-0 sm:w-0 md:w-0 lg:w-1/2 overflow-hidden right-side-content"

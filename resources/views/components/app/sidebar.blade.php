@@ -111,14 +111,14 @@
                     @if (Auth::user()->user_role === 'user')
                         @php
                             $userSections = [
-                                'Dashboard' => [
-                                    [
-                                        'route' => 'dashboard',
-                                        'icon' => 'speedometer2',
-                                        'label' => 'Dashboard',
-                                    ],
-                                ],
-                                'Input Datasets' => [
+                                // 'Dashboard' => [
+                                //     [
+                                //         'route' => 'dashboard',
+                                //         'icon' => 'speedometer2',
+                                //         'label' => 'Dashboard',
+                                //     ],
+                                // ],
+                                'Submit Datasets' => [
                                     
                                     [
                                         'route' => 'pydi-datasets',

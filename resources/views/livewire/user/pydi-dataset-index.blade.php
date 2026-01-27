@@ -211,16 +211,12 @@
                         class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
                         wire:change="onIndicatorChange">
                         <option value="">-- Select an Indicator --</option>
+                        <option value="others">Others Indicator</option>
                         @foreach($indicators as $indicator)
                             <option value="{{ $indicator->id }}">
-                                @if($indicator->dimension)
-                                    {{ $indicator->dimension->name }} - {{ $indicator->name }}
-                                @else
-                                    {{ $indicator->name }}
-                                @endif
+                                {{ $indicator->name }}
                             </option>
                         @endforeach
-                        <option value="other">Other Indicator</option>
                     </select>
                     @error('indicator_id')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -241,10 +237,10 @@
                 @endif
 
                 <div class="mb-3">
-                    <label class="block text-sm font-medium">Data Source</label>
+                    <label class="block text-sm font-medium">Data Description and Source</label>
                     <textarea wire:model="description"
                         class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
-                        placeholder="Enter Data Source"></textarea>
+                        placeholder="Enter Data Description and Source"></textarea>
                     @error('description')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror

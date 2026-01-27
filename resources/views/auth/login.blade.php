@@ -33,8 +33,23 @@
 
     <!-- Welcome Message -->
     <div class="p-4">
+        <!-- Logo and Branding at Top -->
+        <!-- <div class="flex items-center gap-4 mb-8 animate-slide-in-left">
+             Logo 
+            <img src="/images/nyc_logo.png" alt="logo" class="h-16 w-16">
+             Text Branding 
+            <div class="flex flex-col">
+                <h2 class="text-3xl font-bold tracking-wide" style="color: #21B8D8; letter-spacing: 0.05em;">
+                    BILANG KABATAAN
+                </h2>
+                <p class="text-base text-gray-700 font-medium mt-0.5">
+                    Youth Development Reporting System
+                </p>
+            </div>
+        </div> -->
+
         <h1 class="text-3xl text-stone-700 font-bold mb-6 animate-slide-in-left">
-            {{ __('Welcome back!') }}
+            {{ __('Welcome!') }}
         </h1>
         @if (session('status'))
             <!-- Status Message -->
@@ -87,11 +102,11 @@
             <div class="flex items-center justify-between gap-3 mt-6">
 
 
-                <a href="{{ url('/') }}"
+                <!-- <a href="{{ url('/') }}"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium transition">
                     <i class="bi bi-house-door"></i>
                     Home
-                </a>
+                </a> -->
 
                 <x-button class="flex items-center gap-2">
                     {{ __('Sign in') }}

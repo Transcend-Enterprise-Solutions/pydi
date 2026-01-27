@@ -1,5 +1,11 @@
 <div class="w-full">
-    <h2 class="text-xl font-bold mb-3 pt-0">PYDI ({{ $datasetInfo->name }})</h2>
+    <h2 class="text-xl font-bold mb-3 pt-0">Manage Dataset for {{ 
+        $datasetInfo->indicator
+            ? $datasetInfo->indicator->name
+            : (strpos($datasetInfo->name, ' - ') !== false 
+                ? substr($datasetInfo->name, strpos($datasetInfo->name, ' - '))
+                : $datasetInfo->name)
+    }}</h2>
     <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800">
         <div class="flex justify-between items-center mb-4">
             <div class="flex gap-2 items-center">
@@ -29,23 +35,13 @@
                     <div x-show="open" @click.away="open = false" x-cloak
                         class="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50 dark:bg-gray-800 dark:border-gray-700">
                         <ul class="py-2 text-sm">
-                            @if ($datasetInfo->status !== 'approved')
-                                <!-- Manual Input -->
-                                <li>
-                                    <button wire:click="create"
-                                        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition dark:text-gray-300 dark:hover:bg-gray-700">
-                                        <i class="bi bi-pencil-square text-blue-500 mr-2"></i>
-                                        Add Entry (Manual)
-                                    </button>
-                                </li>
-                            @endif
-
+                            
                             <!-- Download Template -->
                             <li>
                                 <button wire:click="$set('showFormatModal', true)"
                                     class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition dark:text-gray-300 dark:hover:bg-gray-700">
                                     <i class="bi bi-filetype-csv text-green-500 mr-2"></i>
-                                    Download CSV/XLSX Template
+                                    Download Template
                                 </button>
                             </li>
 
@@ -60,6 +56,17 @@
                                 </li>
                             @endif
 
+                            @if ($datasetInfo->status !== 'approved')
+                                <!-- Manual Input -->
+                                <li>
+                                    <button wire:click="create"
+                                        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition dark:text-gray-300 dark:hover:bg-gray-700">
+                                        <i class="bi bi-pencil-square text-blue-500 mr-2"></i>
+                                        Manually Add Entry
+                                    </button>
+                                </li>
+                            @endif
+
                             <!-- Export/Generate Report -->
                             <li>
                                 <button wire:click="$set('showExportModal', true)"
@@ -67,7 +74,7 @@
                                     <i class="bi bi-bar-chart-fill text-purple-500 mr-2"></i>
                                     Generate Report
                                 </button>
-                            </li>
+                            </li>        
                         </ul>
                     </div>
                 </div>
@@ -380,7 +387,7 @@
         @if ($showFormatModal)
             <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
-                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Download CSV/XLSX Template</h3>
+                    <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Download Template</h3>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Dimension</label>
