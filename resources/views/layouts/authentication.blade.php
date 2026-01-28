@@ -107,32 +107,42 @@
         </div>
         <div class="relative flex overflow-hidden justify-center lg:justify-between" style="z-index: 99">
     
-            <!-- Header - Outside left-side, spans both sides -->
-<div class="absolute top-0 left-0 right-0 z-50">
-    <div class="flex items-center h-auto px-8 lg:px-12 pt-8 pb-6">
-        <!-- Logo and Branding - Clickable to Landing Page -->
-        <a class="flex items-center gap-5 hover:opacity-90 transition-opacity" href="{{ url('/') }}">
-            <!-- Logo -->
-            <img src="/images/bk-logo.png" alt="logo" class="h-48 w-48">
-            <!-- Branding Text -->
-            <div class="flex flex-col">
-    <h1 class="text-4xl font-bold tracking-wide whitespace-nowrap" style="color: #21B8D8; letter-spacing: 0.08em;">
-        BILANG KABATAAN
-    </h1>
-    <p class="text-base text-gray-800 font-medium mt-1 whitespace-nowrap">
-        Youth Development Reporting System
-    </p>
-</div>
-        </a>
-    </div>
-</div>
+            <!-- Header - Outside left-side, spans both sides (Hidden on mobile) -->
+            <div class="hidden sm:block absolute top-0 left-0 right-0 z-50">
+                <div class="flex items-center h-auto px-8 lg:px-12 pt-8 pb-6" style="margin-left: 275px; margin-top: 50px;">
+                <!-- Logo and Branding - Clickable to Landing Page -->
+                <a class="flex items-center gap-5 hover:opacity-90 transition-opacity" href="{{ url('/') }}">
+                    <!-- Logo -->
+                    <img src="/images/bk-logo.png" alt="logo" class="h-32 w-32">
+                    <!-- Branding Text -->
+                    <div class="flex flex-col">
+                        <h1 class="font-bold tracking-wide whitespace-nowrap" style="color: #21B8D8; letter-spacing: 0.08em; font-size: 4.0rem;">
+                            BILANG KABATAAN
+                        </h1>
+                        <p class="text-gray-800 font-medium mt-1 whitespace-nowrap" style="font-size: 2.35rem;">
+                            Youth Development Reporting System
+                        </p>
+                    </div>
+                </a>
+                </div>
+            </div>
 
             <!-- Content -->
             <div class="left-side">
                 <div class="min-h-[100dvh] h-full flex flex-col">
         
-                    <!-- Top Spacer (replaces header space) -->
-                    <div class="flex-1"></div>
+                    <!-- Mobile Header (Visible only on small screens) -->
+                    <div class="sm:hidden flex-shrink-0">
+                        <div class="flex items-center justify-between h-16 px-4">
+                            <!-- Logo -->
+                            <a class="block" href="{{ url('/') }}">
+                                <img src="/images/bk-logo.png" alt="logo" class="h-12">
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Top Spacer (replaces header space on larger screens) -->
+                    <div class="flex-1 hidden sm:block"></div>
 
                         <!-- Centered Content -->
                         <div class="max-w-sm mx-auto w-full px-4 py-8">
