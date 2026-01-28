@@ -211,7 +211,7 @@
                         class="border rounded w-full px-3 py-2 dark:bg-slate-700 dark:border-gray-600 dark:text-gray-100"
                         wire:change="onIndicatorChange">
                         <option value="">-- Select an Indicator --</option>
-                        <option value="others">Others Indicator</option>
+                        <option value="others">Other Indicator</option>
                         @foreach($indicators as $indicator)
                             <option value="{{ $indicator->id }}">
                                 {{ $indicator->name }}
