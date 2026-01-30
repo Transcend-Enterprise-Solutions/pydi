@@ -87,6 +87,189 @@
             transform: translateX(100%);
         }
 
+        /* Header Responsive Styles */
+        .header-container {
+            margin-left: 2rem;
+            margin-top: 2rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .header-logo {
+            width: 5rem;
+            height: 5rem;
+        }
+
+        .header-title {
+            font-size: 2rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.25rem;
+        }
+
+        .header-gap {
+            gap: 1rem;
+        }
+
+        /* Mobile - Hide main header (already handled by sm:hidden) */
+        @media (max-width: 639px) {
+            .left-side {
+                width: 100%;
+            }
+
+            .right-side img {
+                right: -200px;
+            }
+        }
+
+        /* Tablet - Small (640px - 767px) */
+        @media (min-width: 640px) and (max-width: 767px) {
+            .header-container {
+                margin-left: 1rem;
+                margin-top: 1.5rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .header-logo {
+                width: 4.5rem;
+                height: 4.5rem;
+            }
+
+            .header-title {
+                font-size: 1.875rem;
+            }
+
+            .header-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .header-gap {
+                gap: 0.875rem;
+            }
+
+            .left-side {
+                width: 100%;
+            }
+        }
+
+        /* Tablet - Medium (768px - 1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .header-container {
+                margin-left: 2rem;
+                margin-top: 2rem;
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+
+            .header-logo {
+                width: 5rem;
+                height: 5rem;
+            }
+
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .header-subtitle {
+                font-size: 1.25rem;
+            }
+
+            .header-gap {
+                gap: 1rem;
+            }
+
+            .left-side {
+                width: 100%;
+            }
+
+            .right-side img {
+                right: -200px;
+            }
+        }
+
+        /* Tablet - Large (1024px - 1279px) */
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            .header-container {
+                margin-left: 6rem;
+                margin-top: 2.5rem;
+                padding-left: 2.5rem;
+                padding-right: 2.5rem;
+            }
+
+            .header-logo {
+                width: 6rem;
+                height: 6rem;
+            }
+
+            .header-title {
+                font-size: 2.5rem;
+            }
+
+            .header-subtitle {
+                font-size: 1.5rem;
+            }
+
+            .header-gap {
+                gap: 1.25rem;
+            }
+        }
+
+        /* Desktop - Small (1280px - 1535px) */
+        @media (min-width: 1280px) and (max-width: 1535px) {
+            .header-container {
+                margin-left: 10rem;
+                margin-top: 3rem;
+                padding-left: 2.5rem;
+                padding-right: 2.5rem;
+            }
+
+            .header-logo {
+                width: 7rem;
+                height: 7rem;
+            }
+
+            .header-title {
+                font-size: 3rem;
+            }
+
+            .header-subtitle {
+                font-size: 1.75rem;
+            }
+
+            .header-gap {
+                gap: 1.25rem;
+            }
+        }
+
+        /* Desktop - Large (1536px+) */
+        @media (min-width: 1536px) {
+            .header-container {
+                margin-left: 17.1875rem;
+                margin-top: 3.125rem;
+                padding-left: 3rem;
+                padding-right: 3rem;
+            }
+
+            .header-logo {
+                width: 8rem;
+                height: 8rem;
+            }
+
+            .header-title {
+                font-size: 4rem;
+            }
+
+            .header-subtitle {
+                font-size: 2.35rem;
+            }
+
+            .header-gap {
+                gap: 1.25rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .left-side {
                 width: 100%;
@@ -109,17 +292,17 @@
     
             <!-- Header - Outside left-side, spans both sides (Hidden on mobile) -->
             <div class="hidden sm:block absolute top-0 left-0 right-0 z-50">
-                <div class="flex items-center h-auto px-8 lg:px-12 pt-8 pb-6" style="margin-left: 275px; margin-top: 50px;">
+                <div class="flex items-center h-auto header-container">
                 <!-- Logo and Branding - Clickable to Landing Page -->
-                <a class="flex items-center gap-5 hover:opacity-90 transition-opacity" href="{{ url('/') }}">
+                <a class="flex items-center header-gap hover:opacity-90 transition-opacity" href="{{ url('/') }}">
                     <!-- Logo -->
-                    <img src="/images/bk-logo.png" alt="logo" class="h-32 w-32">
+                    <img src="/images/bk-logo.png" alt="logo" class="header-logo">
                     <!-- Branding Text -->
                     <div class="flex flex-col">
-                        <h1 class="font-bold tracking-wide whitespace-nowrap" style="color: #21B8D8; letter-spacing: 0.08em; font-size: 4.0rem;">
+                        <h1 class="font-bold tracking-wide whitespace-nowrap header-title" style="color: #21B8D8; letter-spacing: 0.08em;">
                             BILANG KABATAAN
                         </h1>
-                        <p class="text-gray-800 font-medium mt-1 whitespace-nowrap" style="font-size: 2.35rem;">
+                        <p class="text-gray-800 font-medium mt-1 whitespace-nowrap header-subtitle">
                             Youth Development Reporting System
                         </p>
                     </div>
