@@ -33,7 +33,11 @@ class Login extends Component
 
             if ($user->active_status == 1) {
                 // Redirect based on role
-                return redirect()->to('/dashboard');
+                if ($user->user_role === 'user') {
+                    return redirect()->route('pydi-datasets');
+                } else {
+                    return redirect()->to('/dashboard');
+                }
             }
 
             // If account is deactivated or pending

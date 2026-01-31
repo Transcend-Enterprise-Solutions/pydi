@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\LoginResponse;
+use Illuminate\Support\Facades\Auth;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -20,7 +22,23 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Override Fortify's LoginResponse to implement role-based redirection
+        $this->app->singleton(LoginResponse::class, function () {
+            return new class implements LoginResponse {
+                public function toResponse($request)
+                {
+                    $user = Auth::user();
+                    
+                    // Redirect based on user role
+                    if ($user->user_role === 'user') {
+                        return redirect()->route('pydi-datasets');
+                    }
+                    
+                    // For admin and sa roles, redirect to dashboard
+                    return redirect()->intended(RouteServiceProvider::HOME);
+                }
+            };
+        });
     }
 
     /**
