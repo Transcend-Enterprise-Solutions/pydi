@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     <!-- Scripts -->
@@ -96,7 +97,7 @@
         }
 
         .header-logo {
-            width: 5rem;
+            width: 4rem;
             height: 5rem;
         }
 
@@ -133,7 +134,7 @@
             }
 
             .header-logo {
-                width: 4.5rem;
+                width: 3.7rem;
                 height: 4.5rem;
             }
 
@@ -164,7 +165,7 @@
             }
 
             .header-logo {
-                width: 5rem;
+                width: 4rem;
                 height: 5rem;
             }
 
@@ -199,7 +200,7 @@
             }
 
             .header-logo {
-                width: 6rem;
+                width: 4.9rem;
                 height: 6rem;
             }
 
@@ -226,7 +227,7 @@
             }
 
             .header-logo {
-                width: 7rem;
+                width: 5.7rem;
                 height: 7rem;
             }
 
@@ -253,7 +254,7 @@
             }
 
             .header-logo {
-                width: 8rem;
+                width: 6.5rem;
                 height: 8rem;
             }
 
@@ -299,10 +300,10 @@
                     <img src="/images/bk-logo.png" alt="logo" class="header-logo">
                     <!-- Branding Text -->
                     <div class="flex flex-col">
-                        <h1 class="font-bold tracking-wide whitespace-nowrap header-title" style="color: #21B8D8; letter-spacing: 0.08em;">
-                            BILANG KABATAAN
-                        </h1>
-                        <p class="text-gray-800 font-medium mt-1 whitespace-nowrap header-subtitle">
+                    <h1 class="whitespace-nowrap header-title" style="color: #46ace5; letter-spacing: 0.01em; font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1.2;">
+    BILANG KABATAAN
+</h1>
+                        <p class="font-medium whitespace-nowrap header-subtitle" style="margin-top: -0.9rem; color: #000853;">
                             Youth Development Reporting System
                         </p>
                     </div>
