@@ -10,7 +10,7 @@ use App\Models\Indicator;
 use App\Services\EmailService;
 
 #[Layout('layouts.app')]
-#[Title('PYDI Datasets')]
+#[Title('Youth Statistics Datasets')]
 class PydiDatasetIndex extends Component
 {
     use WithPagination, WithFileUploads;

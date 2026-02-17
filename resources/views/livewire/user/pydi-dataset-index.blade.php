@@ -2,7 +2,7 @@
     <div class="w-full flex justify-center">
         <div class="w-full bg-white rounded-2xl p-3 sm:p-6 shadow dark:bg-gray-800 overflow-x-visible">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">PYDI Datasets</h2>
+                <h2 class="text-xl font-bold text-gray-700 dark:text-gray-100">Youth Statistics Datasets</h2>
                 <div class="flex items-center gap-2">
                     <input type="text" wire:model.live="search" placeholder="Search..."
                         class="w-52 py-2 px-3 text-sm border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">

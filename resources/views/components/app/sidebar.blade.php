@@ -123,7 +123,7 @@
                                     [
                                         'route' => 'pydi-datasets',
                                         'icon' => 'bar-chart-line',
-                                        'label' => 'PYDI Datasets',
+                                        'label' => 'Youth Statistics Datasets',
                                     ],
                                     [
                                         'route' => 'pydp-levels',
