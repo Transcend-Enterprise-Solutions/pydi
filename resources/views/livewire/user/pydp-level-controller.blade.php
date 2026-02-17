@@ -12,7 +12,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Add Level of Result
+                Add Programs, Projects, and Activities
             </button>
         </div>
     </div>
@@ -23,7 +23,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600" style="width: 25%;">
-                            Levels of Result
+                            Programs, Projects, and Activities
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600" style="width: 50%;">
                             Indicators
@@ -567,7 +567,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 border border-gray-200 dark:border-gray-700">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $editingDimensionId ? 'Edit Level of Result' : 'Add Level of Result' }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $editingDimensionId ? 'Edit Programs, Projects, and Activities' : 'Add Programs, Projects, and Activities' }}</h3>
                         <button wire:click="closeDimensionModal" class="text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -576,7 +576,7 @@
                     </div>
                     <form wire:submit.prevent="saveDimension" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level of Result Title <span class="text-red-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Programs, Projects, and Activities <span class="text-red-600">*</span></label>
                             <input type="text" wire:model.defer="dimensionName" placeholder="e.g., Impact, Output, Activity..." class="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" required />
                         </div>
                         <div>
