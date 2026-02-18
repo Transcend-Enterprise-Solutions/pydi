@@ -81,7 +81,36 @@ class PydiDatasetDetailIndex extends Component
             ]);
         }
 
-        $this->regions = PhilippineRegions::select('id', 'region_description')->get();
+        // Get regions and sort them in the desired order
+        $regions = PhilippineRegions::select('id', 'region_description')->get();
+        
+        // Define the display order
+        $regionOrder = [
+            'National Capital Region (NCR)',
+            'Cordillera Administrative Region (CAR)',
+            'Region I - Ilocos Region',
+            'Region II - Cagayan Valley',
+            'Region III - Central Luzon',
+            'Region IV-A - CALABARZON',
+            'MIMAROPA Region',
+            'Region V - Bicol Region',
+            'Region VI - Western Visayas',
+            'Region VII - Central Visayas',
+            'Region VIII - Eastern Visayas',
+            'Region IX - Zamboanga Peninsula',
+            'Region X - Northern Mindanao',
+            'Region XI - Davao Region',
+            'Region XII - SOCCSKSARGEN',
+            'Region XIII - Caraga',
+            'Bangsamoro Autonomous Region in Muslim Mindanao (BARMM)',
+            'Negros Island Region (NIR)',
+        ];
+        
+        // Sort regions based on the defined order
+        $this->regions = $regions->sortBy(function($region) use ($regionOrder) {
+            $position = array_search($region->region_description, $regionOrder);
+            return $position !== false ? $position : 999;
+        })->values();
     }
 
     public function updatingSearch()
