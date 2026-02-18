@@ -319,29 +319,33 @@ class PydiDatasetDetailIndex extends Component
     // generate template for import
     public function downloadTemplate()
     {
-        $this->validate([
-            'selectedDimension' => 'required',
-        ]);
+        
+        $dimensionId = $this->datasetInfo->indicator->dimension_id ?? null;
 
-        $selectedDimension = Dimension::find($this->selectedDimension);
+        if (!$dimensionId) {
+            session()->flash('error', 'No dimension found for this indicator.');
+            return;
+        }
+
+        // $selectedDimension = Dimension::find($dimensionId);
 
         // Generate filename based on dimension name
-        if ($selectedDimension) {
-            // Convert dimension name to slug format
-            $dimensionSlug = strtolower($selectedDimension->name);
-            $dimensionSlug = preg_replace('/[^a-z0-9]+/', '_', $dimensionSlug);
-            $dimensionSlug = trim($dimensionSlug, '_');
+        // if ($selectedDimension) {
+        //     // Convert dimension name to slug format
+        //     $dimensionSlug = strtolower($selectedDimension->name);
+        //     $dimensionSlug = preg_replace('/[^a-z0-9]+/', '_', $dimensionSlug);
+        //     $dimensionSlug = trim($dimensionSlug, '_');
             
-            $filename = $dimensionSlug . '_template.xlsx';
-        } else {
-            $filename = 'dataset_template.xlsx';
-        }
+        //     $filename = $dimensionSlug . '_template.xlsx';
+        // } else {
+        //     $filename = 'dataset_template.xlsx';
+        // }
 
         $this->showFormatModal = false;
 
         return Excel::download(
-            new PydiDatasetTemplateExport($this->selectedDimension),
-            $filename
+            new PydiDatasetTemplateExport($dimensionId),
+            'pydi_template.xlsx'
         );
     }
 
@@ -350,15 +354,24 @@ class PydiDatasetDetailIndex extends Component
     {
         $this->validate([
             'file' => 'required|mimes:xlsx,csv|max:10240',
-            'selectedDimension' => 'required',
         ]);
+
+        // Automatically get dimension and indicator from the dataset
+        $dimensionId = $this->datasetInfo->indicator->dimension_id ?? null;
+        $indicatorId = $this->datasetInfo->indicator_id ?? null;
+
+        if (!$dimensionId || !$indicatorId) {
+            session()->flash('error', 'No dimension or indicator associated with this dataset.');
+            return;
+        }
 
         $path = $this->file->store('imports');
 
         try {
             $importer = new PydiDatasetDetailsImport(
                 $this->datasetInfo['id'],
-                $this->selectedDimension
+                $dimensionId,
+                $indicatorId
             );
 
             Excel::import($importer, $path);
@@ -372,7 +385,7 @@ class PydiDatasetDetailIndex extends Component
                 session()->flash('success', 'Dataset details imported successfully!');
             }
 
-            $this->reset(['file', 'showImportModal', 'selectedDimension']);
+            $this->reset(['file', 'showImportModal']);
         } catch (\Exception $e) {
             session()->flash('error', 'Error importing file: ' . $e->getMessage());
         }

@@ -38,7 +38,7 @@
                             
                             <!-- Download Template -->
                             <li>
-                                <button wire:click="$set('showFormatModal', true)"
+                                <button wire:click="downloadTemplate"
                                     class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition dark:text-gray-300 dark:hover:bg-gray-700">
                                     <i class="bi bi-filetype-csv text-green-500 mr-2"></i>
                                     Download Template
@@ -384,7 +384,7 @@
         @endif
 
         <!-- Template Download Modal -->
-        @if ($showFormatModal)
+        <!-- @if ($showFormatModal)
             <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
                     <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Download Template</h3>
@@ -417,7 +417,7 @@
                     </div>
                 </div>
             </div>
-        @endif
+        @endif -->
 
         <!-- Import Modal -->
         @if ($showImportModal)
