@@ -128,7 +128,7 @@
                                     [
                                         'route' => 'pydp-levels',
                                         'icon' => 'sliders',
-                                        'label' => 'PYDP Datasets',
+                                        'label' => 'PYDP Accomplishments',
                                     ],
                                 ],
                             ];
