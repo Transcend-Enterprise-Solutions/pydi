@@ -1,6 +1,6 @@
 <div class="w-full bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-lg font-bold text-gray-900 dark:text-white">PYDP Datasets</h1>
+        <h1 class="text-lg font-bold text-gray-900 dark:text-white">PYDP Accomplishments</h1>
         <div class="flex gap-2">
             <button wire:click="openReportModal"
                 class="bg-purple-600 text-sm dark:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-700">

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 #[Layout('layouts.app')]
-#[Title('PYDP Datasets')]
+#[Title('PYDP Accomplishments')]
 class PydpDatasetIndex extends Component
 {
     use WithPagination, WithFileUploads;

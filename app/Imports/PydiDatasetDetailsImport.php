@@ -3,29 +3,35 @@
 namespace App\Imports;
 
 use App\Models\PydiDatasetDetail;
-use App\Models\Indicator;
 use App\Models\PhilippineRegions;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithLimit;
 use Illuminate\Support\Facades\Log;
 
-class PydiDatasetDetailsImport implements ToModel, WithHeadingRow
+class PydiDatasetDetailsImport implements ToModel, WithHeadingRow, WithLimit
 {
     protected $datasetId;
-    protected $dimensionId; // passed from controller
+    protected $dimensionId;
+    protected $indicatorId;
     public $errors = [];
 
-    public function __construct($datasetId, $dimensionId)
+    public function __construct($datasetId, $dimensionId, $indicatorId)
     {
         $this->datasetId = $datasetId;
         $this->dimensionId = $dimensionId;
+        $this->indicatorId = $indicatorId;
+    }
+
+    public function limit(): int
+    {
+        return 1000; // Limit to first 1000 rows
     }
 
     public function model(array $row)
     {
         try {
-            // Required fields (Dimension removed since it's pre-selected)
-            if (!isset($row['indicator'], $row['philippine_region'], $row['sex'], $row['value'])) {
+            if (!isset($row['philippine_region'], $row['sex'], $row['value'])) {
                 return null;
             }
 
@@ -38,29 +44,27 @@ class PydiDatasetDetailsImport implements ToModel, WithHeadingRow
                 throw new \Exception("Value must be an integer, got '{$row['value']}'");
             }
 
-            // Validate `age` as an integer
-            if (!is_numeric($row['age']) || floor($row['age']) != $row['age']) {
-                throw new \Exception("Age must be an integer, got '{$row['age']}'");
+            if (isset($row['age']) && $row['age'] !== '' && $row['age'] !== null) {
+                if (!is_numeric($row['age']) || floor($row['age']) != $row['age']) {
+                    throw new \Exception("Age must be an integer, got '{$row['age']}'");
+                }
             }
 
             // Lookups
-            $indicator = Indicator::where('name', $row['indicator'])
-                ->where('dimension_id', $this->dimensionId)
-                ->first();
             $region = PhilippineRegions::where('region_description', $row['philippine_region'])->first();
 
-            if (!$indicator || !$region) {
-                return null;
+            if (!$region) {
+                throw new \Exception("Region '{$row['philippine_region']}' not found. Please use the exact region name from the database.");
             }
 
             return new PydiDatasetDetail([
                 'pydi_dataset_id'       => $this->datasetId,
                 'dimension_id'          => $this->dimensionId,
-                'indicator_id'          => $indicator->id,
+                'indicator_id'          => $this->indicatorId,
                 'philippine_region_id'  => $region->id,
                 'sex'                   => $row['sex'],
-                'age'                   => intval($row['age']),
-                'value'               => intval($row['value']),
+                'age'                   => isset($row['age']) && $row['age'] !== '' ? intval($row['age']) : null,
+                'value'                 => intval($row['value']),
             ]);
         } catch (\Exception $e) {
             $this->errors[] = [

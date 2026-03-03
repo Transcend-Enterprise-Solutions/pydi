@@ -11,7 +11,9 @@ use App\Livewire\User\{PydiDatasetDetailIndex, PydiDatasetIndex, PydpDatasetInde
 use App\Livewire\Admin\{UserList, ManagePydiIndex, ManagePydiDetailIndex, CoverYearIndex, EmailTemplateManager, ManagePydpIndex, ManagePydpDetailIndex, PydpManagement};
 use App\Livewire\Landing\{HomeIndex, AdvocacyIndex};
 
-Route::redirect('/', '/landing');
+// Redirect to Landing Page Original Code
+// Route::redirect('/', '/landing');
+Route::redirect('/', '/login');
 Route::get('/register', function () {
     return view('registeraccount');
 })->name('register');
